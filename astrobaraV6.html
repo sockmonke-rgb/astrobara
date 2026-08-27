@@ -76,6 +76,10 @@ canvas{display:block;width:100%;height:100%;}
   border-right:1px solid var(--rule);cursor:pointer;}
 #nudge div:last-child{border-right:0;}
 #nudge div:active{background:var(--panel-2);}
+#fit{position:absolute;left:6px;top:6px;z-index:16;display:none;cursor:pointer;
+  background:rgba(16,18,25,.92);border:1px solid var(--rule);color:var(--bone);
+  padding:5px 10px;font-size:10px;letter-spacing:.16em;}
+#fit:active{background:var(--bone);color:var(--vacuum);}
 #flash{position:absolute;inset:0;pointer-events:none;opacity:0;z-index:15;
   background:radial-gradient(circle at 50% 60%, rgba(232,201,122,.85), rgba(232,201,122,0) 65%);}
 #endturn{flex:0 0 auto;padding:11px 6px;text-align:center;letter-spacing:.2em;font-weight:700;font-size:14px;
@@ -173,6 +177,7 @@ canvas{display:block;width:100%;height:100%;}
     <div id="stage">
       <canvas id="cv"></canvas>
       <div id="flash"></div>
+      <div id="fit">FIT</div>
       <div id="probe"></div>
     </div>
     <div id="side">
@@ -220,6 +225,7 @@ canvas{display:block;width:100%;height:100%;}
           <li>Select a mine or processor and hit IDLE — you choose what to carry through the dark.</li>
           <li>Digging exposes a seam. It never destroys it.</li>
           <li>Tap the day counter for the ledger, the full event log, and display options.</li>
+          <li>Pinch to zoom the map. FIT returns to the whole colony.</li>
         </ul>
       </div>
     </div>
@@ -330,7 +336,8 @@ const C = {
 let G = null;
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
-let cell = 12, offX = 0, offY = 0;
+let cell = 12, offX = 0, offY = 0, baseCell = 12, stageW = 1, stageH = 1;
+let zoom = 1, panX = 0, panY = 0;
 let tool = null, sel = null, probeOn = false, probeTab = 'ledger';
 // Display options. Faint glyphs read fine on a desktop monitor and badly on a
 // phone in daylight, so this is switchable rather than a fixed choice.
@@ -805,15 +812,43 @@ function resize(){
     app.style.transform = 'rotate(0deg)';
   }
   const st = document.getElementById('stage');
-  const w = st.clientWidth, h = st.clientHeight;
+  stageW = st.clientWidth; stageH = st.clientHeight;
   const dpr = Math.min(window.devicePixelRatio||1, 2);
-  cv.width = Math.floor(w*dpr); cv.height = Math.floor(h*dpr);
+  cv.width = Math.floor(stageW*dpr); cv.height = Math.floor(stageH*dpr);
   ctx.setTransform(dpr,0,0,dpr,0,0);
-  cell = Math.floor(Math.min(w/CFG.cols, h/CFG.rows));
-  offX = Math.floor((w - cell*CFG.cols)/2);
-  offY = Math.floor((h - cell*CFG.rows)/2);
+  baseCell = Math.max(4, Math.min(stageW/CFG.cols, stageH/CFG.rows));
+  layout();
   if(G) draw();
 }
+
+// Browser pinch is disabled (it would fight the rotation transform and blow up
+// the UI chrome), so the map does its own zoom. zoom 1 == fit to stage.
+function layout(){
+  cell = baseCell * zoom;
+  const maxX = Math.max(0, (cell*CFG.cols - stageW)/2);
+  const maxY = Math.max(0, (cell*CFG.rows - stageH)/2);
+  panX = clamp(panX, -maxX, maxX);
+  panY = clamp(panY, -maxY, maxY);
+  offX = (stageW - cell*CFG.cols)/2 + panX;
+  offY = (stageH - cell*CFG.rows)/2 + panY;
+  const chip = document.getElementById('fit');
+  if(chip) chip.style.display = zoom > 1.02 ? 'block' : 'none';
+}
+
+// Keep the point under the fingers pinned while the scale changes.
+function zoomAt(newZoom, anchor){
+  const z = clamp(newZoom, 1, 5);
+  const c0 = cell;
+  const tx = (anchor.x - offX) / c0;
+  const ty = (anchor.y - offY) / c0;
+  zoom = z;
+  const c1 = baseCell * zoom;
+  panX = anchor.x - tx*c1 - (stageW - c1*CFG.cols)/2;
+  panY = anchor.y - ty*c1 - (stageH - c1*CFG.rows)/2;
+  layout();
+  draw();
+}
+function fitView(){ zoom = 1; panX = 0; panY = 0; layout(); draw(); }
 
 function ore(base, amt, range){
   const a = base + amt*range + (OPT.contrast ? 0.38 : 0);
@@ -971,21 +1006,54 @@ function habOccupancy(x,y,habs){
   return base + (me < extra ? 1 : 0);
 }
 
+// Detail scales with tile size: at fit-zoom two blunt blobs is all that reads,
+// but zoomed in you get the whole animal. Worth pinching for.
 function drawBaras(px,py,n){
   if(n<=0) return;
   const s = cell;
-  // At 12px a tile, four blobs is mush. Two larger ones read; the count
-  // lives in the CREW readout anyway.
-  const spots = [[0.34,0.60],[0.66,0.40]];
-  const bw = s*0.40, bh = s*0.24;
-  for(let i=0;i<Math.min(n,2);i++){
-    const [fx,fy] = spots[i];
+  const many = s >= 30;
+  const spots = many
+    ? [[0.30,0.66],[0.62,0.66],[0.38,0.36],[0.70,0.38]]
+    : [[0.34,0.60],[0.66,0.40]];
+  const count = Math.min(n, many ? 4 : 2);
+  const scale = many ? 0.34 : 0.40;
+  const bw = s*scale, bh = s*scale*0.60;
+
+  for(let i=0;i<count;i++){
+    const fx = spots[i][0], fy = spots[i][1];
     const cx = px + s*fx, cy = py + s*fy;
+    const face = (i % 2 === 0) ? 1 : -1;   // some face left, some right
+
     ctx.fillStyle = C.bara;
-    roundRect(cx-bw/2, cy-bh/2, bw, bh, bh*0.42);
+    // barrel body
+    roundRect(cx-bw/2, cy-bh/2, bw, bh, bh*0.40);
     ctx.fill();
-    // blunt squared head — the whole reason a capybara reads at this size
-    ctx.fillRect(cx+bw/2-bw*0.10, cy-bh*0.62, bw*0.34, bh*0.62);
+
+    // blunt squared head — the shape that makes it read as a capybara at all
+    const hw = bw*0.34, hh = bh*0.72;
+    const hx = cx + face*(bw/2 - bw*0.10) - (face>0 ? 0 : hw);
+    const hy = cy - bh*0.60;
+    roundRect(hx, hy, hw, hh, hh*0.22);
+    ctx.fill();
+
+    if(s >= 20){
+      // stubby legs
+      ctx.fillRect(cx-bw*0.30, cy+bh*0.42, bw*0.14, bh*0.30);
+      ctx.fillRect(cx+bw*0.16, cy+bh*0.42, bw*0.14, bh*0.30);
+      // ear, set well back on the skull
+      ctx.beginPath();
+      ctx.arc(hx + (face>0 ? hw*0.16 : hw*0.84), hy + hh*0.14, Math.max(1, bh*0.13), 0, Math.PI*2);
+      ctx.fill();
+    }
+    if(s >= 30){
+      // eye and the flat blunt snout
+      ctx.fillStyle = '#2A2016';
+      ctx.beginPath();
+      ctx.arc(hx + hw*0.5, hy + hh*0.34, Math.max(1, bh*0.10), 0, Math.PI*2);
+      ctx.fill();
+      ctx.fillRect(hx + (face>0 ? hw*0.62 : 0), hy + hh*0.66, hw*0.38, hh*0.22);
+      ctx.fillStyle = C.bara;
+    }
   }
 }
 function roundRect(x,y,w,h,r){
@@ -1346,8 +1414,66 @@ function toggleSel(){
   say((tile.b.off?'Idled ':'Restarted ')+COST[tile.b.type].name.toLowerCase()+'.');
   recompute();
 }
-cv.addEventListener('touchend', onTap, {passive:false});
+// One finger: tap to select, drag to pan. Two fingers: pinch to zoom.
+let gesture = null, gStartDist = 0, gStartZoom = 1, gAnchor = null;
+let gStartPt = null, gStartPan = null, gMoved = false;
+
+function touchDist(a,b){
+  const dx = a.clientX-b.clientX, dy = a.clientY-b.clientY;
+  return Math.sqrt(dx*dx + dy*dy);
+}
+function touchMid(a,b){
+  return appPoint((a.clientX+b.clientX)/2, (a.clientY+b.clientY)/2);
+}
+function stagePoint(p){
+  const o = canvasOrigin();
+  return { x: p.x - o.ox, y: p.y - o.oy };
+}
+
+cv.addEventListener('touchstart', e => {
+  if(e.touches.length === 2){
+    gesture = 'pinch';
+    gStartDist = touchDist(e.touches[0], e.touches[1]);
+    gStartZoom = zoom;
+    gAnchor = stagePoint(touchMid(e.touches[0], e.touches[1]));
+    e.preventDefault();
+  } else if(e.touches.length === 1){
+    gesture = 'tap';
+    gStartPt = stagePoint(appPoint(e.touches[0].clientX, e.touches[0].clientY));
+    gStartPan = { x: panX, y: panY };
+    gMoved = false;
+  }
+}, {passive:false});
+
+cv.addEventListener('touchmove', e => {
+  if(gesture === 'pinch' && e.touches.length === 2){
+    e.preventDefault();
+    const d = touchDist(e.touches[0], e.touches[1]);
+    if(gStartDist > 0) zoomAt(gStartZoom * (d/gStartDist), gAnchor);
+  } else if(gesture === 'tap' && e.touches.length === 1){
+    const p = stagePoint(appPoint(e.touches[0].clientX, e.touches[0].clientY));
+    const dx = p.x - gStartPt.x, dy = p.y - gStartPt.y;
+    if(!gMoved && Math.sqrt(dx*dx + dy*dy) > 9) gMoved = true;
+    if(gMoved && zoom > 1.02){
+      e.preventDefault();
+      panX = gStartPan.x + dx; panY = gStartPan.y + dy;
+      layout(); draw();
+    }
+  }
+}, {passive:false});
+
+cv.addEventListener('touchend', e => {
+  if(gesture === 'tap' && !gMoved) onTap(e);
+  if(e.touches.length === 0) gesture = null;
+}, {passive:false});
+
 cv.addEventListener('mousedown', e => { if(!('ontouchstart' in window)) onTap(e); });
+cv.addEventListener('wheel', e => {
+  e.preventDefault();
+  const p = stagePoint(appPoint(e.clientX, e.clientY));
+  zoomAt(zoom * (e.deltaY < 0 ? 1.12 : 1/1.12), p);
+}, {passive:false});
+document.getElementById('fit').addEventListener('click', fitView);
 
 document.getElementById('endturn').addEventListener('click', () => {
   if(G.review) restart(); else endTurn();
