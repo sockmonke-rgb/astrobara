@@ -81,9 +81,12 @@ canvas{display:block;width:100%;height:100%;}
   border-right:1px solid var(--rule);cursor:pointer;}
 #nudge div:last-child{border-right:0;}
 #nudge div:active{background:var(--panel-2);}
-#surveybtn{position:absolute;left:6px;top:6px;z-index:16;cursor:pointer;
-  background:rgba(16,18,25,.92);border:1px solid var(--rule);color:var(--dim);
-  padding:5px 10px;font-size:10px;letter-spacing:.16em;}
+#chips{position:absolute;left:6px;top:6px;z-index:16;display:flex;gap:6px;}
+#chips > div{cursor:pointer;background:rgba(16,18,25,.92);border:1px solid var(--rule);
+  color:var(--dim);padding:5px 10px;font-size:10px;letter-spacing:.16em;white-space:nowrap;}
+#idlebtn{display:none;}
+#idlebtn.on{color:var(--bone);border-color:var(--bone);}
+#idlebtn:active{background:var(--bone);color:var(--vacuum);}
 #surveybtn.on{color:var(--vacuum);background:#7AC6E0;border-color:#7AC6E0;}
 #legend{position:absolute;left:6px;bottom:6px;z-index:16;display:none;
   background:rgba(16,18,25,.94);border:1px solid var(--rule);padding:6px 8px;}
@@ -197,7 +200,10 @@ canvas{display:block;width:100%;height:100%;}
     <div id="stage">
       <canvas id="cv"></canvas>
       <div id="flash"></div>
-      <div id="surveybtn">SURVEY</div>
+      <div id="chips">
+        <div id="surveybtn">SURVEY</div>
+        <div id="idlebtn"></div>
+      </div>
       <div id="fit">FIT</div>
       <div id="legend">
         <div class="lrow"><span class="lk">WATER ICE</span><span class="lbar ice"></span></div>
@@ -251,7 +257,7 @@ canvas{display:block;width:100%;height:100%;}
           <li>CLEAR removes a building, or backfills a tunnel to restore cover.</li>
           <li>Habitats need 3 rows of regolith overhead or the crew takes a dose.</li>
           <li>Select a mine or processor and hit IDLE — you choose what to carry through the dark.</li>
-          <li>With nothing selected, that same button idles every machine at once.</li>
+          <li>IDLE ALL sits above the map and shuts every machine down at once, whatever else you have selected.</li>
           <li>Digging exposes a seam. It never destroys it.</li>
           <li>Tap the day counter for the ledger, the full event log, and display options.</li>
           <li>Pinch to zoom the map. FIT returns to the whole colony.</li>
@@ -1232,6 +1238,20 @@ function paintUI(){
     pal.appendChild(div);
   }
 
+  const ib = document.getElementById('idlebtn');
+  if(ib){
+    const ind = industryState();
+    if(G.review || (ind.running === 0 && ind.idled === 0)){
+      ib.style.display = 'none';
+    } else {
+      ib.style.display = 'block';
+      ib.textContent = ind.running > 0
+        ? 'IDLE ALL \u00b7 ' + ind.running
+        : 'RESTART \u00b7 ' + ind.idled;
+      ib.className = ind.idled > 0 && ind.running === 0 ? 'on' : '';
+    }
+  }
+
   paintSel();
   paintProbe();
 }
@@ -1434,20 +1454,7 @@ function paintSel(){
       act.className = 'empty'; act.textContent = 'run over'; act.onclick = null;
       return;
     }
-    // Deciding what to carry through the dark is the whole game, and doing it
-    // one tile at a time is a chore once the base is large.
-    const ind = industryState();
-    if(ind.running > 0){
-      act.className = 'on';
-      act.textContent = 'IDLE ' + ind.running + ' MACHINE' + (ind.running>1?'S':'');
-      act.onclick = () => setIndustry(true);
-    } else if(ind.idled > 0){
-      act.className = 'on';
-      act.textContent = 'RESTART ' + ind.idled;
-      act.onclick = () => setIndustry(false);
-    } else {
-      act.className = 'empty'; act.textContent = 'tap a tile'; act.onclick = null;
-    }
+    bulkAction(act, 'tap a tile');
     return;
   }
 
@@ -1495,7 +1502,26 @@ function paintSel(){
   } else if(t.b && TOGGLEABLE.has(t.b.type)){
     act.className='on'; act.textContent = t.b.off ? 'RESTART' : 'IDLE'; act.onclick = toggleSel;
   } else {
-    act.className='empty'; act.textContent='pick a tool'; act.onclick=null;
+    // A plain tile with no tool is the commonest state there is; offering the
+    // whole-colony toggle here is what makes it reachable at all.
+    bulkAction(act, 'pick a tool');
+  }
+}
+
+// Deciding what to carry through the dark is the whole game, and doing it one
+// machine at a time is a chore once the base is large.
+function bulkAction(act, fallback){
+  const ind = industryState();
+  if(ind.running > 0){
+    act.className = 'on';
+    act.textContent = 'IDLE ALL \u00b7 ' + ind.running;
+    act.onclick = () => setIndustry(true);
+  } else if(ind.idled > 0){
+    act.className = 'on';
+    act.textContent = 'RESTART ALL \u00b7 ' + ind.idled;
+    act.onclick = () => setIndustry(false);
+  } else {
+    act.className = 'empty'; act.textContent = fallback; act.onclick = null;
   }
 }
 
@@ -1527,7 +1553,7 @@ function onTap(e){
   e.preventDefault();
   const t = tileFromEvent(e);
   if(!t) return;
-  sel = t;
+  sel = (sel && sel.x === t.x && sel.y === t.y) ? null : t;
   draw(); paintUI();
 }
 // Mines and processors only. Wallows and the reactor stay hand-managed:
@@ -1630,6 +1656,11 @@ function setSurvey(on){
   draw();
 }
 document.getElementById('surveybtn').addEventListener('click', () => setSurvey(!survey));
+document.getElementById('idlebtn').addEventListener('click', () => {
+  const ind = industryState();
+  if(ind.running > 0) setIndustry(true);
+  else if(ind.idled > 0) setIndustry(false);
+});
 
 document.getElementById('endturn').addEventListener('click', () => {
   if(G.review) restart(); else endTurn();
