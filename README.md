@@ -69,7 +69,7 @@ You can keep playing after that. If the colony dies instead, you can review the 
 
 ## Running it
 
-Open `astrobara.html`. That is the whole thing.
+Open `index.html`. That is the whole thing.
 
 No server, no build, no package manager, no analytics, no fonts, no CDN. It makes no network requests and stores nothing in your browser. Deploying is copying one file.
 
