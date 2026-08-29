@@ -124,6 +124,18 @@ canvas{display:block;width:100%;height:100%;}
   font-size:10px;letter-spacing:.16em;white-space:nowrap;}
 #idlebtn{position:absolute;left:50%;transform:translateX(-50%);bottom:6px;
   z-index:16;display:none;}
+#idlemenu{position:absolute;left:50%;transform:translateX(-50%);bottom:34px;z-index:17;
+  display:none;background:rgba(16,18,25,.97);border:1px solid var(--rule);
+  min-width:200px;max-width:88%;}
+#idlemenu .ig{display:flex;align-items:center;gap:10px;padding:7px 10px;
+  border-bottom:1px solid var(--rule);cursor:pointer;white-space:nowrap;}
+#idlemenu .ig:last-child{border-bottom:0;}
+#idlemenu .ig:active{background:var(--panel-2);}
+#idlemenu .ign{flex:1;font-size:10.5px;letter-spacing:.1em;color:var(--bone);}
+#idlemenu .igc{font-size:9px;color:var(--dim);}
+#idlemenu .igs{font-size:9.5px;letter-spacing:.12em;width:52px;text-align:right;}
+#idlemenu .igs.run{color:var(--sunlit);}
+#idlemenu .igs.off{color:var(--dim);}
 #idlebtn.on{color:var(--bone);border-color:var(--bone);}
 #idlebtn:active{background:var(--bone);color:var(--vacuum);}
 #surveybtn.on{color:var(--vacuum);background:#7AC6E0;border-color:#7AC6E0;}
@@ -265,6 +277,7 @@ canvas{display:block;width:100%;height:100%;}
         <div id="surveybtn">SURVEY</div>
       </div>
       <div id="idlebtn"></div>
+      <div id="idlemenu"></div>
       <div id="fit" title="Fit the whole colony" aria-label="Fit the whole colony">
         <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
           <path d="M3 9V3h6 M21 9V3h-6 M3 15v6h6 M21 15v6h-6"
@@ -330,7 +343,7 @@ canvas{display:block;width:100%;height:100%;}
             <li>Everything must connect to a habitat by dug tunnel.</li>
             <li>Habitats need 3 rows of regolith overhead or the crew takes a dose.</li>
             <li>CLEAR removes a building, or backfills a tunnel to restore that cover.</li>
-            <li>Select a mine or processor and hit IDLE. IDLE ALL, above the map, shuts down every machine at once.</li>
+            <li>Select a mine or processor and hit IDLE. The IDLE menu below the map shuts down a whole class at once — watch that idling mines also stops your water.</li>
             <li>Tap the day counter for the ledger, the full event log, and display options.</li>
             <li>SURVEY shades tiles by ore grade. Pinch to zoom; FIT returns to the whole colony.</li>
           </ul>
@@ -501,7 +514,7 @@ function newGame(){
     goodStreak:0, radStreak:0,
     log:[], trace:[], ledger:null, dead:false, won:false,
     peakCrew:CFG.startCrew, fusionOnline:false, fusionNightTurns:0,
-    ignited:false, selfSufficient:false, review:false
+    ignited:false, selfSufficient:false, review:false, dryWarned:false
   };
 
   // resource distribution --------------------------------------------------
@@ -798,6 +811,16 @@ function endTurn(){
       say('A pup. Crew of '+G.crew+'.','s');
     }
   } else G.goodStreak = 0;
+
+  // a dry colony has no automatic safety net the way a brownout does, so it
+  // has to be said out loud before it happens
+  if(L.waterNet < 0){
+    const dryIn = Math.floor(G.water / -L.waterNet);
+    if(dryIn <= 3 && !G.dryWarned){
+      G.dryWarned = true;
+      say('Water runs dry in '+dryIn+' turn'+(dryIn===1?'':'s')+' at this rate.','a');
+    }
+  } else G.dryWarned = false;
 
   // clock ------------------------------------------------------------------
   const wasNight = isNight(G.turn);
@@ -1275,8 +1298,10 @@ function paintUI(){
       (turnsLeft!==null && turnsLeft<=3 ? ' <small>'+turnsLeft+'t</small>' : '')+
       '<br><span class="need'+(G.cap < nightNeed ? ' warn' : '')+'">night needs '+nightNeed+'</span>',
       L.net<0 && turnsLeft!==null && turnsLeft<=3, true);
-  set('s-wat', Math.round(G.water)+' <small>'+(L.waterNet>=0?'+':'')+L.waterNet.toFixed(1)+'</small>',
-      L.waterNet<0 && G.water < 40, true);
+  const dryIn = L.waterNet < 0 ? Math.floor(G.water / -L.waterNet) : null;
+  set('s-wat', Math.round(G.water)+' <small>'+(L.waterNet>=0?'+':'')+L.waterNet.toFixed(1)+'</small>'
+      + (dryIn !== null && dryIn <= 8 ? ' <small>'+dryIn+'t</small>' : ''),
+      dryIn !== null && dryIn <= 4, true);
   set('s-he3', G.he3.toFixed(1)+' <small>'+(L.he3In>0?'+'+L.he3In.toFixed(1):'')+'</small>', false, true);
   const need = nightLoad(L, false) * (CFG.solLength - CFG.dayLength);
   set('s-mor', Math.round(G.morale), G.morale<35);
@@ -1318,12 +1343,12 @@ function paintUI(){
     const ind = industryState();
     if(G.review || (ind.running === 0 && ind.idled === 0)){
       ib.style.display = 'none';
+      closeIdleMenu();
     } else {
       ib.style.display = 'block';
-      ib.textContent = ind.running > 0
-        ? 'IDLE ALL \u00b7 ' + ind.running
-        : 'RESTART \u00b7 ' + ind.idled;
+      ib.textContent = 'IDLE \u25be';
       ib.className = ind.idled > 0 && ind.running === 0 ? 'on' : '';
+      paintIdleMenu();
     }
   }
 
@@ -1633,24 +1658,43 @@ function onTap(e){
 }
 // Mines and processors only. Wallows and the reactor stay hand-managed:
 // one is morale, the other is the thing keeping the lights on.
-const INDUSTRY = ['MINE','PROC'];
-function industryState(){
-  let running = 0, idled = 0;
-  for(let i=0;i<G.tiles.length;i++){
-    const b = G.tiles[i].b;
-    if(b && INDUSTRY.indexOf(b.type) >= 0){ if(b.off) idled++; else running++; }
+const IDLE_GROUPS = [
+  {label:'ALL INDUSTRY', types:['MINE','PROC']},
+  {label:'ICE MINES',    types:['MINE']},
+  {label:'PROCESSORS',   types:['PROC']},
+  {label:'WALLOWS',      types:['WALLOW']},
+  {label:'REACTORS',     types:['FUSION']}
+];
+
+// Per-class tally: how many run, what they draw, what they make.
+function groupStats(types){
+  const work = 0.5 + G.morale/100;
+  let running = 0, idled = 0, pow = 0, wat = 0;
+  for(let y=0;y<CFG.rows;y++) for(let x=0;x<CFG.cols;x++){
+    const t = G.tiles[idx(x,y)];
+    const b = t.b;
+    if(!b || types.indexOf(b.type) < 0) continue;
+    if(b.off){ idled++; continue; }
+    running++;
+    if(b.type === 'MINE'){ pow += CFG.minePower; wat += CFG.mineYield * t.ice * work; }
+    else if(b.type === 'PROC'){ pow += CFG.procPower; }
+    else if(b.type === 'WALLOW'){ wat -= CFG.wallowWater; }
+    else if(b.type === 'FUSION' && G.he3 >= CFG.fusionHe3){ pow -= CFG.fusionPower; }
   }
-  return {running, idled};
+  return {running, idled, pow, wat};
 }
-function setIndustry(off){
+function industryState(){ return groupStats(['MINE','PROC']); }
+
+function setIdle(types, off){
   let n = 0;
   for(let i=0;i<G.tiles.length;i++){
     const b = G.tiles[i].b;
-    if(b && INDUSTRY.indexOf(b.type) >= 0 && b.off !== off){ b.off = off; n++; }
+    if(b && types.indexOf(b.type) >= 0 && b.off !== off){ b.off = off; n++; }
   }
   if(n) say((off ? 'Idled ' : 'Restarted ') + n + ' machine' + (n>1?'s':'') + '.');
   recompute();
 }
+function setIndustry(off){ setIdle(['MINE','PROC'], off); }
 
 function commitSel(){
   if(!sel || !tool) return;
@@ -1785,11 +1829,52 @@ function clampLegend(){
   el.style.left = legendPos.x+'px';
   el.style.top = legendPos.y+'px';
 }
+let idleMenuOpen = false;
+function closeIdleMenu(){
+  idleMenuOpen = false;
+  document.getElementById('idlemenu').style.display = 'none';
+}
 document.getElementById('idlebtn').addEventListener('click', () => {
-  const ind = industryState();
-  if(ind.running > 0) setIndustry(true);
-  else if(ind.idled > 0) setIndustry(false);
+  idleMenuOpen = !idleMenuOpen;
+  paintIdleMenu();
 });
+cv.addEventListener('touchstart', closeIdleMenu, {passive:true});
+cv.addEventListener('mousedown', closeIdleMenu);
+
+// Each class shows its own draw and yield, because the trap is that idling
+// mines saves power and silently stops the water.
+function paintIdleMenu(){
+  const m = document.getElementById('idlemenu');
+  if(!idleMenuOpen || G.review){ m.style.display = 'none'; return; }
+  const rows = [];
+  for(let i=0;i<IDLE_GROUPS.length;i++){
+    const g = IDLE_GROUPS[i];
+    const st = groupStats(g.types);
+    if(st.running + st.idled === 0) continue;
+    const bits = [];
+    if(st.pow > 0) bits.push(Math.round(st.pow)+'p draw');
+    if(st.pow < 0) bits.push(Math.round(-st.pow)+'p made');
+    if(st.wat > 0.05) bits.push('+'+st.wat.toFixed(1)+'w');
+    if(st.wat < -0.05) bits.push(st.wat.toFixed(1)+'w');
+    const on = st.running > 0;
+    rows.push('<div class="ig" data-i="'+i+'">'
+      + '<span class="ign">'+g.label+'</span>'
+      + '<span class="igc">'+(st.running + st.idled)+(bits.length ? ' \u00b7 '+bits.join(' \u00b7 ') : '')+'</span>'
+      + '<span class="igs '+(on?'run':'off')+'">'+(on ? 'IDLE' : 'RESTART')+'</span></div>');
+  }
+  if(!rows.length){ m.style.display='none'; return; }
+  m.innerHTML = rows.join('');
+  m.style.display = 'block';
+  Array.prototype.forEach.call(m.querySelectorAll('.ig'), function(el){
+    el.onclick = function(e){
+      e.stopPropagation();
+      const g = IDLE_GROUPS[+el.dataset.i];
+      const st = groupStats(g.types);
+      setIdle(g.types, st.running > 0);
+      paintIdleMenu();
+    };
+  });
+}
 
 document.getElementById('endturn').addEventListener('click', () => {
   if(G.review) restart(); else endTurn();

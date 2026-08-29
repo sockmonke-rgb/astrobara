@@ -50,7 +50,7 @@ Tap a tile to select it, pick a tool, then commit with the button in the bottom 
 
 **Habitats need three rows of regolith overhead.** Dig above one and its cover is gone, and the crew starts taking a dose. `CLEAR` backfills a tunnel to put the cover back.
 
-**Idle your machines before the dark.** Processors are your heaviest load at 22 power a turn each. Deciding what to carry through the night is the decision the whole game is built around. `IDLE ALL` does the lot in one tap. There is an automatic safety net underneath: if a turn would drive power below zero, industry goes dark on its own before anyone gets hurt.
+**Idle your machines before the dark.** Processors are your heaviest load at 22 power a turn each. Deciding what to carry through the night is the decision the whole game is built around. The `IDLE` menu shuts down a whole class at once and shows what each class draws and produces — idling the mines saves very little power and stops your water, which is the mistake that kills colonies. There is an automatic safety net for power: if a turn would drive it below zero, industry goes dark on its own before anyone gets hurt. There is no such net for water.
 
 **Wallows are not decoration.** Capybaras are semi-aquatic and social. Standing water they can sit in is an extravagant use of your scarcest resource, and without one morale tops out at 60 — under the 70 the herd needs to grow.
 
