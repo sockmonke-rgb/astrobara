@@ -132,7 +132,14 @@ canvas{display:block;width:100%;height:100%;}
 #tools.moved{right:auto;bottom:auto;}
 #tools.lit{border-color:#7AC6E0;}
 #tools.lit #toolsicon{color:#7AC6E0;}
-#toolsbody{border-top:1px solid var(--rule);min-width:188px;}
+#toolsbody{border-top:1px solid var(--rule);min-width:214px;}
+#pane-display{padding:2px 9px 6px;}
+#pane-display .opt{display:flex;justify-content:space-between;gap:14px;padding:7px 0;
+  border-bottom:1px solid var(--rule);cursor:pointer;}
+#pane-display .opt:last-child{border-bottom:0;}
+#pane-display .opt .lab{color:var(--bone);font-size:10px;}
+#pane-display .opt .sw{color:var(--dim);letter-spacing:.1em;font-size:10px;}
+#pane-display .opt .sw.on{color:var(--sunlit);}
 #tools{max-width:calc(100% - 12px);}
 #idlemenu .ig{flex-wrap:wrap;}
 #toolstabs{display:flex;}
@@ -293,6 +300,7 @@ canvas{display:block;width:100%;height:100%;}
           <div id="toolstabs">
             <div class="ttab on" data-ttab="survey">SURVEY</div>
             <div class="ttab" data-ttab="idle">IDLE</div>
+            <div class="ttab" data-ttab="display">DISPLAY</div>
           </div>
           <div id="pane-survey">
             <div id="surveybtn">SURVEY · OFF</div>
@@ -306,6 +314,7 @@ canvas{display:block;width:100%;height:100%;}
           </div>
           </div>
           <div id="pane-idle"><div id="idlemenu"></div></div>
+          <div id="pane-display"></div>
         </div>
       </div>
       <div id="fsbtn" title="Full screen" aria-label="Toggle full screen">
@@ -1414,18 +1423,9 @@ function paintProbe(){
   const tabs = '<div class="tabs">'
     + '<div class="tab'+(probeTab==='ledger'?' on':'')+'" data-tab="ledger">LEDGER</div>'
     + '<div class="tab'+(probeTab==='log'?' on':'')+'" data-tab="log">LOG</div>'
-    + '<div class="tab'+(probeTab==='display'?' on':'')+'" data-tab="display">DISPLAY</div>'
     + '</div>';
   if(probeTab === 'log'){
     p.innerHTML = tabs + renderLog();
-    bindProbe(p);
-    return;
-  }
-  if(probeTab === 'display'){
-    p.innerHTML = tabs + OPT_ROWS.map(function(o){
-      return '<div class="opt" data-opt="'+o[0]+'"><span class="lab">'+o[1]+'</span>'
-           + '<span class="sw'+(OPT[o[0]]?' on':'')+'">'+(OPT[o[0]]?'ON':'OFF')+'</span></div>';
-    }).join('') + '<div class="note">Tap the day counter to close.</div>';
     bindProbe(p);
     return;
   }
@@ -1873,9 +1873,28 @@ document.getElementById('surveybtn').addEventListener('click', () => setSurvey(!
 
 // Tabs, and a title bar that toggles the panel — but only when the pointer did
 // not travel, so opening and dragging never fight each other.
+function paintDisplayPane(){
+  const p = document.getElementById('pane-display');
+  if(!p) return;
+  p.innerHTML = OPT_ROWS.map(function(o){
+    return '<div class="opt" data-opt="'+o[0]+'"><span class="lab">'+o[1]+'</span>'
+         + '<span class="sw'+(OPT[o[0]]?' on':'')+'">'+(OPT[o[0]]?'ON':'OFF')+'</span></div>';
+  }).join('');
+  Array.prototype.forEach.call(p.querySelectorAll('.opt'), function(el){
+    el.addEventListener('click', function(e){
+      e.stopPropagation();
+      OPT[el.dataset.opt] = !OPT[el.dataset.opt];
+      paintDisplayPane();
+      clampTools();
+      draw();
+    });
+  });
+}
 function showTab(name){
-  document.getElementById('pane-survey').style.display = name === 'survey' ? 'block' : 'none';
-  document.getElementById('pane-idle').style.display   = name === 'idle'   ? 'block' : 'none';
+  document.getElementById('pane-survey').style.display  = name === 'survey'  ? 'block' : 'none';
+  document.getElementById('pane-idle').style.display    = name === 'idle'    ? 'block' : 'none';
+  document.getElementById('pane-display').style.display = name === 'display' ? 'block' : 'none';
+  if(name === 'display') paintDisplayPane();
   Array.prototype.forEach.call(document.querySelectorAll('#toolstabs .ttab'), function(el){
     el.classList.toggle('on', el.dataset.ttab === name);
   });
@@ -1884,6 +1903,7 @@ function showTab(name){
 Array.prototype.forEach.call(document.querySelectorAll('#toolstabs .ttab'), function(el){
   el.addEventListener('click', function(e){ e.stopPropagation(); showTab(el.dataset.ttab); });
 });
+paintDisplayPane();
 showTab('survey');
 
 // Drag the legend clear of whatever it is covering. Deltas go through
