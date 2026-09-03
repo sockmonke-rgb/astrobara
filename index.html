@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  ASTROBARA V12RC1
+  ASTROBARA V12RC1PATCH002
   A 3X lunar survival colony builder. Single file, no dependencies, no network.
 
   MIT License
@@ -38,7 +38,7 @@
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <meta name="author" content="Mark Florentino LLC, Kittenmancer">
-<meta name="description" content="Astrobara V12RC1 — a 3X lunar survival colony builder. MIT licensed.">
+<meta name="description" content="Astrobara V12RC1PATCH002 — a 3X lunar survival colony builder. MIT licensed.">
 <style>
 :root{
   --vacuum:#07080B;
@@ -344,7 +344,7 @@ canvas{display:block;width:100%;height:100%;}
   </div>
 
 <div class="overlay" id="splash">
-  <div id="ver">V12RC1</div>
+  <div id="ver">V12RC1PATCH002</div>
   <div class="card">
     <div class="head">
       <h1>ASTROBARA</h1>
@@ -1816,6 +1816,12 @@ function paintFs(){
   if(p) p.setAttribute('d', fsActive() ? FS_IN : FS_OUT);
   b.title = fsActive() ? 'Leave full screen' : 'Full screen';
 }
+function lockLandscape(){
+  try {
+    const o = screen.orientation;
+    if(o && o.lock){ const r = o.lock('landscape'); if(r && r.catch) r.catch(function(){}); }
+  } catch(err){ /* unsupported, or not in fullscreen: the CSS rotation covers it */ }
+}
 function toggleFullscreen(){
   const e = fsElement();
   if(!e) return;
@@ -1840,8 +1846,13 @@ function toggleFullscreen(){
   }
 }
 document.getElementById('fsbtn').addEventListener('click', toggleFullscreen);
-document.addEventListener('fullscreenchange', function(){ paintFs(); resize(); });
-document.addEventListener('webkitfullscreenchange', function(){ paintFs(); resize(); });
+function onFsChange(){
+  if(fsActive()) lockLandscape();
+  paintFs();
+  resize();
+}
+document.addEventListener('fullscreenchange', onFsChange);
+document.addEventListener('webkitfullscreenchange', onFsChange);
 paintFs();
 function setSurvey(on){
   survey = on;
@@ -2092,7 +2103,7 @@ function finish(won){
     'nights endured · '+Math.floor(G.turn/CFG.solLength)+'<br>'+
     'peak crew · '+G.peakCrew+'<br>'+
     'fusion · '+(G.fusionOnline?'online':'never lit')+
-    '<br><span style="opacity:.55">astrobara v12rc1 · Mark Florentino LLC &amp; Kittenmancer</span>'+
+    '<br><span style="opacity:.55">astrobara v12rc1patch002 · Mark Florentino LLC &amp; Kittenmancer</span>'+
     (won ? '' : '<br>'+postMortem().join('<br>'))+
     '</div>';
   const keep = document.getElementById('keep');
