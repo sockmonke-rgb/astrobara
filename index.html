@@ -118,15 +118,33 @@ canvas{display:block;width:100%;height:100%;}
   border-right:1px solid var(--rule);cursor:pointer;}
 #nudge div:last-child{border-right:0;}
 #nudge div:active{background:var(--panel-2);}
-#chips{position:absolute;right:6px;top:6px;z-index:16;}
-#chips > div, #idlebtn{cursor:pointer;background:rgba(16,18,25,.92);
-  border:1px solid var(--rule);color:var(--dim);padding:5px 10px;
-  font-size:10px;letter-spacing:.16em;white-space:nowrap;}
-#idlebtn{position:absolute;left:50%;transform:translateX(-50%);bottom:6px;
-  z-index:16;display:none;}
-#idlemenu{position:absolute;left:50%;transform:translateX(-50%);bottom:34px;z-index:17;
-  display:none;background:rgba(16,18,25,.97);border:1px solid var(--rule);
-  min-width:200px;max-width:88%;}
+/* One movable panel: a collapsed [=] icon that opens onto two tabs. Replaces
+   the survey chip, the idle chip and the floating legend, so the map carries
+   one small object instead of three. */
+#tools{position:absolute;right:6px;top:6px;z-index:17;
+  background:rgba(16,18,25,.96);border:1px solid #3A4152;
+  touch-action:none;-webkit-user-select:none;user-select:none;}
+#toolsbar{display:flex;align-items:center;gap:8px;padding:6px 9px;cursor:move;}
+#toolsicon{font-size:12px;color:var(--bone);letter-spacing:0;}
+#toolsname{font-size:9px;letter-spacing:.18em;color:var(--dim);}
+#tools.shut #toolsbody, #tools.shut #toolsname{display:none;}
+#tools.shut #toolsbar{padding:5px 7px;}
+#tools.moved{right:auto;bottom:auto;}
+#tools.lit{border-color:#7AC6E0;}
+#tools.lit #toolsicon{color:#7AC6E0;}
+#toolsbody{border-top:1px solid var(--rule);min-width:188px;}
+#tools{max-width:calc(100% - 12px);}
+#idlemenu .ig{flex-wrap:wrap;}
+#toolstabs{display:flex;}
+#toolstabs .ttab{flex:1;text-align:center;padding:6px 8px;font-size:9px;
+  letter-spacing:.14em;color:var(--dim);cursor:pointer;
+  border-bottom:1px solid var(--rule);}
+#toolstabs .ttab.on{color:var(--sunlit);border-bottom-color:var(--sunlit);}
+#pane-survey{padding:8px 9px 9px;}
+#surveybtn{text-align:center;padding:7px 8px;margin-bottom:8px;cursor:pointer;
+  font-size:10px;letter-spacing:.16em;color:var(--bone);border:1px solid #3A4152;}
+#surveybtn.on{color:var(--vacuum);background:#7AC6E0;border-color:#7AC6E0;}
+#idlemenu .inone{padding:10px;font-size:9px;letter-spacing:.1em;color:var(--dim);text-align:center;}
 #idlemenu .ig{display:flex;align-items:center;gap:10px;padding:7px 10px;
   border-bottom:1px solid var(--rule);cursor:pointer;white-space:nowrap;}
 #idlemenu .ig:last-child{border-bottom:0;}
@@ -136,27 +154,21 @@ canvas{display:block;width:100%;height:100%;}
 #idlemenu .igs{font-size:9.5px;letter-spacing:.12em;width:52px;text-align:right;}
 #idlemenu .igs.run{color:var(--sunlit);}
 #idlemenu .igs.off{color:var(--dim);}
-#idlebtn.on{color:var(--bone);border-color:var(--bone);}
-#idlebtn:active{background:var(--bone);color:var(--vacuum);}
-#surveybtn.on{color:var(--vacuum);background:#7AC6E0;border-color:#7AC6E0;}
-#legend{position:absolute;right:6px;top:34px;z-index:16;display:none;
-  background:rgba(16,18,25,.94);border:1px solid var(--rule);padding:5px 8px 6px;
-  cursor:move;touch-action:none;}
-#legend .lgrip{font-size:7.5px;letter-spacing:.18em;color:var(--dim);
-  padding-bottom:4px;margin-bottom:4px;border-bottom:1px solid var(--rule);}
-#legend.moved{right:auto;bottom:auto;}
-#legend .lrow{display:flex;align-items:center;gap:6px;padding:1.5px 0;}
-#legend .lk{font-size:8.5px;letter-spacing:.1em;color:var(--dim);}
-#legend .lbar{width:52px;height:8px;border:1px solid var(--rule);}
-#legend .lbar.ice{background:linear-gradient(90deg,rgba(122,198,224,.16),rgba(122,198,224,1));}
-#legend .lbar.he3{background:linear-gradient(90deg,rgba(240,190,96,.16),rgba(240,190,96,1));}
-#legend .lbar.barren{background:#2B2A2E;width:20px;}
-#legend .lbar.unk{background:#14161C;width:20px;}
-#legend .lscale{display:flex;justify-content:space-between;width:52px;margin-left:62px;
+#legendrows .lrow{display:flex;align-items:center;gap:6px;padding:1.5px 0;}
+#legendrows .lk{font-size:8.5px;letter-spacing:.1em;color:var(--dim);}
+#legendrows .lbar{width:52px;height:8px;border:1px solid var(--rule);}
+#legendrows .lbar.ice{background:linear-gradient(90deg,rgba(122,198,224,.16),rgba(122,198,224,1));}
+#legendrows .lbar.he3{background:linear-gradient(90deg,rgba(240,190,96,.16),rgba(240,190,96,1));}
+#legendrows .lbar.barren{background:#2B2A2E;width:20px;}
+#legendrows .lbar.unk{background:#14161C;width:20px;}
+#legendrows .lscale{display:flex;justify-content:space-between;width:52px;margin-left:62px;
   font-size:7.5px;color:var(--dim);letter-spacing:.06em;}
-#fit{position:absolute;right:6px;bottom:6px;z-index:16;display:none;cursor:pointer;
+#fit, #fsbtn{position:absolute;bottom:6px;z-index:16;cursor:pointer;
   background:rgba(16,18,25,.92);border:1px solid var(--rule);color:var(--bone);
   padding:5px 6px;line-height:0;}
+#fit{right:6px;display:none;}
+#fsbtn{left:6px;display:none;}
+#fsbtn:active{background:var(--bone);color:var(--vacuum);}
 #fit:active{background:var(--bone);color:var(--vacuum);}
 #flash{position:absolute;inset:0;pointer-events:none;opacity:0;z-index:15;
   background:radial-gradient(circle at 50% 60%, rgba(232,201,122,.85), rgba(232,201,122,0) 65%);}
@@ -195,7 +207,7 @@ canvas{display:block;width:100%;height:100%;}
 /* ---- probe ---- */
 #probe{position:absolute;left:6px;top:6px;background:rgba(16,18,25,.97);border:1px solid var(--rule);
   padding:6px 9px;font-size:10px;line-height:1.5;display:none;pointer-events:auto;
-  max-width:70%;max-height:88%;overflow-y:auto;z-index:14;}
+  max-width:70%;max-height:88%;overflow-y:auto;z-index:18;}
 #probe .tabs{display:flex;margin:-2px 0 6px;}
 #probe .tab{flex:1;text-align:center;padding:5px 10px;border:1px solid var(--rule);
   font-size:9.5px;letter-spacing:.14em;color:var(--dim);cursor:pointer;}
@@ -273,25 +285,42 @@ canvas{display:block;width:100%;height:100%;}
     <div id="stage">
       <canvas id="cv" role="img" aria-label="Lunar colony cross-section. Use the readouts and the ledger panel for the state of the colony."></canvas>
       <div id="flash"></div>
-      <div id="chips">
-        <div id="surveybtn">SURVEY</div>
+      <div id="tools" class="shut">
+        <div id="toolsbar">
+          <span id="toolsicon">[≡]</span><span id="toolsname">TOOLS</span>
+        </div>
+        <div id="toolsbody">
+          <div id="toolstabs">
+            <div class="ttab on" data-ttab="survey">SURVEY</div>
+            <div class="ttab" data-ttab="idle">IDLE</div>
+          </div>
+          <div id="pane-survey">
+            <div id="surveybtn">SURVEY · OFF</div>
+            <div id="legendrows">
+            <div class="lrow"><span class="lk">WATER ICE</span><span class="lbar ice"></span></div>
+        <div class="lrow"><span class="lk">HELIUM-3</span><span class="lbar he3"></span></div>
+        <div class="lrow"><span class="lk">BARREN</span><span class="lbar barren"></span>
+          <span class="lk">UNSURVEYED</span><span class="lbar unk"></span></div>
+        <div class="lscale"><span>trace</span><span>rich</span>
+          </div>
+          </div>
+          </div>
+          <div id="pane-idle"><div id="idlemenu"></div></div>
+        </div>
       </div>
-      <div id="idlebtn"></div>
-      <div id="idlemenu"></div>
+      <div id="fsbtn" title="Full screen" aria-label="Toggle full screen">
+        <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
+          <path id="fspath" d="M4 10V4h6 M20 14v6h-6 M4 4l6 6 M20 20l-6-6"
+                fill="none" stroke="currentColor" stroke-width="2.2"
+                stroke-linecap="square"/>
+        </svg>
+      </div>
       <div id="fit" title="Fit the whole colony" aria-label="Fit the whole colony">
         <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
           <path d="M3 9V3h6 M21 9V3h-6 M3 15v6h6 M21 15v6h-6"
                 fill="none" stroke="currentColor" stroke-width="2.6"
                 stroke-linecap="square" stroke-linejoin="miter"/>
         </svg>
-      </div>
-      <div id="legend">
-        <div class="lgrip">≡ drag</div>
-        <div class="lrow"><span class="lk">WATER ICE</span><span class="lbar ice"></span></div>
-        <div class="lrow"><span class="lk">HELIUM-3</span><span class="lbar he3"></span></div>
-        <div class="lrow"><span class="lk">BARREN</span><span class="lbar barren"></span>
-          <span class="lk">UNSURVEYED</span><span class="lbar unk"></span></div>
-        <div class="lscale"><span>trace</span><span>rich</span></div>
       </div>
       <div id="probe"></div>
     </div>
@@ -470,6 +499,7 @@ const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
 let cell = 12, offX = 0, offY = 0, baseCell = 12, stageW = 1, stageH = 1;
 let zoom = 1, panX = 0, panY = 0, survey = false;
+let toolsPos = null;
 let tool = null, sel = null, probeOn = false, probeTab = 'ledger';
 // Display options. Faint glyphs read fine on a desktop monitor and badly on a
 // phone in daylight, so this is switchable rather than a fixed choice.
@@ -856,10 +886,11 @@ function canPlace(x,y,type){
   if(!inb(x,y)) return 'off map';
   const t = G.tiles[idx(x,y)];
   const c = COST[type];
+  const EPS = 1e-6;
   if(G.labor < c.l) return 'no labor left this turn';
-  if(G.power < c.p) return 'not enough power';
-  if(G.water < c.w) return 'not enough water';
-  if(c.h && G.he3 < c.h) return 'not enough He-3';
+  if(G.power + EPS < c.p) return 'not enough power';
+  if(G.water + EPS < c.w) return 'not enough water';
+  if(c.h && G.he3 + EPS < c.h) return 'not enough He-3';
 
   if(type==='DIG'){
     if(!t.rock || t.dug) return 'already open';
@@ -960,7 +991,7 @@ function resize(){
   ctx.setTransform(dpr,0,0,dpr,0,0);
   baseCell = Math.max(4, Math.min(stageW/CFG.cols, stageH/CFG.rows));
   layout();
-  clampLegend();
+  clampTools();
   if(G) draw();
 }
 
@@ -1293,16 +1324,16 @@ function paintUI(){
   set('s-crew', G.crew+'/'+(L.habs*CFG.habCap), G.crew<=1);
   const turnsLeft = L.net < 0 ? Math.floor(G.power / -L.net) : null;
   const nightNeed = Math.round(nightLoad(L,false) * (CFG.solLength - CFG.dayLength));
-  set('s-pow', Math.round(G.power)+'/'+Math.round(G.cap)+
+  set('s-pow', floorTo(G.power,0)+'/'+Math.round(G.cap)+
       ' <small>'+(L.net>=0?'+':'')+L.net.toFixed(0)+'</small>' +
       (turnsLeft!==null && turnsLeft<=3 ? ' <small>'+turnsLeft+'t</small>' : '')+
       '<br><span class="need'+(G.cap < nightNeed ? ' warn' : '')+'">night needs '+nightNeed+'</span>',
       L.net<0 && turnsLeft!==null && turnsLeft<=3, true);
   const dryIn = L.waterNet < 0 ? Math.floor(G.water / -L.waterNet) : null;
-  set('s-wat', Math.round(G.water)+' <small>'+(L.waterNet>=0?'+':'')+L.waterNet.toFixed(1)+'</small>'
+  set('s-wat', floorTo(G.water,0)+' <small>'+(L.waterNet>=0?'+':'')+L.waterNet.toFixed(1)+'</small>'
       + (dryIn !== null && dryIn <= 8 ? ' <small>'+dryIn+'t</small>' : ''),
       dryIn !== null && dryIn <= 4, true);
-  set('s-he3', G.he3.toFixed(1)+' <small>'+(L.he3In>0?'+'+L.he3In.toFixed(1):'')+'</small>', false, true);
+  set('s-he3', floorTo(G.he3,1)+' <small>'+(L.he3In>0?'+'+L.he3In.toFixed(1):'')+'</small>', false, true);
   const need = nightLoad(L, false) * (CFG.solLength - CFG.dayLength);
   set('s-mor', Math.round(G.morale), G.morale<35);
   set('s-lab', G.labor+'/'+G.crew, false);
@@ -1322,7 +1353,7 @@ function paintUI(){
   for(const k of ORDER){
     const c = COST[k];
     const div = document.createElement('div');
-    const afford = G.power>=c.p && G.water>=c.w && G.he3>=(c.h||0) && G.labor>=c.l;
+    const afford = G.power+1e-6>=c.p && G.water+1e-6>=c.w && G.he3+1e-6>=(c.h||0) && G.labor>=c.l;
     div.className = 'btn' + (tool===k?' sel':'') + (afford?'':' no');
     let cost = c.p+'p';
     if(c.w) cost += ' '+c.w+'w';
@@ -1338,22 +1369,17 @@ function paintUI(){
     pal.appendChild(div);
   }
 
-  const ib = document.getElementById('idlebtn');
-  if(ib){
-    const ind = industryState();
-    if(G.review || (ind.running === 0 && ind.idled === 0)){
-      ib.style.display = 'none';
-      closeIdleMenu();
-    } else {
-      ib.style.display = 'block';
-      ib.textContent = 'IDLE \u25be';
-      ib.className = ind.idled > 0 && ind.running === 0 ? 'on' : '';
-      paintIdleMenu();
-    }
-  }
+  paintIdleMenu();
 
   paintSel();
   paintProbe();
+}
+
+// Round down, never up: a readout that overstates by a hundredth makes the
+// game look broken when a build is refused.
+function floorTo(v, dp){
+  const m = Math.pow(10, dp);
+  return (Math.floor(v * m + 1e-9) / m).toFixed(dp);
 }
 
 function set(id, html, warn, isHtml){
@@ -1768,84 +1794,164 @@ cv.addEventListener('wheel', e => {
   zoomAt(zoom * (e.deltaY < 0 ? 1.12 : 1/1.12), p);
 }, {passive:false});
 document.getElementById('fit').addEventListener('click', fitView);
+
+// Full screen. Not offered where it cannot work: iOS Safari has no Fullscreen
+// API for ordinary elements, and an embedded frame only gets it if the host
+// allows it. In both cases the button stays hidden rather than doing nothing.
+const FS_OUT = 'M4 10V4h6 M20 14v6h-6 M4 4l6 6 M20 20l-6-6';
+const FS_IN  = 'M10 4v6H4 M14 20v-6h6 M10 10L4 4 M14 14l6 6';
+function fsElement(){ return document.documentElement || null; }
+function fsActive(){ return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+function fsAvailable(){
+  const e = fsElement();
+  if(!e) return false;
+  const enabled = document.fullscreenEnabled !== false && document.webkitFullscreenEnabled !== false;
+  return enabled && !!(e.requestFullscreen || e.webkitRequestFullscreen);
+}
+function paintFs(){
+  const b = document.getElementById('fsbtn');
+  if(!b) return;
+  b.style.display = fsAvailable() ? 'block' : 'none';
+  const p = document.getElementById('fspath');
+  if(p) p.setAttribute('d', fsActive() ? FS_IN : FS_OUT);
+  b.title = fsActive() ? 'Leave full screen' : 'Full screen';
+}
+function toggleFullscreen(){
+  const e = fsElement();
+  if(!e) return;
+  try {
+    if(fsActive()){
+      const exit = document.exitFullscreen || document.webkitExitFullscreen;
+      if(exit) exit.call(document);
+    } else {
+      const req = e.requestFullscreen || e.webkitRequestFullscreen;
+      if(req){
+        const r = req.call(e);
+        // a blocked request rejects; hide the button rather than leave it dead
+        if(r && r.catch) r.catch(function(){
+          const b = document.getElementById('fsbtn');
+          if(b) b.style.display = 'none';
+        });
+      }
+    }
+  } catch(err){
+    const b = document.getElementById('fsbtn');
+    if(b) b.style.display = 'none';
+  }
+}
+document.getElementById('fsbtn').addEventListener('click', toggleFullscreen);
+document.addEventListener('fullscreenchange', function(){ paintFs(); resize(); });
+document.addEventListener('webkitfullscreenchange', function(){ paintFs(); resize(); });
+paintFs();
 function setSurvey(on){
   survey = on;
-  document.getElementById('surveybtn').classList.toggle('on', survey);
-  document.getElementById('legend').style.display = survey ? 'block' : 'none';
+  const sb = document.getElementById('surveybtn');
+  sb.classList.toggle('on', survey);
+  sb.textContent = 'SURVEY \u00b7 ' + (survey ? 'ON' : 'OFF');
+  document.getElementById('tools').classList.toggle('lit', survey);
   // Survey is for reading the ground, not working it — put the build controls
   // out of reach so the mode is unambiguous.
   // The arrows stay live: walking the selection is how you read the ground.
   document.getElementById('palette').classList.toggle('dim', survey);
   document.getElementById('endturn').classList.toggle('dim', survey);
   document.getElementById('bact').classList.toggle('dim', survey);
-  if(survey) clampLegend();
+  clampTools();
   draw();
 }
 document.getElementById('surveybtn').addEventListener('click', () => setSurvey(!survey));
 
+// Tabs, and a title bar that toggles the panel — but only when the pointer did
+// not travel, so opening and dragging never fight each other.
+function showTab(name){
+  document.getElementById('pane-survey').style.display = name === 'survey' ? 'block' : 'none';
+  document.getElementById('pane-idle').style.display   = name === 'idle'   ? 'block' : 'none';
+  Array.prototype.forEach.call(document.querySelectorAll('#toolstabs .ttab'), function(el){
+    el.classList.toggle('on', el.dataset.ttab === name);
+  });
+  clampTools();
+}
+Array.prototype.forEach.call(document.querySelectorAll('#toolstabs .ttab'), function(el){
+  el.addEventListener('click', function(e){ e.stopPropagation(); showTab(el.dataset.ttab); });
+});
+showTab('survey');
+
 // Drag the legend clear of whatever it is covering. Deltas go through
 // appPoint so this still works while the whole app is rotated 90 degrees.
-let legendPos = null;
 (function(){
-  const el = document.getElementById('legend');
-  if(!el) return;
-  let live = false, sx = 0, sy = 0, ox = 0, oy = 0;
+  const el  = document.getElementById('tools');
+  const bar = document.getElementById('toolsbar');
+  if(!el || !bar) return;
+  let live = false, moved = false, sx = 0, sy = 0, ox = 0, oy = 0;
   function pointOf(e){
     const pt = (e.touches && e.touches[0]) || (e.changedTouches && e.changedTouches[0]) || e;
     return appPoint(pt.clientX, pt.clientY);
   }
   function start(e){
     const p = pointOf(e);
-    live = true; sx = p.x; sy = p.y;
+    live = true; moved = false; sx = p.x; sy = p.y;
     ox = el.offsetLeft; oy = el.offsetTop;
-    el.classList.add('moved');
-    el.style.left = ox+'px'; el.style.top = oy+'px';
     e.preventDefault();
   }
   function move(e){
     if(!live) return;
     const p = pointOf(e);
+    if(!moved && (Math.abs(p.x - sx) > 4 || Math.abs(p.y - sy) > 4)){
+      moved = true;
+      // only now does it stop being right-anchored
+      el.classList.add('moved');
+      el.style.left = ox+'px'; el.style.top = oy+'px';
+    }
+    if(!moved) return;
     const nx = clamp(ox + p.x - sx, 0, Math.max(0, stageW - el.offsetWidth));
     const ny = clamp(oy + p.y - sy, 0, Math.max(0, stageH - el.offsetHeight));
     el.style.left = nx+'px'; el.style.top = ny+'px';
-    legendPos = {x:nx, y:ny};
+    toolsPos = {x:nx, y:ny};
     e.preventDefault();
   }
-  function end(){ live = false; }
-  el.addEventListener('touchstart', start, {passive:false});
-  el.addEventListener('touchmove', move, {passive:false});
-  el.addEventListener('touchend', end);
-  el.addEventListener('mousedown', start);
+  // A tap on the bar opens or shuts the panel; a drag moves it. Only the bar
+  // starts a drag, so tapping a tab or a button inside never nudges the panel.
+  function end(){
+    if(live && !moved){
+      el.classList.toggle('shut');
+      clampTools();
+    }
+    live = false;
+  }
+  bar.addEventListener('touchstart', start, {passive:false});
+  bar.addEventListener('touchmove', move, {passive:false});
+  bar.addEventListener('touchend', end);
+  bar.addEventListener('mousedown', start);
   window.addEventListener('mousemove', move);
   window.addEventListener('mouseup', end);
 })();
 
 // keep it on screen when the viewport changes
-function clampLegend(){
-  const el = document.getElementById('legend');
-  if(!el || !legendPos) return;
-  legendPos.x = clamp(legendPos.x, 0, Math.max(0, stageW - el.offsetWidth));
-  legendPos.y = clamp(legendPos.y, 0, Math.max(0, stageH - el.offsetHeight));
-  el.style.left = legendPos.x+'px';
-  el.style.top = legendPos.y+'px';
+function clampTools(){
+  const el = document.getElementById('tools');
+  if(!el) return;
+  const maxX = Math.max(0, stageW - el.offsetWidth);
+  const maxY = Math.max(0, stageH - el.offsetHeight);
+  if(toolsPos){
+    toolsPos.x = clamp(toolsPos.x, 0, maxX);
+    toolsPos.y = clamp(toolsPos.y, 0, maxY);
+    el.style.left = toolsPos.x+'px';
+    el.style.top  = toolsPos.y+'px';
+    return;
+  }
+  // Untouched panel: still anchored by its right edge. Only pin coordinates if
+  // it has actually outgrown the stage, which right-anchoring alone cannot fix.
+  if(el.offsetLeft < 0 || el.offsetTop < 0){
+    el.classList.add('moved');
+    toolsPos = {x: clamp(el.offsetLeft, 0, maxX), y: clamp(el.offsetTop, 0, maxY)};
+    el.style.left = toolsPos.x+'px';
+    el.style.top  = toolsPos.y+'px';
+  }
 }
-let idleMenuOpen = false;
-function closeIdleMenu(){
-  idleMenuOpen = false;
-  document.getElementById('idlemenu').style.display = 'none';
-}
-document.getElementById('idlebtn').addEventListener('click', () => {
-  idleMenuOpen = !idleMenuOpen;
-  paintIdleMenu();
-});
-cv.addEventListener('touchstart', closeIdleMenu, {passive:true});
-cv.addEventListener('mousedown', closeIdleMenu);
-
 // Each class shows its own draw and yield, because the trap is that idling
 // mines saves power and silently stops the water.
 function paintIdleMenu(){
   const m = document.getElementById('idlemenu');
-  if(!idleMenuOpen || G.review){ m.style.display = 'none'; return; }
+  if(G.review){ m.innerHTML = ''; return; }
   const rows = [];
   for(let i=0;i<IDLE_GROUPS.length;i++){
     const g = IDLE_GROUPS[i];
@@ -1862,9 +1968,9 @@ function paintIdleMenu(){
       + '<span class="igc">'+(st.running + st.idled)+(bits.length ? ' \u00b7 '+bits.join(' \u00b7 ') : '')+'</span>'
       + '<span class="igs '+(on?'run':'off')+'">'+(on ? 'IDLE' : 'RESTART')+'</span></div>');
   }
-  if(!rows.length){ m.style.display='none'; return; }
+  if(!rows.length){ m.innerHTML = '<div class="inone">nothing built yet</div>'; clampTools(); return; }
   m.innerHTML = rows.join('');
-  m.style.display = 'block';
+  clampTools();
   Array.prototype.forEach.call(m.querySelectorAll('.ig'), function(el){
     el.onclick = function(e){
       e.stopPropagation();
