@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Astrobara</title>
+<meta name="description" content="A 3X lunar survival colony builder. One HTML file. The antagonist is the lunar night.">
+<style>
+:root{
+  --vacuum:#07080B;
+  --panel:#101219;
+  --rule:#2B2A2E;
+  --regolith:#4A423A;
+  --bone:#D8D2C6;
+  --dim:#8A8579;
+  --sunlit:#E8C97A;
+  --ice:#7FA9B8;
+  --bara:#C08A54;
+}
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0;
+  background:var(--vacuum);
+  color:var(--bone);
+  font-family:ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace;
+  font-size:15px;
+  line-height:1.65;
+}
+.wrap{max-width:68ch;margin:0 auto;padding:56px 22px 88px;}
+
+h1{
+  font-size:clamp(30px,7vw,46px);
+  letter-spacing:.30em;
+  text-indent:.30em;
+  font-weight:700;
+  margin:0 0 6px;
+  line-height:1.1;
+}
+.standfirst{color:var(--dim);font-size:13px;line-height:1.6;margin:0 0 34px;}
+
+/* Hero: the game's own day/night bar. Fifteen lit turns, fourteen dark. */
+.cycle{margin:0 0 12px;}
+.bar{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:12px;}
+.tick{
+  width:14px;height:22px;flex:0 0 auto;
+  opacity:0;animation:rise .34s ease-out forwards;
+  animation-delay:calc(var(--i) * 42ms);
+}
+.tick.lit{background:var(--sunlit);}
+.tick.dark{background:transparent;border:1px solid var(--regolith);}
+@keyframes rise{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
+@media (prefers-reduced-motion:reduce){
+  .tick{opacity:1;animation:none;}
+}
+.cycle p{margin:0;font-size:17px;line-height:1.5;}
+.cycle .gloss{color:var(--dim);font-size:13px;margin-top:8px;}
+
+h2{
+  font-size:15px;font-weight:700;letter-spacing:.04em;
+  color:var(--sunlit);margin:46px 0 12px;
+}
+h3{font-size:14px;font-weight:700;color:var(--bone);margin:30px 0 10px;}
+p{margin:0 0 15px;}
+a{color:var(--ice);text-decoration:none;border-bottom:1px solid rgba(127,169,184,.4);}
+a:hover,a:focus-visible{border-bottom-color:var(--ice);}
+a:focus-visible{outline:2px solid var(--ice);outline-offset:3px;}
+strong{color:#F0EBE0;font-weight:700;}
+code{color:var(--bara);font-size:.92em;}
+hr{border:0;border-top:1px solid var(--rule);margin:44px 0;}
+ul{margin:0 0 15px;padding-left:20px;}
+li{margin-bottom:9px;}
+li::marker{color:var(--regolith);}
+
+/* Two resources. Colour carries which is which, matching the survey overlay. */
+.ores{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:0 0 15px;}
+@media (max-width:620px){.ores{grid-template-columns:1fr;gap:26px;}}
+.ore{padding-left:14px;}
+.ore.water{border-left:2px solid var(--ice);}
+.ore.helium{border-left:2px solid var(--sunlit);}
+.ore h3{margin:0 0 12px;letter-spacing:.06em;}
+.ore.water h3{color:var(--ice);}
+.ore.helium h3{color:var(--sunlit);}
+.ore dl{margin:0;}
+.ore dt{color:var(--dim);font-size:11.5px;letter-spacing:.1em;margin-bottom:2px;}
+.ore dd{margin:0 0 13px;font-size:13.5px;line-height:1.55;}
+.pull{
+  border-left:2px solid var(--regolith);padding-left:14px;
+  margin:0 0 15px;color:var(--bone);
+}
+footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--rule);
+  color:var(--dim);font-size:13px;}
+footer a{color:var(--dim);border-bottom-color:rgba(138,133,121,.4);}
+footer a:hover{color:var(--ice);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>ASTROBARA</h1>
+  <p class="standfirst">v14 &middot; A 3X lunar survival colony builder. One HTML file, no dependencies, no network, no build step.</p>
+
+  <section class="cycle" aria-label="The lunar day and night cycle">
+    <div class="bar" role="img" aria-label="Twenty-nine turns: fifteen lit, fourteen dark.">
+        <span class="tick lit" style="--i:0"></span>
+        <span class="tick lit" style="--i:1"></span>
+        <span class="tick lit" style="--i:2"></span>
+        <span class="tick lit" style="--i:3"></span>
+        <span class="tick lit" style="--i:4"></span>
+        <span class="tick lit" style="--i:5"></span>
+        <span class="tick lit" style="--i:6"></span>
+        <span class="tick lit" style="--i:7"></span>
+        <span class="tick lit" style="--i:8"></span>
+        <span class="tick lit" style="--i:9"></span>
+        <span class="tick lit" style="--i:10"></span>
+        <span class="tick lit" style="--i:11"></span>
+        <span class="tick lit" style="--i:12"></span>
+        <span class="tick lit" style="--i:13"></span>
+        <span class="tick lit" style="--i:14"></span>
+        <span class="tick dark" style="--i:15"></span>
+        <span class="tick dark" style="--i:16"></span>
+        <span class="tick dark" style="--i:17"></span>
+        <span class="tick dark" style="--i:18"></span>
+        <span class="tick dark" style="--i:19"></span>
+        <span class="tick dark" style="--i:20"></span>
+        <span class="tick dark" style="--i:21"></span>
+        <span class="tick dark" style="--i:22"></span>
+        <span class="tick dark" style="--i:23"></span>
+        <span class="tick dark" style="--i:24"></span>
+        <span class="tick dark" style="--i:25"></span>
+        <span class="tick dark" style="--i:26"></span>
+        <span class="tick dark" style="--i:27"></span>
+        <span class="tick dark" style="--i:28"></span>
+    </div>
+    <p>A lunar day is 29 turns. Fourteen of them are dark.</p>
+    <p class="gloss">You are running a colony of capybaras on the rim of Shackleton crater.
+       There are no rivals and no combat. The antagonist is the lunar night.</p>
+  </section>
+
+  <p><a href="https://sockmonke-rgb.github.io/astrobara/">Play it</a> — landscape, phone or desktop.</p>
+
+  <hr>
+
+  <h2>The premise</h2>
+  <p>When the sun goes down your solar arrays make nothing, habitat heating triples, and the colony
+     runs on whatever you banked. Every structure you add raises the load you have to carry through
+     the next darkness. The colony grows until it can no longer afford itself.</p>
+  <p>Doing nothing kills you on turn 19, during the first night. A disciplined run reaches
+     self-sufficiency around turn 58.</p>
+
+  <h2>The two resources</h2>
+  <p>They are scarce in opposite ways, and they pull you in opposite directions.</p>
+
+  <div class="ores">
+    <div class="ore water">
+      <h3>Water ice</h3>
+      <dl>
+        <dt>Where</dt><dd>Deep, in ground the sun never reaches.</dd>
+        <dt>Verb</dt><dd>Prospect — finding it is a map puzzle.</dd>
+        <dt>Feeds</dt><dd>Drinking, life support, radiation shielding.</dd>
+        <dt>Trap</dt><dd>The best ice sits where there is no sun to run the extraction.</dd>
+      </dl>
+    </div>
+    <div class="ore helium">
+      <h3>Helium-3</h3>
+      <dl>
+        <dt>Where</dt><dd>The top few metres, where the sun does reach.</dd>
+        <dt>Verb</dt><dd>Process — throughput gated by the power you already have.</dd>
+        <dt>Feeds</dt><dd>Fusion, once you can bank 25 of it.</dd>
+        <dt>Trap</dt><dd>You spend energy to get energy, and it can stall out.</dd>
+      </dl>
+    </div>
+  </div>
+
+  <p class="pull">You cannot dig toward both at once.</p>
+
+  <h2>Geography</h2>
+  <p>The map is hand-authored rather than generated, because the shadow geometry has to be exact.
+     Shackleton sits at the pole, so the sun never rises more than 14&deg; above the horizon.
+     That single fact produces the whole map:</p>
+  <ul>
+    <li><strong>Columns 13&ndash;16</strong> are lit on all fifteen daylight turns — a peak of eternal light.</li>
+    <li><strong>Columns 4&ndash;11</strong> are lit on none of them — a floor of permanent shadow.</li>
+  </ul>
+  <p>They are adjacent. Your arrays want the crest; your ice is in the dark right beside it. This is
+     the real reason to go to the lunar pole, and it fell out of the shadow maths rather than being
+     designed in.</p>
+  <p>The lander sets down badly, with its arrays in shadow. Moving them is your first real decision.</p>
+
+  <h2>Playing</h2>
+  <p>Tap a tile to select it, pick a tool, then commit with the button in the bottom bar. Tiles are
+     small on a phone, so the arrow pad walks the selection one tile at a time rather than making you
+     tap precisely.</p>
+  <ul>
+    <li><strong>Nine tools.</strong> Dig, clear, solar array, battery, habitat, ice mine, processor,
+        wallow, fusion reactor. Selecting one expands it to show both its build cost and its per-turn
+        upkeep — those are different numbers and the distinction decides runs.</li>
+    <li><strong>Everything must connect to a habitat by dug tunnel.</strong> Orphaned structures go dead.</li>
+    <li><strong>Habitats need three rows of regolith overhead.</strong> Dig above one and its cover is
+        gone, and the crew starts taking a dose. <code>CLEAR</code> backfills a tunnel to put the cover back.</li>
+    <li><strong>Idle your machines before the dark.</strong> Processors are your heaviest load at 22
+        power a turn each. Deciding what to carry through the night is the decision the whole game is
+        built around. <code>IDLE ALL</code> does the lot in one tap. There is an automatic safety net
+        underneath: if a turn would drive power below zero, industry goes dark on its own before
+        anyone gets hurt.</li>
+    <li><strong>Wallows are not decoration.</strong> Capybaras are semi-aquatic and social. Standing
+        water they can sit in is an extravagant use of your scarcest resource, and without one morale
+        tops out at 60 — under the 70 the herd needs to grow.</li>
+  </ul>
+
+  <h3>Instruments</h3>
+  <ul>
+    <li><strong>The ledger</strong> — tap the day counter. Every generation and consumption line for
+        the current turn, plus what the coming night will cost and whether your storage can cover it.</li>
+    <li><strong>The log</strong> — the same panel, second tab. Every event, turn-stamped and filed
+        under a snapshot of the numbers that produced it. Why you lost someone on sol 2 is answerable
+        after the fact.</li>
+    <li><strong>Survey mode</strong> — shades every tile by ore grade, cyan for ice and amber for
+        helium-3, intensity by concentration. Fog still applies: unsurveyed ground reads as unknown,
+        not as barren.</li>
+    <li><strong>Display options</strong> — high-contrast ore, larger glyphs, grid lines on or off.</li>
+  </ul>
+
+  <h3>Winning, losing, and afterwards</h3>
+  <p>Carry one whole night on fusion and the colony is self-sufficient. The reward is visible on the
+     map: from then on the tunnels light themselves, and the night stops being dark.</p>
+  <p>You can keep playing after that. If the colony dies instead, you can review the run — the map
+     stays open, the log stays readable, and the end card diagnoses the failure: first brownout and
+     when, peak power ever banked, turns spent running a deficit.</p>
+
+  <h2>Running it</h2>
+  <p>Open <code>index.html</code>. That is the whole thing.</p>
+  <p>No server, no build, no package manager, no analytics, no fonts, no CDN. It makes no network
+     requests and stores nothing in your browser. Deploying is copying one file.</p>
+
+  <h2>Scope</h2>
+  <p>This is a vertical slice, and some of what is missing is missing on purpose.</p>
+  <ul>
+    <li><strong>Autosaves every turn</strong>, so backgrounding the app does not cost you the run.</li>
+    <li><strong>Turn-based</strong>, one turn to one lunar day.</li>
+    <li><strong>One map</strong>, one landing site.</li>
+    <li><strong>No opponents.</strong> Removing the fourth X was the design decision the rest of it hangs on.</li>
+  </ul>
+  <p>All tuning lives in a single <code>CFG</code> object at the top of the file.</p>
+
+  <footer>
+    <p>Built by <strong>Mark Florentino LLC</strong> and <strong>Kittenmancer</strong>.<br>
+       Released under the
+       <a href="https://github.com/sockmonke-rgb/astrobara/blob/main/LICENSE">MIT License</a>.</p>
+  </footer>
+
+</div>
+</body>
+</html>

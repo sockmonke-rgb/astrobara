@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  ASTROBARA V13RC1PATCH003
+  ASTROBARA V14
   A 3X lunar survival colony builder. Single file, no dependencies, no network.
 
   MIT License
@@ -38,7 +38,7 @@
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <meta name="author" content="Mark Florentino LLC, Kittenmancer">
-<meta name="description" content="Astrobara V13RC1PATCH003 — a 3X lunar survival colony builder. MIT licensed.">
+<meta name="description" content="Astrobara V14 — a 3X lunar survival colony builder. MIT licensed.">
 <style>
 :root{
   --vacuum:#07080B;
@@ -66,7 +66,7 @@ body{
 }
 /* Sized from JS off visualViewport. iOS Chrome resolves dvh/vh in a way that
    pushed the entire sidebar off-screen, so nothing here depends on them. */
-#app{position:fixed;left:0;top:0;display:flex;flex-direction:column;overflow:hidden;}
+#app{position:absolute;left:0;top:0;display:flex;flex-direction:column;overflow:hidden;}
 
 /* ---- top readout ---- */
 #top{display:flex;align-items:stretch;border-bottom:1px solid var(--rule);background:var(--panel);flex:0 0 auto;}
@@ -132,7 +132,12 @@ canvas{display:block;width:100%;height:100%;}
 #tools.moved{right:auto;bottom:auto;}
 #tools.lit{border-color:#7AC6E0;}
 #tools.lit #toolsicon{color:#7AC6E0;}
-#toolsbody{border-top:1px solid var(--rule);min-width:214px;}
+#toolsbody{border-top:1px solid var(--rule);min-width:268px;}
+#pane-run{padding:9px;}
+#pane-run .status{font-size:9.5px;line-height:1.5;color:var(--dim);margin-bottom:9px;}
+#pane-run .newrun{text-align:center;padding:9px 8px;cursor:pointer;font-size:10px;
+  letter-spacing:.14em;color:var(--bone);border:1px solid #3A4152;}
+#pane-run .newrun.arm{color:var(--alarm);border-color:var(--alarm);}
 #pane-display{padding:2px 9px 6px;}
 #pane-display .opt{display:flex;justify-content:space-between;gap:14px;padding:7px 0;
   border-bottom:1px solid var(--rule);cursor:pointer;}
@@ -301,6 +306,7 @@ canvas{display:block;width:100%;height:100%;}
             <div class="ttab on" data-ttab="survey">SURVEY</div>
             <div class="ttab" data-ttab="idle">IDLE</div>
             <div class="ttab" data-ttab="display">DISPLAY</div>
+            <div class="ttab" data-ttab="run">RUN</div>
           </div>
           <div id="pane-survey">
             <div id="surveybtn">SURVEY · OFF</div>
@@ -315,6 +321,7 @@ canvas{display:block;width:100%;height:100%;}
           </div>
           <div id="pane-idle"><div id="idlemenu"></div></div>
           <div id="pane-display"></div>
+          <div id="pane-run"></div>
         </div>
       </div>
       <div id="fsbtn" title="Full screen" aria-label="Toggle full screen">
@@ -353,7 +360,7 @@ canvas{display:block;width:100%;height:100%;}
   </div>
 
 <div class="overlay" id="splash">
-  <div id="ver">V13RC1PATCH003</div>
+  <div id="ver">V14</div>
   <div class="card">
     <div class="head">
       <h1>ASTROBARA</h1>
@@ -512,12 +519,13 @@ let toolsPos = null;
 let tool = null, sel = null, probeOn = false, probeTab = 'ledger';
 // Display options. Faint glyphs read fine on a desktop monitor and badly on a
 // phone in daylight, so this is switchable rather than a fixed choice.
-const OPT = { contrast:false, bigGlyph:false, grid:true, reveal:false };
+const OPT = { contrast:false, bigGlyph:false, grid:true, reveal:false, autorotate:true };
 const OPT_ROWS = [
   ['contrast','High-contrast ore'],
   ['bigGlyph','Larger glyphs'],
   ['grid','Tile grid lines'],
-  ['reveal','Reveal map (review only)']
+  ['reveal','Reveal map (review only)'],
+  ['autorotate','Rotate view in portrait']
 ];
 
 const idx = (x,y) => y*CFG.cols + x;
@@ -879,6 +887,7 @@ function endTurn(){
 
   G.labor = G.crew;
   recordTrace(G.turn - 1, L, brownout, thirst, shed);
+  saveRun();
 
   if(G.crew <= 0){ finish(false); return; }
   if(!nowNight && wasNight && G.fusionNightTurns >= CFG.fusionNightWin && !G.selfSufficient){
@@ -957,6 +966,7 @@ function touchesConnected(x,y,conn){
 
 function doPlace(x,y,type){
   if(G.review) return;
+  setTimeout(saveRun, 0);
   const err = canPlace(x,y,type);
   if(err){ say(err,'a'); paintUI(); return; }
   const c = COST[type];
@@ -978,10 +988,19 @@ function viewport(){
            h: Math.round(vv ? vv.height : window.innerHeight) };
 }
 let rotated = false;
+function isPortrait(){
+  try {
+    const mq = window.matchMedia && window.matchMedia('(orientation: portrait)');
+    if(mq && typeof mq.matches === 'boolean') return mq.matches;
+  } catch(err){ /* fall through to measuring */ }
+  const vp = viewport();
+  return vp.h > vp.w;
+}
 function resize(){
   const vp = viewport();
   const app = document.getElementById('app');
-  rotated = vp.h > vp.w;
+  // Only rotate when the device really is portrait AND the player wants it.
+  rotated = OPT.autorotate && isPortrait() && vp.h > vp.w;
   if(rotated){
     app.style.width  = vp.h+'px';
     app.style.height = vp.w+'px';
@@ -1885,16 +1904,46 @@ function paintDisplayPane(){
       e.stopPropagation();
       OPT[el.dataset.opt] = !OPT[el.dataset.opt];
       paintDisplayPane();
+      if(el.dataset.opt === 'autorotate') resize();
       clampTools();
       draw();
+      saveRun();
     });
+  });
+}
+let newRunArmed = false;
+function paintRunPane(){
+  const p = document.getElementById('pane-run');
+  if(!p) return;
+  const where = G ? ('sol ' + solOf(G.turn) + ', ' +
+      (isNight(G.turn) ? 'night ' + (dayOf(G.turn) - CFG.dayLength) : 'day ' + dayOf(G.turn))) : '';
+  p.innerHTML =
+    '<div class="status">' +
+      (saveWorks
+        ? 'Saved automatically every turn.<br>This run: ' + where + '.'
+        : 'This browser is blocking storage, so the run cannot be saved.') +
+    '</div>' +
+    '<div class="newrun' + (newRunArmed ? ' arm' : '') + '" id="newrunbtn">' +
+      (newRunArmed ? 'DISCARD RUN \u2014 CONFIRM' : 'NEW COLONY') +
+    '</div>';
+  const b = document.getElementById('newrunbtn');
+  b.addEventListener('click', function(e){
+    e.stopPropagation();
+    if(!newRunArmed){ newRunArmed = true; paintRunPane(); clampTools(); return; }
+    newRunArmed = false;
+    clearRun();
+    restart();
+    paintRunPane();
   });
 }
 function showTab(name){
   document.getElementById('pane-survey').style.display  = name === 'survey'  ? 'block' : 'none';
   document.getElementById('pane-idle').style.display    = name === 'idle'    ? 'block' : 'none';
   document.getElementById('pane-display').style.display = name === 'display' ? 'block' : 'none';
+  document.getElementById('pane-run').style.display     = name === 'run'     ? 'block' : 'none';
+  if(name !== 'run') newRunArmed = false;
   if(name === 'display') paintDisplayPane();
+  if(name === 'run') paintRunPane();
   Array.prototype.forEach.call(document.querySelectorAll('#toolstabs .ttab'), function(el){
     el.classList.toggle('on', el.dataset.ttab === name);
   });
@@ -2060,7 +2109,9 @@ document.getElementById('keep').addEventListener('click', () => {
 function restart(){
   document.getElementById('over').style.display='none';
   tool = null; sel = null; probeOn = false; probeTab = 'ledger';
-  newGame(); resize();
+  clearRun();
+  newGame(); resize(); saveRun();
+  if(typeof paintRunPane === 'function') paintRunPane();
 }
 document.getElementById('again').addEventListener('click', restart);
 window.addEventListener('keydown', e => {
@@ -2077,6 +2128,14 @@ window.addEventListener('keydown', e => {
   if(e.key==='ArrowDown'){ e.preventDefault(); nudge(0,1); }
 });
 window.addEventListener('resize', resize);
+window.addEventListener('orientationchange', function(){
+  resize(); setTimeout(resize, 120); setTimeout(resize, 400);
+});
+try {
+  const mqp = window.matchMedia('(orientation: portrait)');
+  if(mqp.addEventListener) mqp.addEventListener('change', function(){ resize(); setTimeout(resize, 150); });
+  else if(mqp.addListener) mqp.addListener(function(){ resize(); setTimeout(resize, 150); });
+} catch(err){ /* no matchMedia: the resize listener still covers it */ }
 if(window.visualViewport){
   window.visualViewport.addEventListener('resize', resize);
   window.visualViewport.addEventListener('scroll', resize);
@@ -2123,7 +2182,7 @@ function finish(won){
     'nights endured · '+Math.floor(G.turn/CFG.solLength)+'<br>'+
     'peak crew · '+G.peakCrew+'<br>'+
     'fusion · '+(G.fusionOnline?'online':'never lit')+
-    '<br><span style="opacity:.55">astrobara v13rc1patch003 · Mark Florentino LLC &amp; Kittenmancer</span>'+
+    '<br><span style="opacity:.55">astrobara v14 · Mark Florentino LLC &amp; Kittenmancer</span>'+
     (won ? '' : '<br>'+postMortem().join('<br>'))+
     '</div>';
   const keep = document.getElementById('keep');
@@ -2134,9 +2193,61 @@ function finish(won){
   draw();
 }
 
+/* ---------------- persistence ---------------- */
+// Everything in G is plain data, so the run round-trips through JSON as-is.
+const SAVE_KEY = 'astrobara.run';
+const SAVE_VERSION = 1;
+let saveWorks = true;
+
+function saveRun(){
+  if(!saveWorks || !G) return;
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify({
+      v: SAVE_VERSION, cols: CFG.cols, rows: CFG.rows,
+      G: G, opt: OPT, survey: survey
+    }));
+  } catch(err){
+    // private mode, quota, or a host that blocks storage: stop trying
+    saveWorks = false;
+    paintRunPane();
+  }
+}
+function clearRun(){
+  try { localStorage.removeItem(SAVE_KEY); } catch(err){ /* nothing to clear */ }
+}
+function loadRun(){
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(!raw) return false;
+    const d = JSON.parse(raw);
+    // a save from a different map shape cannot be trusted
+    if(!d || d.v !== SAVE_VERSION || d.cols !== CFG.cols || d.rows !== CFG.rows) return false;
+    if(!d.G || !d.G.tiles || d.G.tiles.length !== CFG.cols * CFG.rows) return false;
+    G = d.G;
+    if(d.opt) for(const k in OPT){ if(k in d.opt) OPT[k] = d.opt[k]; }
+    recompute();
+    if(d.survey) setSurvey(true);
+    return true;
+  } catch(err){
+    return false;
+  }
+}
+
+// Save at every point the run changes, and again on the way out — iOS often
+// gives no warning beyond pagehide.
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState === 'hidden') saveRun();
+});
+window.addEventListener('pagehide', saveRun);
+window.addEventListener('beforeunload', saveRun);
+
 /* ---------------- boot ---------------- */
-newGame();
+const resumed = loadRun();
+if(!resumed) newGame();
+if(resumed) document.getElementById('splash').style.display = 'none';
+paintRunPane();
 resize();
+saveRun();
 </script>
 </div>
 

@@ -1,6 +1,6 @@
 # Astrobara
 
-A 3X lunar survival colony builder. One HTML file, no dependencies, no network, no build step.
+**v14** · A 3X lunar survival colony builder. One HTML file, no dependencies, no network, no build step.
 
 You are running a colony of capybaras on the rim of Shackleton crater. There are no rivals and no combat. The antagonist is the lunar night.
 
@@ -77,12 +77,21 @@ No server, no build, no package manager, no analytics, no fonts, no CDN. It make
 
 This is a vertical slice, and some of what is missing is missing on purpose.
 
-- **No saving.** A run is a sitting.
+- **Autosaves every turn** to local storage, so closing the tab or backgrounding the app does not cost you the run. New colony, in the tools panel, starts over.
 - **Turn-based**, one turn to one lunar day.
 - **One map**, one landing site.
 - **No opponents.** Removing the fourth X was the design decision the rest of it hangs on.
 
 All tuning lives in a single `CFG` object at the top of the file.
+
+## Changes in v14
+
+- Runs autosave every turn and survive a cold reload, so backgrounding the app no longer costs you the colony.
+- New colony, with a confirm step, in the tools panel.
+- Survey, idle, display options and run controls merged into one movable panel.
+- Full-screen toggle where the platform supports it.
+- Fixed a rotation misfire on home-screen launches that could mismap touch targets.
+- Fixed readouts rounding up, which could show enough of a resource while refusing the build.
 
 ## Credits
 
