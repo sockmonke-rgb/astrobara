@@ -69,6 +69,15 @@ body{
 #app{position:absolute;left:0;top:0;display:flex;flex-direction:column;overflow:hidden;}
 
 /* ---- top readout ---- */
+#portraitgate{position:absolute;inset:0;z-index:40;display:none;
+  flex-direction:column;align-items:center;justify-content:center;gap:10px;
+  background:var(--vacuum);text-align:center;padding:24px;}
+#portraitgate .pg-turn{font-size:34px;color:var(--sunlit);line-height:1;}
+#portraitgate .pg-head{font-size:14px;letter-spacing:.24em;color:var(--bone);}
+#portraitgate .pg-sub{font-size:11px;color:var(--dim);}
+#portraitgate .pg-alt{margin-top:14px;font-size:10px;letter-spacing:.1em;
+  color:var(--dim);border:1px solid var(--rule);padding:9px 14px;cursor:pointer;}
+#portraitgate .pg-alt:active{background:var(--bone);color:var(--vacuum);}
 #top{display:flex;align-items:stretch;border-bottom:1px solid var(--rule);background:var(--panel);flex:0 0 auto;}
 #clock{padding:3px 9px;border-right:1px solid var(--rule);display:flex;flex-direction:column;
   justify-content:center;cursor:pointer;white-space:nowrap;flex:0 0 auto;
@@ -354,6 +363,13 @@ canvas{display:block;width:100%;height:100%;}
     </div>
   </div>
 
+  <div id="portraitgate">
+    <div class="pg-turn">↻</div>
+    <div class="pg-head">TURN YOUR PHONE</div>
+    <div class="pg-sub">Astrobara plays in landscape.</div>
+    <div class="pg-alt" id="pg-rotate">Can't turn it? Rotate the view instead</div>
+  </div>
+
   <div id="bottom">
     <div id="binfo"><div id="obj"></div><div id="detail"></div></div>
     <div id="bact"></div>
@@ -519,13 +535,13 @@ let toolsPos = null;
 let tool = null, sel = null, probeOn = false, probeTab = 'ledger';
 // Display options. Faint glyphs read fine on a desktop monitor and badly on a
 // phone in daylight, so this is switchable rather than a fixed choice.
-const OPT = { contrast:false, bigGlyph:false, grid:true, reveal:false, autorotate:true };
+const OPT = { contrast:false, bigGlyph:false, grid:true, reveal:false, autorotate:false };
 const OPT_ROWS = [
   ['contrast','High-contrast ore'],
   ['bigGlyph','Larger glyphs'],
   ['grid','Tile grid lines'],
   ['reveal','Reveal map (review only)'],
-  ['autorotate','Rotate view in portrait']
+  ['autorotate','Rotate view in portrait (last resort)']
 ];
 
 const idx = (x,y) => y*CFG.cols + x;
@@ -996,11 +1012,27 @@ function isPortrait(){
   const vp = viewport();
   return vp.h > vp.w;
 }
+let lastLayout = '';
+let layoutQueued = false;
 function resize(){
+  if(layoutQueued) return;
+  layoutQueued = true;
+  requestAnimationFrame(function(){ layoutQueued = false; applyLayout(); });
+}
+function applyLayout(){
   const vp = viewport();
   const app = document.getElementById('app');
   // Only rotate when the device really is portrait AND the player wants it.
-  rotated = OPT.autorotate && isPortrait() && vp.h > vp.w;
+  const portrait = isPortrait() && vp.h > vp.w;
+  rotated = OPT.autorotate && portrait;
+
+  const pg = document.getElementById('portraitgate');
+  if(pg) pg.style.display = (portrait && !OPT.autorotate) ? 'flex' : 'none';
+
+  const sig = vp.w+'x'+vp.h+':'+(rotated?1:0);
+  if(sig === lastLayout && G) return;
+  lastLayout = sig;
+
   if(rotated){
     app.style.width  = vp.h+'px';
     app.style.height = vp.w+'px';
@@ -1888,6 +1920,12 @@ function setSurvey(on){
   clampTools();
   draw();
 }
+document.getElementById('pg-rotate').addEventListener('click', function(){
+  OPT.autorotate = true;
+  lastLayout = '';
+  applyLayout();
+  saveRun();
+});
 document.getElementById('surveybtn').addEventListener('click', () => setSurvey(!survey));
 
 // Tabs, and a title bar that toggles the panel — but only when the pointer did
