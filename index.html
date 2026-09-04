@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  ASTROBARA V14
+  ASTROBARA V14.1
   A 3X lunar survival colony builder. Single file, no dependencies, no network.
 
   MIT License
@@ -38,7 +38,7 @@
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <meta name="author" content="Mark Florentino LLC, Kittenmancer">
-<meta name="description" content="Astrobara V14 — a 3X lunar survival colony builder. MIT licensed.">
+<meta name="description" content="Astrobara V14.1 — a 3X lunar survival colony builder. MIT licensed.">
 <style>
 :root{
   --vacuum:#07080B;
@@ -376,7 +376,7 @@ canvas{display:block;width:100%;height:100%;}
   </div>
 
 <div class="overlay" id="splash">
-  <div id="ver">V14</div>
+  <div id="ver">V14.1</div>
   <div class="card">
     <div class="head">
       <h1>ASTROBARA</h1>
@@ -2144,11 +2144,35 @@ document.getElementById('keep').addEventListener('click', () => {
     recompute();
   }
 });
+function closePanels(){
+  // ledger
+  probeOn = false;
+  probeTab = 'ledger';
+  const clock = document.getElementById('clock');
+  if(clock) clock.classList.remove('open');
+  const probe = document.getElementById('probe');
+  if(probe) probe.style.display = 'none';
+
+  // tools panel: collapsed, back on its first tab, nothing armed
+  const tools = document.getElementById('tools');
+  if(tools) tools.classList.add('shut');
+  newRunArmed = false;
+  if(typeof showTab === 'function') showTab('survey');
+
+  // overlays and view state
+  const over = document.getElementById('over');
+  if(over) over.style.display = 'none';
+  setSurvey(false);
+  fitView();
+}
+
 function restart(){
-  document.getElementById('over').style.display='none';
-  tool = null; sel = null; probeOn = false; probeTab = 'ledger';
+  closePanels();
+  tool = null; sel = null;
   clearRun();
   newGame(); resize(); saveRun();
+  // A fresh colony starts where the first one did, on the splash.
+  document.getElementById('splash').style.display = '';
   if(typeof paintRunPane === 'function') paintRunPane();
 }
 document.getElementById('again').addEventListener('click', restart);
@@ -2220,7 +2244,7 @@ function finish(won){
     'nights endured · '+Math.floor(G.turn/CFG.solLength)+'<br>'+
     'peak crew · '+G.peakCrew+'<br>'+
     'fusion · '+(G.fusionOnline?'online':'never lit')+
-    '<br><span style="opacity:.55">astrobara v14 · Mark Florentino LLC &amp; Kittenmancer</span>'+
+    '<br><span style="opacity:.55">astrobara v14.1 · Mark Florentino LLC &amp; Kittenmancer</span>'+
     (won ? '' : '<br>'+postMortem().join('<br>'))+
     '</div>';
   const keep = document.getElementById('keep');
