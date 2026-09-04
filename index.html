@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  ASTROBARA V14.1
+  ASTROBARA V14.1.1
   A 3X lunar survival colony builder. Single file, no dependencies, no network.
 
   MIT License
@@ -38,7 +38,7 @@
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <meta name="author" content="Mark Florentino LLC, Kittenmancer">
-<meta name="description" content="Astrobara V14.1 — a 3X lunar survival colony builder. MIT licensed.">
+<meta name="description" content="Astrobara V14.1.1 — a 3X lunar survival colony builder. MIT licensed.">
 <style>
 :root{
   --vacuum:#07080B;
@@ -376,7 +376,7 @@ canvas{display:block;width:100%;height:100%;}
   </div>
 
 <div class="overlay" id="splash">
-  <div id="ver">V14.1</div>
+  <div id="ver">V14.1.1</div>
   <div class="card">
     <div class="head">
       <h1>ASTROBARA</h1>
@@ -2155,7 +2155,13 @@ function closePanels(){
 
   // tools panel: collapsed, back on its first tab, nothing armed
   const tools = document.getElementById('tools');
-  if(tools) tools.classList.add('shut');
+  if(tools){
+    tools.classList.add('shut');
+    tools.classList.remove('moved');
+    tools.style.left = '';
+    tools.style.top = '';
+    toolsPos = null;
+  }
   newRunArmed = false;
   if(typeof showTab === 'function') showTab('survey');
 
@@ -2244,7 +2250,7 @@ function finish(won){
     'nights endured · '+Math.floor(G.turn/CFG.solLength)+'<br>'+
     'peak crew · '+G.peakCrew+'<br>'+
     'fusion · '+(G.fusionOnline?'online':'never lit')+
-    '<br><span style="opacity:.55">astrobara v14.1 · Mark Florentino LLC &amp; Kittenmancer</span>'+
+    '<br><span style="opacity:.55">astrobara v14.1.1 · Mark Florentino LLC &amp; Kittenmancer</span>'+
     (won ? '' : '<br>'+postMortem().join('<br>'))+
     '</div>';
   const keep = document.getElementById('keep');
