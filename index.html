@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  ASTROBARA V14.1.4
+  ASTROBARA V14.1.5
   A 3X lunar survival colony builder. Single file, no dependencies, no network.
 
   MIT License
@@ -40,7 +40,7 @@
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <meta name="author" content="Mark Florentino LLC, Kittenmancer">
-<meta name="description" content="Astrobara V14.1.4 — a 3X lunar survival colony builder. MIT licensed.">
+<meta name="description" content="Astrobara V14.1.5 — a 3X lunar survival colony builder. MIT licensed.">
 <style>
 :root{
   --vacuum:#07080B;
@@ -545,6 +545,9 @@ const OPT_ROWS = [
   ['reveal','Reveal map (review only)'],
   ['autorotate','Rotate view in portrait (last resort)']
 ];
+const ACTION_ROWS = [
+  ['recalibrate','Fix touch alignment']
+];
 
 const idx = (x,y) => y*CFG.cols + x;
 const inb = (x,y) => x>=0 && y>=0 && x<CFG.cols && y<CFG.rows;
@@ -1020,7 +1023,30 @@ function resize(){
   layoutQueued = true;
   requestAnimationFrame(function(){ layoutQueued = false; applyLayout(); });
 }
+// A hidden scroll offset in standalone mode moves where touches land without
+// moving anything you can see.
+function resetScroll(){
+  try {
+    if(window.pageYOffset || window.pageXOffset) window.scrollTo(0, 0);
+    if(document.body) { document.body.scrollTop = 0; document.body.scrollLeft = 0; }
+    if(document.documentElement) { document.documentElement.scrollTop = 0; document.documentElement.scrollLeft = 0; }
+  } catch(err){ /* nothing to reset */ }
+}
+
+// Force the layout to be rebuilt so touch regions are re-registered against it.
+function recalibrate(){
+  resetScroll();
+  const app = document.getElementById('app');
+  if(!app) return;
+  const prev = app.style.display;
+  app.style.display = 'none';
+  void app.offsetHeight;
+  app.style.display = prev || '';
+  void app.offsetHeight;
+}
+
 function applyLayout(){
+  resetScroll();
   const vp = viewport();
   const app = document.getElementById('app');
   // Only rotate when the device really is portrait AND the player wants it.
@@ -1051,6 +1077,7 @@ function applyLayout(){
   layout();
   clampTools();
   if(G) draw();
+  recalibrate();
 }
 
 // Browser pinch is disabled (it would fight the rotation transform and blow up
@@ -1934,7 +1961,18 @@ function paintDisplayPane(){
     return '<div class="opt" data-opt="'+o[0]+'"><span class="lab">'+o[1]+'</span>'
          + '<span class="sw'+(OPT[o[0]]?' on':'')+'">'+(OPT[o[0]]?'ON':'OFF')+'</span></div>';
   }).join('');
-  Array.prototype.forEach.call(p.querySelectorAll('.opt'), function(el){
+  p.innerHTML += ACTION_ROWS.map(function(a){
+    return '<div class="opt" data-act="'+a[0]+'"><span class="lab">'+a[1]+'</span>'
+         + '<span class="sw">RUN</span></div>';
+  }).join('');
+  Array.prototype.forEach.call(p.querySelectorAll('.opt[data-act]'), function(el){
+    el.addEventListener('click', function(e){
+      e.stopPropagation();
+      recalibrate();
+      resize();
+    });
+  });
+  Array.prototype.forEach.call(p.querySelectorAll('.opt[data-opt]'), function(el){
     el.addEventListener('click', function(e){
       e.stopPropagation();
       OPT[el.dataset.opt] = !OPT[el.dataset.opt];
@@ -2195,7 +2233,14 @@ window.addEventListener('keydown', e => {
 });
 window.addEventListener('resize', resize);
 window.addEventListener('orientationchange', function(){
-  resize(); setTimeout(resize, 120); setTimeout(resize, 400);
+  resize();
+  setTimeout(resize, 120);
+  setTimeout(resize, 400);
+  setTimeout(function(){ recalibrate(); resize(); }, 700);
+});
+window.addEventListener('focus', function(){ recalibrate(); resize(); });
+document.addEventListener('visibilitychange', function(){
+  if(document.visibilityState === 'visible'){ recalibrate(); resize(); }
 });
 try {
   const mqp = window.matchMedia('(orientation: portrait)');
@@ -2265,7 +2310,7 @@ function finish(won){
 // Everything in G is plain data, so the run round-trips through JSON as-is.
 const SAVE_KEY = 'astrobara.run';
 const SAVE_VERSION = 1;
-const BUILD = 'V14.1.4';
+const BUILD = 'V14.1.5';
 let saveWorks = true;
 
 function saveRun(){
