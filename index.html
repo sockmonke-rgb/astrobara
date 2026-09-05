@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  ASTROBARA V14.1.1
+  ASTROBARA V14.1.3
   A 3X lunar survival colony builder. Single file, no dependencies, no network.
 
   MIT License
@@ -38,7 +38,7 @@
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <meta name="author" content="Mark Florentino LLC, Kittenmancer">
-<meta name="description" content="Astrobara V14.1.1 — a 3X lunar survival colony builder. MIT licensed.">
+<meta name="description" content="Astrobara V14.1.3 — a 3X lunar survival colony builder. MIT licensed.">
 <style>
 :root{
   --vacuum:#07080B;
@@ -376,7 +376,7 @@ canvas{display:block;width:100%;height:100%;}
   </div>
 
 <div class="overlay" id="splash">
-  <div id="ver">V14.1.1</div>
+  <div id="ver"></div>
   <div class="card">
     <div class="head">
       <h1>ASTROBARA</h1>
@@ -903,7 +903,6 @@ function endTurn(){
 
   G.labor = G.crew;
   recordTrace(G.turn - 1, L, brownout, thirst, shed);
-  saveRun();
 
   if(G.crew <= 0){ finish(false); return; }
   if(!nowNight && wasNight && G.fusionNightTurns >= CFG.fusionNightWin && !G.selfSufficient){
@@ -913,6 +912,7 @@ function endTurn(){
   }
 
   recompute();
+  saveRun();
 }
 
 /* ---------------- actions ---------------- */
@@ -1012,7 +1012,6 @@ function isPortrait(){
   const vp = viewport();
   return vp.h > vp.w;
 }
-let lastLayout = '';
 let layoutQueued = false;
 function resize(){
   if(layoutQueued) return;
@@ -1028,10 +1027,6 @@ function applyLayout(){
 
   const pg = document.getElementById('portraitgate');
   if(pg) pg.style.display = (portrait && !OPT.autorotate) ? 'flex' : 'none';
-
-  const sig = vp.w+'x'+vp.h+':'+(rotated?1:0);
-  if(sig === lastLayout && G) return;
-  lastLayout = sig;
 
   if(rotated){
     app.style.width  = vp.h+'px';
@@ -1922,7 +1917,6 @@ function setSurvey(on){
 }
 document.getElementById('pg-rotate').addEventListener('click', function(){
   OPT.autorotate = true;
-  lastLayout = '';
   applyLayout();
   saveRun();
 });
@@ -1958,7 +1952,8 @@ function paintRunPane(){
   p.innerHTML =
     '<div class="status">' +
       (saveWorks
-        ? 'Saved automatically every turn.<br>This run: ' + where + '.'
+        ? 'Saved automatically every turn.<br>This run: ' + where + '.<br>'
+          + '<span style="opacity:.7">Saves do not carry across builds.</span>'
         : 'This browser is blocking storage, so the run cannot be saved.') +
     '</div>' +
     '<div class="newrun' + (newRunArmed ? ' arm' : '') + '" id="newrunbtn">' +
@@ -2250,7 +2245,7 @@ function finish(won){
     'nights endured · '+Math.floor(G.turn/CFG.solLength)+'<br>'+
     'peak crew · '+G.peakCrew+'<br>'+
     'fusion · '+(G.fusionOnline?'online':'never lit')+
-    '<br><span style="opacity:.55">astrobara v14.1.1 · Mark Florentino LLC &amp; Kittenmancer</span>'+
+    '<br><span style="opacity:.55">astrobara '+BUILD.toLowerCase()+' · Mark Florentino LLC &amp; Kittenmancer</span>'+
     (won ? '' : '<br>'+postMortem().join('<br>'))+
     '</div>';
   const keep = document.getElementById('keep');
@@ -2259,19 +2254,22 @@ function finish(won){
   document.getElementById('again').textContent = won ? 'START A NEW COLONY' : 'RUN IT AGAIN';
   document.getElementById('over').style.display='flex';
   draw();
+  saveRun();
 }
 
 /* ---------------- persistence ---------------- */
+
 // Everything in G is plain data, so the run round-trips through JSON as-is.
 const SAVE_KEY = 'astrobara.run';
 const SAVE_VERSION = 1;
+const BUILD = 'V14.1.3';
 let saveWorks = true;
 
 function saveRun(){
   if(!saveWorks || !G) return;
   try {
     localStorage.setItem(SAVE_KEY, JSON.stringify({
-      v: SAVE_VERSION, cols: CFG.cols, rows: CFG.rows,
+      v: SAVE_VERSION, build: BUILD, cols: CFG.cols, rows: CFG.rows,
       G: G, opt: OPT, survey: survey
     }));
   } catch(err){
@@ -2290,11 +2288,16 @@ function loadRun(){
     const d = JSON.parse(raw);
     // a save from a different map shape cannot be trusted
     if(!d || d.v !== SAVE_VERSION || d.cols !== CFG.cols || d.rows !== CFG.rows) return false;
+    // saves do not carry across builds
+    if(d.build !== BUILD){ clearRun(); return false; }
     if(!d.G || !d.G.tiles || d.G.tiles.length !== CFG.cols * CFG.rows) return false;
     G = d.G;
     if(d.opt) for(const k in OPT){ if(k in d.opt) OPT[k] = d.opt[k]; }
     recompute();
     if(d.survey) setSurvey(true);
+    // A save written by an older build — or any state that ended without being
+    // marked — must not resume as a playable colony with nobody in it.
+    if(G.crew <= 0 && !G.dead && !G.review) finish(false);
     return true;
   } catch(err){
     return false;
@@ -2303,6 +2306,11 @@ function loadRun(){
 
 // Save at every point the run changes, and again on the way out — iOS often
 // gives no warning beyond pagehide.
+(function(){
+  const v = document.getElementById('ver');
+  if(v) v.textContent = BUILD;
+})();
+
 document.addEventListener('visibilitychange', function(){
   if(document.visibilityState === 'hidden') saveRun();
 });
