@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  ASTROBARA V14.1.3
+  ASTROBARA V14.1.4
   A 3X lunar survival colony builder. Single file, no dependencies, no network.
 
   MIT License
@@ -32,13 +32,15 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>ASTROBARA</title>
 <meta name="theme-color" content="#07080B">
+<meta http-equiv="Cache-Control" content="no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2307080B'/%3E%3Ccircle cx='23' cy='9' r='4' fill='%23E8C97A'/%3E%3Crect x='4' y='18' width='24' height='10' fill='%234A423A'/%3E%3Crect x='9' y='21' width='9' height='5' rx='2.5' fill='%23C08A54'/%3E%3Crect x='16' y='19' width='4' height='4' fill='%23C08A54'/%3E%3C/svg%3E">
 <meta property="og:title" content="Astrobara">
 <meta property="og:description" content="A 3X lunar survival colony builder. The antagonist is the night.">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <meta name="author" content="Mark Florentino LLC, Kittenmancer">
-<meta name="description" content="Astrobara V14.1.3 — a 3X lunar survival colony builder. MIT licensed.">
+<meta name="description" content="Astrobara V14.1.4 — a 3X lunar survival colony builder. MIT licensed.">
 <style>
 :root{
   --vacuum:#07080B;
@@ -66,7 +68,7 @@ body{
 }
 /* Sized from JS off visualViewport. iOS Chrome resolves dvh/vh in a way that
    pushed the entire sidebar off-screen, so nothing here depends on them. */
-#app{position:absolute;left:0;top:0;display:flex;flex-direction:column;overflow:hidden;}
+#app{position:absolute;left:0;top:0;right:0;bottom:0;display:flex;flex-direction:column;overflow:hidden;}
 
 /* ---- top readout ---- */
 #portraitgate{position:absolute;inset:0;z-index:40;display:none;
@@ -1034,10 +1036,11 @@ function applyLayout(){
     app.style.transformOrigin = '0 0';
     app.style.transform = 'rotate(90deg) translateY(-100%)';
   } else {
-    app.style.width  = vp.w+'px';
-    app.style.height = vp.h+'px';
-    app.style.transformOrigin = '0 0';
-    app.style.transform = 'rotate(0deg)';
+    // no inline size, no transform: #app fills its fixed parent via inset:0
+    app.style.width  = '';
+    app.style.height = '';
+    app.style.transformOrigin = '';
+    app.style.transform = '';
   }
   const st = document.getElementById('stage');
   stageW = st.clientWidth; stageH = st.clientHeight;
@@ -1478,7 +1481,7 @@ function paintProbe(){
   const L = G.ledger;
   const row = (k,v) => '<div class="row"><span>'+k+'</span><span>'+v+'</span></div>';
   p.innerHTML = tabs +
-    '<div class="h">TURN LEDGER · T'+G.turn+'</div>'+
+    '<div class="h">TURN LEDGER · T'+G.turn+' · '+BUILD+'</div>'+
     row('sun elevation', L.sunPct+'%')+
     row('arrays live', L.liveArrays+'/'+L.arrays)+
     '<hr>'+
@@ -2262,7 +2265,7 @@ function finish(won){
 // Everything in G is plain data, so the run round-trips through JSON as-is.
 const SAVE_KEY = 'astrobara.run';
 const SAVE_VERSION = 1;
-const BUILD = 'V14.1.3';
+const BUILD = 'V14.1.4';
 let saveWorks = true;
 
 function saveRun(){
