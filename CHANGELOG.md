@@ -1,0 +1,2019 @@
+## V2.10.0
+
+Glass is the main line. The `-GLASS` suffix is gone, and V2.9.4 — the last
+build of the boxed layout — is retired as a line of its own. Its layout is
+still in the game: turn **Glass panels** off in TOOLS · DISPLAY.
+
+Nothing to merge: nothing shipped on the old line after the branch point, and
+V2.9.4's own change (idled machines draw grey) was already here.
+
+### Changed
+
+- **Achievements belong to a major version.** They carry across every build
+  inside one — dev builds and release candidates alike — and are cleared once
+  when the major version changes. V2.9.15 cleared them on every build; that is
+  withdrawn. A record written before the build stamp existed is treated as V2's
+  and kept.
+- **Versioning.** V2.x is development and anything may change. V3.0-RC*n* are
+  release candidates: presentation only, never how a turn resolves. The README
+  and the test plan carry the rule.
+- Code comments no longer call glass a branch.
+
+### Coming from V2.9.4
+
+Everything on the glass line was layout, input, copy or the end card. None of
+it changed how a turn resolves.
+
+- The map runs full-bleed with the panels floating on it; glass off restores
+  the boxed layout.
+- The bottom lane carries the arrows, FIT, the objective line and the action,
+  ordered by handedness (BALANCED, LEFT, RIGHT).
+- A drag that starts on or beside the build column scrolls the column, never
+  the map.
+- The top row fits without scrolling at 135% text. The night line reads
+  *night 224*.
+- The splash, the end card and the portrait gate are glass cards. The end
+  card lays the run out in two columns and reads itself out; a tap speeds it
+  up.
+- The ledger counts structures standing, for SKELETON CREW.
+- MAXIMUM OCCUPANCY is FULL CAPYCITY; its id is unchanged.
+- Copy diagnostics adds frame-rate dips with context and the last eight
+  touches.
+
+### Verified
+
+- Tier 0 clean: P1–P12. P2 now reads a suffix with digits, so `V3.0-RC1`
+  checks the same way `V2.10.0` does.
+- Headless Chromium, through real reloads at V2.10.0: a record that is
+  unstamped, stamped V2.9.15-GLASS or stamped V2.10.3 is kept; one stamped
+  V1.4.0 or V3.0-RC1 is cleared; the board survives every case; an award from
+  this build survives a reload.
+- The same build restamped as V3.0-RC1: a V2.10.0 record is cleared, a
+  V3.0-RC2 record is kept.
+- Glass on, off, and on again: stage 746×300, then 594×199, then 746×300;
+  the build column's last row, FUSION, takes a tap in both; the grip exists
+  only with glass on.
+- The stamp reads V2.10.0 on the splash, in the ledger header and at the top
+  of Copy diagnostics. No page errors.
+
+### Not verified
+
+- Tiers 1–3, and Safari. Test plan 1.3 lists what the playtest should cover.
+
+---
+
+## V2.9.15-GLASS
+
+### Changed
+
+- **Achievements are cleared by a version bump.** The record is stamped with
+  the build that wrote it, and a build that finds another build's stamp — or
+  the old unstamped shape — clears it before anything reads it. An award says
+  this build can be beaten that way, so it is worth what that build is worth.
+  Saved runs already behaved this way. The board still carries, and each row
+  still names the build it was set on.
+- **The storage footnote is gone from TOOLS · BOARD.** The line naming the
+  storage key went with it, along with its now-dead style rule. COPY AS TEXT
+  follows the achievement list directly.
+
+### Verified
+
+- Tier 0 clean: P1–P12.
+- Headless Chromium, 750×304, four states through real reloads:
+  - a record left in the old unstamped shape, with two awards, a held rating
+    and a loss count: cleared, board untouched.
+  - an award written by this build: survives an ordinary reload, stamped
+    `V2.9.15-GLASS`.
+  - that same record restamped as `V2.9.14-GLASS`: cleared, board untouched.
+  - the BOARD pane: no footnote, board rows and COPY AS TEXT still there,
+    `UNLOCKED · 0 of 11` after the clear.
+- No page errors on any of them.
+
+### Not verified
+
+- Tiers 1–3, and Safari.
+
+### Worth watching
+
+- This is now the fastest-moving thing in the game: every build shipped in a
+  session wipes the sheet. If it turns out to be wanted only during
+  development, the gate is one comparison — matching the leading version
+  instead of the whole string would keep awards across a -GLASS patch level
+  and clear them on a minor bump.
+
+---
+
+## V2.9.14-GLASS
+
+### Added
+
+- **`structures standing` in the ledger.** SKELETON CREW asks for fewer than 20
+  structures and there was no way to count what you had. The ledger now shows
+  the number, taken from the same count the award is judged on — one function,
+  so the two can never drift apart.
+
+### Changed
+
+- **The top row fits without scrolling at 135% text.** Four trims, no readout
+  removed:
+  - The night line under POWER and WATER reads *night 224* rather than *night
+    needs 224*. It was the widest thing in the water cell, and the row is about
+    the night already.
+  - The sun bar in the day cell is a step smaller, and LEDGER's letter-spacing
+    is tighter.
+  - Cell padding is 6px rather than 7–8px, and the labels are set a little
+    tighter.
+
+### Verified
+
+- Tier 0 clean: P1–P12.
+- Headless Chromium, 750×304, with a mid-game readout (573/1640, night 224,
+  6/8 crew, 6/6 labour): the row needs 723px against 724px of space at 135%
+  text, where V2.9.13 needed 795px and clipped LABOR. It still fits at 100%
+  and 115%.
+- The ledger reports the same count `builtCount()` returns; no page errors.
+
+### Not verified
+
+- Tiers 1–3, and Safari.
+
+### Worth watching
+
+- At 150% text the row is still about 56px too wide and scrolls. The next
+  candidates are the POWER cell — it is the widest now, at *573/1640 +114* —
+  and dropping the word LEDGER for its arrow alone.
+
+---
+
+## V2.9.13-GLASS
+
+### Changed
+
+- **The portrait gate's note is shorter**: *Switch lives in [≡] TOOLS ·
+  DISPLAY, toggle to turn off.* The 280px cap on it was narrower than the card
+  it sits in, so the note now uses the width it has, and where it does wrap the
+  two lines are balanced rather than ragged. The footnote is a half-step
+  smaller.
+
+### Verified
+
+- Tier 0 clean: P1–P12.
+- Headless Chromium, portrait 395×750: one line at text AUTO; two balanced,
+  centred lines at M and L. At L the sentence wants about 410px and the card
+  gives about 300, so no text size in normal use fits it on one line in
+  portrait — see below.
+- No page errors.
+
+### Not verified
+
+- Tiers 1–3, and Safari.
+
+### Worth watching
+
+- One line in portrait at 135% needs either about 35 characters — *[≡] TOOLS ·
+  DISPLAY toggles it off.* — or a footnote about a third smaller than it is
+  now. The wording is the cheaper of the two.
+
+---
+
+## V2.9.12-GLASS
+
+### Changed
+
+- **The portrait gate names the tools panel with its glyph** too: *The same
+  switch lives in [≡] TOOLS · DISPLAY, to turn back off.* The style rule for
+  the glyph moved off the hints box, since it should look the same wherever
+  the panel is named.
+
+### Verified
+
+- Tier 0 clean: P1–P12.
+- Headless Chromium: the gate renders with the glyph and the note still sits on
+  two centred lines; the end-card hints line is still one line at AUTO, M and
+  L; no page errors on either screen.
+
+### Not verified
+
+- Tiers 1–3, and Safari.
+
+---
+
+## V2.9.11-GLASS
+
+### Fixed
+
+- **The tools button read as a square inside a rounded shadow.** The bar kept
+  its own square-cornered background from the opaque theme, and with no
+  clipping on the panel it sat proud of the panel's 14px corners — most
+  visible when the panel is shut and the bar is all there is. On glass the bar
+  is now transparent, so the panel is the only surface and the button is as
+  round as the panel it opens. Shut, it is a rounded pill with a little more
+  room around the glyph. Glass off is untouched.
+- **The hints line on the end card wrapped to two lines.** It is shorter now —
+  *Objective hints are off — [≡] TOOLS · DISPLAY turns them on.* — and the box
+  is a half-step smaller with tighter padding.
+
+### Verified
+
+- Tier 0 clean: P1–P12.
+- Headless Chromium, 750×304: the hints line is one line at text AUTO, M and L
+  (--ts up to 1.32); the phone was at 1.35 when it wrapped, and the line is now
+  about a third shorter than the space it has.
+- The tools button, shut and open, on glass and with glass off; no page errors.
+
+### Not verified
+
+- Tiers 1–3, and Safari.
+
+---
+
+## V2.9.10-GLASS
+
+### Changed
+
+- **The end card reads at a third of the pace.** Every constant behind it is
+  three times what it was: the verdict fills over 2.7s, each character takes
+  33ms, the beat between lines is 270ms, and the board, hints box and
+  attribution fade over 1.26s. The gap between the verdict and the first typed
+  line is now its own constant, `OVER_LEAD`.
+
+### Verified
+
+- Tier 0 clean: P1–P12.
+- Headless Chromium, 750×304, a forced loss with the full seven-line
+  post-mortem: the buttons come live at 12.2s, where V2.9.9 took 3.5s. One tap
+  at 3s brings that to 5.4s; a second tap at 3.6s ends it at 4.2s.
+- No page errors.
+
+### Not verified
+
+- Tiers 1–3, and Safari.
+
+### Worth watching
+
+- Twelve seconds is a long time for a card with nothing to press on it. If a
+  player who does not know about the tap reads it as a freeze, the fix is
+  either a faint line saying the screen can be tapped, or letting the buttons
+  appear before the fade-ins finish.
+
+---
+
+## V2.9.9-GLASS
+
+### Changed
+
+- **The end card is laid out in reading order.** The run was one column with the
+  build line buried in the middle of it, which read as though the attribution
+  were a statistic.
+  - The run is one block in **two columns**, filled down the left and then the
+    right: turns survived, nights endured, peak crew, fusion on the left; the
+    post-mortem — first brownout, peak power banked, turns in deficit — on the
+    right.
+  - Then the board, then the hints box, then the attribution, then the buttons.
+- **The hints box names the tools panel with its glyph**, `[≡] TOOLS ·
+  DISPLAY · Objective hints`, since TOOLS is a button on screen and a reader
+  who has not opened it has no way to know that.
+
+### Added
+
+- **The card reads itself out.**
+  - **COLONY LOST fills from the top down**, out of the dark into red — a
+    gradient three times the height of the line, sliding up through it, with
+    the text as its mask. SELF-SUFFICIENT does the same in amber.
+  - **The obituary fades in**, then the run **types line by line**, left column
+    first. Each line's full text is held in place invisibly underneath, so
+    nothing on the card moves while it types.
+  - **The board, the hints box and the attribution fade in last.**
+  - **The buttons are not there until it is done** — invisible and untappable,
+    so nothing can be pressed by accident mid-sentence.
+  - **A tap anywhere speeds it up** four times over, and a tap after that ends
+    it immediately. With the buttons inert until the end, a tap can only mean
+    get on with it.
+  - `prefers-reduced-motion` goes straight to the finished card.
+  - The intro stops if the card is dismissed while it is still running.
+
+### Verified
+
+- Tier 0 clean: P1–P12.
+- Headless Chromium, 750×304, a forced loss: at 0.4s the verdict is a third
+  filled with nothing else on the card and the buttons at opacity 0; at 1.6s
+  the verdict is full and two lines have typed; at the end every line is
+  complete and the buttons are live.
+- Tapping at 1.6s finishes the remaining five lines inside 0.8s; the second tap
+  ends it; the buttons then take taps.
+- `prefers-reduced-motion: reduce` renders the finished card in the first frame.
+- A win renders SELF-SUFFICIENT, four stats in two columns, the board, and
+  KEEP PLAYING / FIND A NEW SITE.
+- No page errors on either path.
+
+### Not verified
+
+- Tiers 1–3, and Safari. `background-clip: text` carries the verdict; where it
+  is unsupported the word is drawn in flat colour with no wipe, which is the
+  `@supports` fallback rather than a guess.
+
+### Worth watching
+
+- The typing takes about 3.5 seconds at full length on a loss. If that is long
+  on the second or third colony lost in a row, the per-character step is one
+  constant, `OVER_CHAR`.
+
+---
+
+## V2.9.8-GLASS
+
+### Fixed
+
+- **Scrolling the build list at the screen edge moved the map.** With the
+  panels floating, the build column is ringed by 10px of map on every side,
+  including the strip between it and the screen edge where a thumb rests. A
+  touch that began in that strip belonged to the canvas, so the drag panned the
+  map instead of scrolling the list. Reproduced headlessly: three drags started
+  just outside the column all panned.
+  - A transparent grip now sits under the column and over the map, covering the
+    ring out to the screen edge. A touch that starts on it scrolls the build
+    list and nothing else until the finger lifts. It follows LEFT, works in the
+    rotated portrait view, and is absent with glass off, where the column meets
+    the screen edge directly.
+  - The canvas gestures count `targetTouches` rather than `touches`, so a
+    finger that went down on a panel can never become part of a pan or a pinch.
+
+### Changed
+
+- **The splash, the verdict and the portrait gate are glass.** The scrim behind
+  them blurs whatever is underneath; the card on it is a tinted, ruled sheet
+  with the same top-edge specular as the panes in play, rounded 18px. BEGIN,
+  KEEP PLAYING and RUN IT AGAIN are rounded amber-tinted buttons. There is
+  little behind the splash to bend, so the tint does most of the work. Glass
+  off, and `prefers-reduced-transparency`, keep the opaque versions.
+  - The portrait gate's contents sit in a card, which is one wrapper `div` in
+    the markup and changes nothing with glass off.
+- **MAXIMUM OCCUPANCY is FULL CAPYCITY.** The id stays `big_herd`, so anyone who
+  already holds it keeps it.
+- **A dip is now a second under 30 fps, not 50.** Nothing in a turn-based game
+  needs more than a steady 30.
+
+### Added
+
+- **Copy diagnostics · `touch`.** Where each of the last eight touches began —
+  the element it landed on and the screen point — and whether it became a pan
+  or a list scroll. Capture-phase and passive: it watches and changes nothing.
+
+### Verified
+
+- Tier 0 clean: P1–P12.
+- Headless Chromium, 750×304, glass on, RIGHT and LEFT: drags starting in the
+  outer edge strip, the strip on the map side and the gap above the column
+  scroll the list, with the map's pan unchanged. A drag on open map still pans.
+  V2.9.7 on the same drags: all three panned the map.
+- Rotated portrait view: a drag on the grip scrolls the list by 80px; no pan.
+- Scrolled to the end, FUSION hit-tests to its own row in glass RIGHT, glass
+  LEFT and glass off.
+- The portrait gate's switch still turns rotation on through the tap.
+- A glass-off save still resumes as glass off.
+
+### Not verified
+
+- Tiers 1–3, and Safari. The grip was confirmed against the cause found in
+  Chromium; whether that is the cause on the phone is what the `touch` line in
+  Copy diagnostics will say.
+
+### Worth watching
+
+- The grip also covers the 10px of map on the inner side of the column, so a
+  tile there can no longer be tapped without panning it clear first. If that
+  gets in the way, the inner strip can go and the outer edge stay.
+- If the splash still reads as flat, the next step is a faint image of the
+  site behind it rather than more tint.
+
+---
+
+## V2.9.7-GLASS
+
+### Fixed
+
+- **FUSION could not be tapped.** The direction pad floated at the bottom-right
+  corner, over the last rows of the build column. Scrolled to the end, a tap on
+  FUSION landed on the pad. The pad now lives in the lane in both modes, and the
+  lane runs the full width, so the build column ends above it with nothing on
+  top of it.
+- **Turning glass off left the glass layout in place with the backs removed.**
+  Only a few glass rules were undone for glass off, and one of those lost on
+  specificity: `#side{background:transparent}` beat `.noglass .glasspane`, so
+  the build column floated over the map with no back at all.
+  - Every glass rule is now scoped to `#app.glass`. Glass off removes the class
+    and the V2.9.4 layout is the layout.
+  - **The stage kept its glass height after the switch.** The canvas was in
+    flow, so a 300px canvas sized the grid row to 300px, which `resize()` then
+    measured and kept. The canvas is out of flow and the row is
+    `minmax(0,1fr)`: glass off now measures 199px, as V2.9.4 does.
+  - The same specificity problem made `prefers-reduced-transparency` and the
+    no-blur fallback draw clear panes with no blur. Both now win.
+- **The FPS meter drew over the tools panel.** It sat at z-index 22 against the
+  panel's 17. It now sits under the panel and the ledger.
+- **A dragged tools panel stretched.** Once moved, its inline `left` was set
+  while the glass anchor still set `right`, so the panel spanned between them.
+  The anchor lets go once the panel is moved.
+- **The tools panel ran under the lane.** Its height and drag range now stop
+  above it.
+- Duplicated `applyGlass()` / `applyFps()` calls left by an earlier patch in the
+  handedness row and the resume path are gone.
+
+### Changed
+
+- **BALANCED splits the thumbs: arrows · FIT · description · action.** The left
+  thumb moves the view; the right thumb builds, with the action cell under the
+  build column. It used to differ from RIGHT only in where the action cell sat,
+  which on a phone reads as the same layout.
+
+  | | lane | build column |
+  |---|---|---|
+  | LEFT | arrows · action · description · FIT | left |
+  | RIGHT | FIT · description · action · arrows | right |
+  | BALANCED | arrows · FIT · description · action | right |
+
+  - FIT goes with whichever thumb is not building. With glass off it is the chip
+    over the map, as before, and `#lanefit` takes no room.
+  - `#bact` no longer carries its own right rule; the mode says which edge.
+- **The tools panel has no blur of its own** with glass on. It was a second
+  pane over the map at .92 opacity, costing a blur for almost nothing visible.
+- The FPS meter follows the build column's side in LEFT; the full-screen button
+  (not offered on iOS) sits beside the tools button rather than on the lane.
+
+### Added
+
+- **FPS meter, second pass.**
+  - The first two windows after the meter starts, or after glass is toggled,
+    are warm-up and not counted. A saved `fps=true` starts the meter during page
+    load, which is the likely source of the turn-0 low of 25.
+  - A window longer than 1.6s (tab hidden, rAF paused) is dropped rather than
+    counted as a stutter.
+  - Toggling glass restarts the meter, so each half of the comparison is
+    measured on its own.
+  - Every window under 50 is a **dip**, counted on the meter and logged in Copy
+    diagnostics with the turn, glass state, and whether tools, the ledger, zoom
+    or night were in play. The low is tagged the same way.
+
+### Verified
+
+- Tier 0 clean: P1–P12.
+- Headless Chromium at 750×304, glass on and off, all three hands, text S and L:
+  - Scrolled to the end, FUSION, WALLOW and PROCESSOR each hit-test to their own
+    row in every glass mode. In V2.9.6 the same test put FUSION on `#nudge`.
+  - Tapping `Glass panels` off through the real row: stage 199px, canvas
+    backing store 398px, tools panel bottom 248 inside a stage ending at 254.
+    V2.9.6 on the same path: stage 300, tools past the stage.
+  - Glass off, a resumed save restores `noglass`, the pad in the lane and FIT
+    over the map.
+  - Handedness row cycles LEFT → RIGHT → BALANCED; the pad stays in the lane
+    throughout.
+  - A forced 450ms main-thread block registers as one dip with its context; a
+    glass toggle then resets the meter to warm-up.
+- No simulation, cost, site-generation, turn-resolution, persistence or
+  hit-testing code was touched.
+
+### Not verified
+
+- Tiers 1–3, and anything on the phone. Chromium is not Safari, and the blur
+  cost the meter is there to find is Safari's.
+
+### Worth watching
+
+- At text L the build column shows about two and a half rows before it scrolls.
+  If that is too few, the alternative is the lane stopping short of the column
+  and the column running to the bottom edge, at the cost of about 160px of lane
+  text.
+- The glass panes are drawn clear, as they were in V2.9.6: the `.55` tint in
+  `.glasspane` was always overridden. Kept as seen rather than changed quietly.
+
+---
+
+## V2.9.6-GLASS
+
+### Fixed
+
+- **The ledger could take the top bar off screen and refuse to come back.**
+  `#probe` is sized as a share of `#stage`, and on this branch the stage is the
+  whole screen rather than the old boxed area — so 70% wide and 88% tall could
+  exceed the room between the floating panes and push the HUD out with it. It is
+  now anchored under the top pane, bounded by the other two, and never wider than
+  the clear area.
+- **END TURN and the gutters were opaque.** Both were panels of their own inside
+  a sheet that is meant to be one pane: glass on glass, with a black bar across
+  it. END TURN is now a tinted pane with its own rule, and the gutters are
+  transparent.
+
+### Changed
+
+- **A colony opens on its crest**, upper left, where the sun is and where the
+  first decision is. Centring showed the middle of a map twice the height of the
+  screen, most of it ground nobody has dug.
+- **The tools panel sits over the map in the top corner**, clear of the build
+  column, and keeps a solid back rather than stacking a second pane.
+- **FIT and the direction pad swap.** The pad floats at the bottom-right corner
+  where a thumb rests; FIT takes its slot in the lane. The elements move rather
+  than being duplicated, so each keeps one handler and one live state, and they
+  swap back when glass is turned off.
+
+### Added
+
+- **TOOLS · DISPLAY · FPS meter.** `now · low · avg`, sampled over one-second
+  windows. Off by default and the loop does not run when off, so it costs nothing
+  unless it is being read. The numbers also go into Copy diagnostics.
+  - The **low** is the number that matters. An average hides exactly the stutter
+    worth finding, which on this branch is a blur re-sampling a live canvas.
+  - Glass panels can be toggled off in the same pane, so both halves of the
+    comparison are in one build.
+
+### Verified
+
+- Tier 0 clean: P1–P12.
+
+### Not verified
+
+- Tiers 1–3. Test plan 1.2 adds F1–F5 for exactly this branch.
+
+---
+
+## V2.9.4
+
+### Changed
+
+- **Idled machines draw grey.** An idled machine carried the same colour as a
+  running one with a small slash over it. Idling is the most-used decision in
+  the game and the thing you scan the map for, so it should read at a glance
+  rather than on inspection. Idled is now `--dim` whatever the structure, 130
+  luminance below the brightest running state. Unpowered still draws alarm red,
+  which outranks both.
+
+---
+
+## V2.9.4-GLASS · branch
+
+Not a successor to V2.9.4 — a branch from it, identical in every other respect,
+so both can be played and one thrown away. The version string carries `-GLASS`
+so a screenshot says which you are looking at.
+
+### Changed
+
+- **The map is the screen.** It runs full-bleed behind everything; the HUD, the
+  build column and the status lane float on it as translucent sheets with rounded
+  corners and a 10px inset. Glass needs something behind it to bend — over the
+  black margin of the old layout it would have read as tinted film, which is why
+  full-bleed had to come first.
+- **Tiles grow.** The reference cell is measured against the whole screen rather
+  than the space left between panels, so the map is drawn at roughly twice the
+  area.
+- **You can pan any tile out from under a panel.** The pan range is extended by
+  the measured panel extents, and the resting position after FIT centres the map
+  on the clear area between them rather than on the screen.
+- **One sheet per surface, never glass on glass**, per Apple's guidance. The
+  tools panel and the ledger already float over the map, so they keep their solid
+  backgrounds rather than stacking a second pane.
+- **Three ways back to opaque**: `prefers-reduced-transparency`, a DISPLAY toggle
+  (`Glass panels`), and an `@supports` fallback for anything that cannot blur.
+
+### Verified
+
+- Tier 0 clean on both builds: P1–P12. `preflight.py` updated to accept a branch
+  suffix in the version string.
+
+### Not verified
+
+- Tiers 1–3, and the thing that actually matters here: whether `backdrop-filter`
+  over a live canvas holds frame rate on the phone. That is the reason this is a
+  branch rather than a release.
+
+---
+
+## V2.9.3
+
+### Changed
+
+- **Objective hints are off by default.** Working out that the night needs
+  batteries, and that arrays belong on the crest, is the game; a line saying so
+  on turn one is a walkthrough. TOOLS · DISPLAY · Objective hints turns them on.
+  - Self-sufficiency still reports either way. It says what the colony *is*, not
+    what to do next, so it is a state rather than a hint.
+- **The hint is offered once, after a colony is lost.** A player who has not yet
+  failed has no reason to want the answers; a player who has may not know they
+  exist. The loss overlay names the setting, and only while hints are off.
+  - Losses are counted in the achievement store, so the offer survives a version
+    bump the same way the board does.
+
+### Verified
+
+- Tier 0 clean: P1–P12.
+
+---
+
+## V2.9.2
+
+### Fixed
+
+- **`Your arrays sit in shadow` kept saying that when it was not true.** The
+  test is "solar income under 36"; shadow is only one of the ways that test
+  fails, and arrays in full sun but too few of them made the line a lie. The
+  objective now reads the ledger: `Your arrays sit in shadow` at zero income,
+  `Solar makes 11 of 36` above it. Objective text functions receive the ledger.
+- **DIG said BUILD.** It opens ground rather than building anything, and the
+  button should say what the tool does rather than what most tools do.
+
+### Changed
+
+- **Air between the glyph and the word** in the action cell: 3px scaling with
+  the text, and the wrapper's leading up from 1.2 to 1.45.
+
+### Verified
+
+- Tier 0 clean: P1–P12.
+- The objective at solar 0, 11, 26, 35 and 36: the shadow line only at zero, the
+  count in between, and the next objective at 36.
+
+---
+
+## V2.9.1
+
+### Changed
+
+- **The action-button toggle becomes a handedness setting: LEFT · RIGHT ·
+  BALANCED**, and it moves every control rather than one button.
+
+  | | lane | build column | FIT |
+  |---|---|---|---|
+  | LEFT | arrows · action · description | left of the map | bottom-left |
+  | RIGHT | description · action · arrows | right | bottom-right |
+  | BALANCED | action · description · arrows | right | bottom-right |
+
+  - LEFT puts the action 0px from the left edge; RIGHT puts it 176px from the
+    right, just past the arrows; BALANCED splits them.
+  - Still flex `order`, so nothing in the markup moves and the file reads the
+    same whichever mode is set.
+  - Each mode names which edges carry a divider. A rule drawn from the DOM order
+    lands on the wrong side of a reordered row, which is the kind of thing that
+    looks fine in one mode and wrong in the other two.
+  - In LEFT the build column swaps sides with the map and its border swaps with
+    it, and the FIT chip follows to the bottom-left.
+  - Defaults to BALANCED, which is the arrangement as it stood.
+
+### Verified
+
+- Tier 0 clean: P1–P12.
+
+### Not verified
+
+- Tiers 1–3 need a device. LEFT in particular moves the build column for the
+  first time; worth a look that the map and the panel have not swapped borders.
+
+---
+
+## V2.9.0
+
+### Added
+
+- **TOOLS · DISPLAY · Action button — LEFT or MIDDLE.** Middle puts it between
+  the description and the direction pad, 176px from the right edge instead of
+  638px, so a right thumb reaches it without leaving the arrows. Which hand the
+  phone is in decides where that button should be, and only the person holding
+  it knows.
+  - Defaults to MIDDLE.
+  - Implemented with flex `order`, so the reading order of the file stays the
+    reading order of the lane and nothing has to move to change a preference.
+  - The divider follows the button to whichever side needs it.
+  - Saved with the run, applied on load and on restore.
+
+### Verified
+
+- Tier 0 clean: P1–P12.
+
+### Not verified
+
+- Tiers 1–3 need a device. Whether MIDDLE actually reaches better than LEFT is a
+  thumb question, not an arithmetic one.
+
+---
+
+## V2.8.9
+
+### Fixed
+
+- **The glyph and the verb were rendering on one line** — `~BUILD`, `∩BUILD` —
+  in both V2.8.7 and V2.8.8. `#bact` is a flex container, so every element child
+  becomes a flex *item* and sits in a row, and a `<br>` between flex items does
+  nothing at all.
+  - Plain text with `<br>` had worked because the text collapses into one
+    anonymous flex item, where the break still applies. The moment the glyph got
+    its own `<span>` in V2.8.7, the two became two items side by side, and adding
+    an explicit `<br>` in V2.8.8 changed nothing because it was a third item.
+  - Everything the cell writes now goes inside a single wrapper, so there is one
+    flex item and ordinary block layout inside it.
+
+### Verified
+
+- Tier 0 clean: P1–P12.
+
+### Note
+
+- I said in V2.8.8 that an explicit break "can't fail that way". It failed in
+  exactly that way, and I asserted it without being able to render the page. The
+  screenshots were the only thing that could have told either of us.
+
+---
+
+## V2.8.8
+
+### Changed
+
+- **An explicit `<br>` between the glyph and the verb**, and the two spans go
+  inline so the break is what stacks them. They were block-level spans stacking
+  by their own display, which gives the same result until something changes the
+  display and it silently doesn't.
+
+### Verified
+
+- Tier 0 clean: P1–P12.
+
+---
+
+## V2.8.7
+
+### Changed
+
+- **The action button is a glyph over a verb.** It had been carrying the name of
+  the thing as well as the verb, which is what forced three lines of five-letter
+  fragments. The glyph says which thing in one character, the description line
+  beside it says which one in full, and the button keeps the one word that
+  matters: what tapping it does.
+  - `◫ / BUILD`, `∩ / STRIP`, `× / BACKFILL`, `≋ / IDLE`, `(6) / IDLE ALL`.
+  - Every actionable state is now exactly two lines, whatever the structure.
+- **Refusals are two words at most.** Thirteen of them were three lines of
+  fragments; none is now. `not enough power` → `no power`; `dig it out first` →
+  `dig first`; `must sit beside a habitat` → `needs a hab`; `too deep — He-3 is
+  near the surface` → `too deep`.
+
+### Verified
+
+- Tier 0 clean: P1–P12.
+- Fifteen actionable states: all exactly two lines.
+- Thirteen refusals: all were three lines, none is now — seven at two, six at one.
+
+### Worth watching
+
+- The refusals lost their explanations along with their length. `too deep` no
+  longer says helium sits near the surface, and `needs a hab` no longer says
+  beside. If a new player stalls on one of those, the sentence belongs in the
+  description line, not back in the button.
+
+### Not verified
+
+- Tiers 1–3 need a device.
+
+---
+
+## V2.8.6
+
+### Changed
+
+- **The action cell wraps by width rather than by word.** One word per line was
+  breaking phrases that fit together — `arrays / go / on` for something eight
+  characters long. It now fills each line to the width the cell actually has,
+  about eight characters, and stops at three lines, keeping any remainder on the
+  last line rather than dropping it.
+  - `arrays / go on`, `last / habitat`, `IDLE ALL / (6)`, `BUILD / BATTERY`.
+- **`the last habitat must stand` becomes `last habitat`.** A refusal in a 108px
+  cell is a label, not a sentence.
+- **The objective breaks at the sentence.** The first says what is wrong, the
+  second what to do about it, and they are easier to take in apart than run
+  together.
+- **Less prose in the objectives.** `Build ARRAYS on the bright crest` →
+  `on the crest`; `Build BATTERIES to bank power` → `Build BATTERIES`;
+  `Ice sits 3+ rows below the basin floor` → `Ice sits deep in the basin`;
+  `Free play — grow the herd as far as the ice will carry it` → `Grow the herd
+  as far as the ice allows`.
+
+### Verified
+
+- Tier 0 clean: P1–P12.
+- Every action label through the wrapper: fifteen cases, longest three lines,
+  none truncated.
+- Every objective at one sentence per line against a 462px description: worst
+  case two lines, and the lane shows three before it scrolls.
+
+### Not verified
+
+- Tiers 1–3 need a device.
+
+---
+
+## V2.8.5
+
+### Changed
+
+- **The lane is a fixed 48px and its text scrolls.** It was a minimum height, so
+  a three-line label grew it; now it holds three lines of the objective at
+  12px/1.2 — 43px against 48 with padding — and anything longer scrolls rather
+  than pushing the map up.
+- **The action cell narrows from 152px to 108px**, and its padding and leading
+  come in. The description gains that width: 462px of the 746px lane.
+- **`IDLE ALL (6)` rather than `IDLE ALL ·6`.** Brackets read as a count of what
+  the button acts on. The long form goes in the line beside it — `· 6 running`,
+  `· 13 idled` — so the detail is there whether or not the button has room.
+- **The map clips the sky rather than the ground.** At a fixed tile size the map
+  can be taller than the stage, and centring it took the overflow off the top
+  *and the bottom* — the bottom being the deep regolith where the ice is. FIT now
+  anchors to the bottom, so the rows that go are the vacuum above the crest.
+
+### Verified
+
+- Tier 0 clean: P1–P12.
+- Against the viewport in your diagnostics (874×327): the 14px the lane gives
+  back is more than the map was overflowing by, so at that size nothing is
+  clipped at all now. The anchor is there for the viewports where it still is.
+- Lane arithmetic: action 108 + arrows 176 + description 462 = 746.
+
+### Not verified
+
+- Tiers 1–3 need a device.
+
+---
+
+## V2.8.4
+
+### Changed
+
+- **The bottom lane runs the full width of the app**, 594px to 746px. V2.6.1 had
+  put it under the map only so the build column could run full height; now that
+  the lane carries the action and the direction pad as well as the text, it needs
+  the width more than the column needs the height. The column scrolls, so what it
+  gives up it can still reach.
+  - The description gets 418px, up from 266.
+- **Action labels are capped at three words.** `no labor left this turn` becomes
+  `no labor left`; `STRIP WALLOW · +9p +35w` becomes `STRIP WALLOW`, with the
+  salvage numbers moved to the detail line beside the button, where the rest of
+  the tile's detail already is.
+  - The bulk labels keep their count by attaching it to the third word —
+    `IDLE ALL ·6` rather than `IDLE ALL · 6`, which the cap would have cut.
+
+### Verified
+
+- Tier 0 clean: P1–P12. Divs balance, lane is a sibling of `#main` rather than a
+  child of `#left`.
+- Every action label at three words or fewer, so the cap never truncates one.
+
+### Not verified
+
+- Tiers 1–3 need a device.
+
+---
+
+## V2.8.3
+
+### Changed
+
+- **The bottom lane reads ACTION · DESCRIPTION · NAVIGATION.** The thing you are
+  about to do belongs at the start of the line, not wedged between the tile
+  description and the direction pad.
+- **The lane is 23% shorter**, 62px to 48px at S. The 62px was set before the
+  arrows lived there; the arrows now set the floor, so the reservation above
+  them was empty space. 14px back to the map.
+- Arrows 46px square to 44px — still exactly the 44pt touch minimum at S, and
+  larger above it.
+
+### Verified
+
+- Tier 0 clean: P1–P12.
+- Lane arithmetic at every text size: height 48–53px, action 152px, description
+  249–266px, arrows square and never under 44pt.
+
+### Not verified
+
+- Tiers 1–3 need a device.
+
+---
+
+## V2.8.2
+
+### Fixed
+
+- **The status detail truncated before the scroll box ever saw it.** V2.8.1 made
+  `#binfo` scrollable, but `#detail` still carried `white-space:nowrap` with
+  `text-overflow:ellipsis` — the characters were discarded at the line, so there
+  was nothing overflowing to scroll to. It wraps now. A scroll container around a
+  line that truncates itself is not a fix.
+- **The arrows were not square.** `aspect-ratio:1` was being overridden by the
+  row's stretch. Both dimensions are now set outright, so square is square
+  however the app is turned.
+
+### Changed
+
+- **Action labels go one word per line.** The cell is 152px however the app is
+  rotated, and a label is two to five words; `pick a tool` becomes `pick / a /
+  tool`. Applied to every label rather than the placeholder alone — `BUILD
+  BATTERY` had the same problem — and routed through one function, so nothing
+  writes to that cell without stacking.
+- Action cell type down from 12.5px to 11.5px, placeholder from 10px to 9.5px.
+
+### Verified
+
+- Tier 0 clean: P1–P12.
+- Every action label at one word per line: longest single word is 7 characters,
+  about 48px at S, against a 152px cell. Nothing overflows.
+
+### Not verified
+
+- Tiers 1–3 need a device. The rotated view in particular.
+
+---
+
+## V2.8.1
+
+### Fixed
+
+- **Taps were landing on the wrong tile, by the width of the safe area.**
+  `canvasOrigin()` measures from `#app`; `appPoint()` returned raw client
+  coordinates. Those agreed until V2.5.1 moved `#app` inside the safe area with
+  a 2px gutter — so every tap has been off by that inset since. On an iPhone in
+  landscape with the notch on the left that is 49px, or three columns. In
+  portrait it is 61px, four rows. Even with no inset at all it was off by the
+  2px gutter. `appPoint()` now subtracts `#app`'s own rect first.
+- **FIT floated over the splash.** It is z-index 24 so the tools panel cannot
+  bury it; the overlays were 20. Overlays are now 30 — above the chip, below the
+  portrait gate.
+- **The status line could not be panned.** It clipped with `overflow:hidden` and
+  a fixed max-height on the objective. Both replaced with a scrollable box that
+  accepts pan and pinch on both axes.
+- **The splash could not be scrolled or zoomed.** `overflow:hidden` meant
+  anything past the fold was unreachable at a large text size. Now scrolls and
+  takes the system pinch, as the other panels do.
+
+### Changed
+
+- **The arrows move into the status bar and become square.** They were the last
+  thing in the build column that does not build anything, and a direction pad
+  reads as a pad when its targets are as wide as they are tall. 46px square at
+  S, rising with the text; the 44pt touch target holds at every size. The status
+  line keeps 258px at S, and pans now, so nothing is lost.
+- **RUN rows report that they ran.** Reset map view and Fix touch alignment both
+  work instantly and invisibly, which reads as a dead button. They now say DONE
+  in green and fade back.
+
+### Verified
+
+- Tier 0 clean: P1–P12. 63 unique ids, 46 targets present, divs balanced, three
+  storage keys, no network, 81 scaled font sizes, every `touch-action` naming
+  `pinch-zoom`, 11 achievement ids matching the awarded set, 10 of 10 seeds
+  correct, 237 braces balanced.
+- Bottom row arithmetic at every text size: arrows 46–51px square, action 152px,
+  status line 239–258px.
+
+### Not verified
+
+- Tiers 1–3 need a device. The tap fix in particular wants V15 and a few taps at
+  the edges of the map, in both orientations.
+
+---
+
+## V2.8.0
+
+### Added
+
+- **TOOLS · DISPLAY · Copy diagnostics.** One block on the clipboard, about 700
+  characters: build stamp, site code and seed with its rating, turn and colony
+  state, the view numbers, the text scale requested against the scale applied,
+  page and visual viewport with the current page zoom, every display option, the
+  unlocked achievement ids, the ratings tally, board size, **which storage keys
+  actually exist on this host**, and the last ten log lines.
+  - The storage line answers the question no amount of reasoning from outside the
+    device can: whether this host shares local storage between build files.
+- **`preflight.py` + `seedcheck.js`** — Tier 0 of the test plan, automated.
+  `python3 preflight.py <build.html> SEEDS.txt`, exits non-zero on failure and
+  prints the evidence for every check rather than a bare verdict.
+
+### Verified
+
+- Tier 0 clean on this build: P1–P12 all pass. 63 unique ids, 46 getElementById
+  targets all present, divs balanced in `#app`, three storage keys, no network,
+  81 scaled font sizes and zero bare ones, every `touch-action` pan list also
+  naming `pinch-zoom`, 11 achievement ids matching the awarded set, 10 of 10
+  seed codes regenerating their claimed site and rating, 235 CSS braces balanced.
+
+### Not verified
+
+- Tiers 1, 2 and 3 need a device with a browser and a person playing. They were
+  not run.
+
+---
+
+## Test plan 1.0
+
+Not a build. `TESTPLAN.md` replaced with a versioned plan covering V2.7.3,
+modelled on the Ink Strike plan: four tiers, each check naming the build whose
+regression it guards.
+
+- **Tier 0** — twelve static checks that need no device. P8 (every font size
+  scaled) would have caught the V2.6.2 sky label; P9 (every `touch-action`
+  justified) would have caught V2.7.1; P10 (achievement table integrity) catches
+  an achievement renamed out from under its check.
+- **Tier 1** — the view. Zoom stability tested in both directions separately,
+  since V2.7.2 fixed pinching in and V2.7.3 had to fix pinching out. Constant
+  cell size across text settings is checked by reading `cell` in DISPLAY.
+- **Tier 2** — the model, the herd tiles, the board, the platform.
+- **Tier 3** — proof that all eleven achievements are obtainable, as four runs
+  with named seeds from `SEEDS.txt`. SOL SURVIVOR was unreachable for three
+  builds without anything anywhere reporting an error, which is the case this
+  tier exists for. SKELETON CREW's threshold of 20 structures is flagged as
+  never having been tested against a real colony.
+
+The plan verifies against the build: eleven declared ids, all awarded in
+`checkAchv`, all eleven names cited, every seed it names present in `SEEDS.txt`,
+and the three storage keys it lists matching the three in the file.
+
+On the probe question: a full one is not needed, because the ledger, the log tab
+and the DISPLAY view numbers already say what a probe would print. What is
+missing is portability — a tester can see all of it and send none of it. The plan
+recommends one COPY DIAGNOSTICS button instead.
+
+---
+
+## V2.7.3
+
+### Fixed
+
+- **Pinch-zooming out crashed the tab.** Two faults, both mine, both from the
+  last two builds:
+  - **The V2.7.2 guard was one-sided.** `pageScale() > 1.01` is true when zoomed
+    in and false when zoomed out, so a zoom-out ran `resetScroll()` on every
+    scroll event — and `resetScroll()` calls `scrollTo`, which dispatches scroll.
+    The test is now `|scale - 1| > 0.01`: any scale that is not 1 is a zoom, in
+    either direction.
+  - **`resetScroll()` could re-enter itself.** It now holds a flag while running,
+    and only writes an offset that is actually non-zero, since writing the same
+    value still counts as a write and a write is an event.
+- **Zoom-out below 100% is clamped again.** V2.7.1 removed `maximum-scale=1` to
+  allow accessibility zoom, which removed the whole clamp rather than its upper
+  half. `minimum-scale=1` restores the floor: there is nothing to see below 100%
+  in a full-bleed app, so the gesture that crashed was also the gesture with no
+  purpose.
+
+### Verified
+
+- The guard across the scale range 0.25 to 3.0: the old one ran the scroll reset
+  at every scale below 1, the new one only at exactly 1.
+- Re-entrancy replayed: without the flag, 201 nested calls and a stack runaway;
+  with it, one call.
+
+### Changed
+
+- `TESTPLAN.md` §1.1 now tests zoom out as its own case in every panel, with a
+  note that it is not the same test backwards — it was only possible from V2.7.1
+  and the V2.7.2 guard covered zooming in only.
+
+---
+
+## V2.7.2
+
+### Fixed
+
+- **Pinch-zooming the tools panel crashed the tab.** Four things compounded into
+  an unbounded loop, each harmless alone:
+  1. `viewport()` read `visualViewport.width`, which is the *visual* viewport and
+     shrinks as the reader zooms in. The app was laid out against it, so zooming
+     resized the app, which resized the visual viewport, which fired resize.
+     It now multiplies by `scale` to recover the layout viewport, which a pinch
+     does not change.
+  2. `visualViewport` **scroll** fires every frame of a pinch and was wired
+     straight to a full layout pass. Panning a zoomed page changes no layout, so
+     it now only does the standalone scroll reset.
+  3. `resetScroll()` called `scrollTo(0,0)` mid-gesture, undoing the reader's pan
+     and firing another scroll event back. It is a no-op while zoomed.
+  4. Every pass reallocated the canvas backing store — assigning to
+     `canvas.width` reallocates even when the value is unchanged — and forced two
+     synchronous reflows. Both are now skipped when nothing has changed, and the
+     reference cell size is cached against the app size and text scale.
+
+### Verified
+
+- A thirty-frame pinch replayed through both code paths: **before**, 400 layout
+  passes, 400 canvas reallocations and 800 forced reflows before the guard
+  tripped — a runaway loop. **After**, 30 layout passes, 1 canvas reallocation,
+  2 forced reflows, stable.
+
+### Added
+
+- `TESTPLAN.md`. Section 1 is zoom: the three separate mechanisms that get
+  confused with each other, a stability pass that has to be held for five
+  seconds rather than flicked, and a check that the three do not interfere.
+  Each section names the build whose regression it guards.
+
+---
+
+## V2.7.1
+
+### Fixed
+
+- **The tools panel and the ledger accept the system pinch zoom.** `touch-action`
+  is a whitelist, not a list of things to add: naming `pan-x pan-y` told the
+  browser those are the only gestures the element answers, so the pinch was being
+  refused on exactly the two panels carrying the most text. Both now read
+  `pan-x pan-y pinch-zoom`.
+  - Everywhere zoom already worked — the top readout, the build column, the
+    status bar — has no `touch-action` at all, which is why those behaved and
+    these did not.
+  - The tools title bar keeps `touch-action:none`; it is the drag grip, and a
+    pinch there would fight the drag.
+  - The map keeps its own pinch zoom, unchanged.
+- **`maximum-scale=1` removed from the viewport.** It is a request not to let the
+  reader zoom. iOS has ignored it since iOS 10, which is why zoom worked
+  elsewhere on the phone, but Android and desktop Chrome still honour it.
+
+---
+
+## V2.7.0
+
+### Fixed
+
+- **The tools panel and the ledger pan in both directions.** Both scrolled
+  vertically and clipped horizontally, so at a large text size a line ran off the
+  right edge with no way to reach it — the same failure the top readout had
+  before V2.6.0. `touch-action` allows both axes and `overscroll-behavior:
+  contain` keeps the gesture inside the panel.
+- **The status line was being squeezed by FIT.** The bar sits under the map only
+  since V2.6.1, so it is narrower than it was, and a 62px cell in it cost the
+  objective about nine characters a line.
+
+### Changed
+
+- **FIT goes back over the map**, bottom right. It was moved into the status bar
+  in V2.1.3 because the floating chip kept disappearing — but the position was
+  never the cause. It was `display:none` until zoomed, at a z-index the tools
+  panel sat above. Both were fixed long ago, so the chip can come back and the
+  62px goes to the objective.
+  - z-index 24, above the tools panel at 17, the ledger at 18 and the achievement
+    banner at 21. Nothing the stage can draw goes in front of it.
+  - Always visible, dim until the view is actually zoomed or panned.
+- **The objective gets a third line** before it clips, 30px to 46px.
+
+### Verified
+
+- Objective width 380→442px at S, 370→435 at M, 359→427 at L — about 52 to 61
+  characters a line, against a longest objective of 60.
+- FIT is inside `#stage`, gone from the status bar, handler and live-state
+  toggle both intact.
+
+---
+
+## V2.6.4
+
+### Changed
+
+- **The arrows, properly this time.** V2.6.3 raised the cell 13% and the glyph
+  from 16px to 19px, which is below the threshold of noticing — the change was
+  real and invisible. The glyph is what the eye measures, so the glyph is what
+  moved: 27px now, in a 52px cell. Against V2.6.1 that is +41% cell and +69%
+  glyph.
+- `line-height:1` on the cell, so the glyph centres on its box rather than on its
+  font metrics.
+
+---
+
+## V2.6.3
+
+### Changed
+
+- **The arrow row is sized like the rows above it.** It was 9px of padding
+  around one glyph, so the column ended in a strip shorter than everything in
+  it — and the arrows are the control most often used repeatedly with a thumb.
+  Now a 42px minimum that scales with the text, centred rather than padded, with
+  a larger glyph.
+- **The portrait gate offers the setting, in the setting's own words.** It read
+  `Can't turn it? Rotate the view instead`, which is a different sentence for the
+  same switch that DISPLAY calls `Rotate view in portrait`. It is now presented
+  as that row — label left, state right — flips to ON when tapped, and says where
+  to find it again to turn it back off.
+
+### Verified
+
+- Arrow cell height against a two-line build row: 37→42px at S, 38→44 at M,
+  39→46 at L. Apple's minimum touch target is 44pt; these were under 30 before
+  V2.6.1 made the rows two lines.
+
+---
+
+## V2.6.2
+
+### Removed
+
+- **The sky label.** `POLAR DAY // LOW-ELEVATION SUN` was drawn at 8px and 16%
+  opacity, unscaled by the text setting, over a dark sky — unreadable at any size
+  and saying nothing the HUD does not already say.
+
+---
+
+## V2.6.1
+
+### Changed
+
+- **The build column runs the full height of the app.** The status bar used to
+  span the whole width beneath both the map and the column, which capped the
+  column at the map's height. The bar now sits under the map alone, inside a new
+  left column, and the build list gets that height back — 183px to 245px, or
+  three visible rows to five before scrolling.
+- **The wallow says what the 70 is for again.** `+25 morale beside a habitat, and
+  the herd needs 70 to grow`. The number alone was the efficient version; the
+  clause is the one that teaches.
+
+### Fixed
+
+- **Achievement cards fit their text.** They were 232px with `text-overflow:
+  ellipsis`, so a name or condition longer than the card was simply cut —
+  `a night carried on one rea…`. The card now sizes up to 300px, capped against
+  the viewport, and both lines wrap instead of truncating.
+- **Tapping a card holds it.** A card that slides away while you are still
+  reading it is a card you did not get to read. A tap cancels the dismissal and
+  adds TAP TO DISMISS; a second tap lets it go and releases the queue behind it.
+
+### Verified
+
+- The restructured shell nests correctly: div balance in `#app` matches V2.6.0
+  exactly, with `#main > #left > #stage, #bottom` and `#side` in the right order.
+
+---
+
+## V2.6.1
+
+### Fixed
+
+- **The unlock banner truncated the achievement it was announcing.** `a night
+  carried on one rea…` — the one moment the game tells you what you just did,
+  cut off mid-word. The card sizes to its contents now, capped at 300px or the
+  room available, and both lines wrap rather than ending in an ellipsis. Every
+  one of the eleven fits without wrapping the name.
+- **Tapping the banner holds it open.** The four-second dismissal is a guess
+  about how fast someone reads; tapping the card cancels it and adds `TAP TO
+  DISMISS`, so the guess never has to be right. The queue waits while a card is
+  held.
+
+### Changed
+
+- **The wallow line says what it costs you again**: `4 water/turn, no power ·
+  +25 morale beside a habitat, and the herd needs 70 to grow`. The 70 was doing
+  the teaching, not the 25 — without it a new player has no reason to care about
+  morale at all.
+
+---
+
+## V2.6.0
+
+### Fixed
+
+- **The top readout pans instead of clipping.** At the extremes of the system
+  text setting the row is simply wider than the glass, and clipping loses
+  figures with no way to get them back. The row scrolls horizontally now, so
+  every number is reachable at any size.
+  - The step-down clamp from V2.5.1 is gone with it. It existed only to avoid
+    the clipping, and it made the setting quietly do less than it was asked.
+  - The cells stop shrinking, since shrinking was the other half of the same
+    compromise.
+
+### Changed
+
+- **Every build row is two lines**, name above cost, whether or not it would
+  have fitted on one. A row that changes height when it happens to fit makes the
+  column jump as the colony's resources change.
+- **Tool copy moved to the status bar.** Selecting a tool used to expand a
+  paragraph inside the build column, pushing every row below it down. The
+  description now appears in the bar that already carries the running
+  commentary, and the column holds still.
+- **The copy is 41% shorter** — 709 characters across the nine tools down to
+  417, longest line from 144 to 61. `upkeep 3/turn by day, 9/turn at night.
+  Houses 4 — the herd cannot grow past its housing. Each crew costs a further 3
+  power and 2 water per turn.` became `houses 4 · 3/turn by day, 9 at night ·
+  3p 2w per capybara`.
+
+---
+
+## V2.5.3
+
+### Changed
+
+- **A tile is the same size at every text setting.** `baseCell` was derived from
+  whatever room the HUD left over, so any change to the chrome changed the scale
+  of the map. It is now measured once against the stage the app would have at
+  text size S — the scale variables are briefly set to 1, the stage is read, and
+  they are put back — and the map keeps that scale regardless of what the chrome
+  is doing.
+  - Where the stage is shorter, the map overflows and the view pans rather than
+    shrinking. That is what a zoom control is for.
+  - FIT now means "back to reference scale, centred" rather than "fit the whole
+    map into whatever is left". At the larger sizes the whole colony no longer
+    fits on screen at once, by design.
+  - The FIT indicator lights on an actual zoom or pan, not merely on the map
+    being larger than the stage, which is now the normal state above S.
+
+### Verified
+
+- Against the stage sizes the tools panel reported: cell size is 16.64px at S, M,
+  L and AUTO 135% alike, where it previously fell from 16.64 to 15.36. At L, 10.2
+  of 11 rows are on screen and the remaining 13px pans.
+
+---
+
+## V2.5.2
+
+### Changed
+
+- **Larger text no longer costs the map much.** Text at 12px and above now grows
+  at 30% of the requested rate, while everything at 11px and below takes the full
+  increase. The readouts that were hard to read are the 8 and 9px labels — CREW,
+  MORALE, `night needs` — and the 15px numbers beside them were never the
+  problem. But it is the large text that sets the height of the HUD and the
+  status bar, and that height is the map's height, subtracted.
+  - 61 rules take the full scale, 18 are damped.
+  - The side column stops growing at all. Its rows are large text, so they no
+    longer need the width, and the map keeps those pixels.
+
+### Verified
+
+- Against the stage size the tools panel reports (594×181 at 100%): at L the map
+  area is 22% larger than V2.5.1 gave, and cell size goes from 13.1px back to
+  15.5px. At AUTO 135%, 24% larger.
+- The 9px labels still reach 11.9px at L, unchanged. The 15px readouts grow to
+  16.4px instead of 19.8px.
+
+---
+
+## V2.5.1
+
+Larger text stopped fitting the screen. It fits now, and the edges have room.
+
+### Fixed
+
+- **The app overflowed sideways at larger text sizes.** The top readout is a row
+  of nowrap cells, so at 124% its natural width exceeded the screen and pushed
+  the whole layout past both edges, clipping the sol counter on the left and the
+  tile detail on the right.
+  - The requested size is now treated as a request rather than an instruction.
+    After applying it the game measures the readout against the screen and
+    shrinks in 4% steps until it fits, floor 0.84. A clipped number is worth less
+    than a slightly smaller legible one.
+  - The control reports what actually happened: `AUTO · 124% → 118%` when the
+    screen forced a reduction, rather than claiming a size it did not get.
+  - Re-measured on every layout, so rotating or resizing re-fits.
+  - Guarded against running before first layout, when the row has no width and
+    every comparison would read as an overflow.
+- **The status bar cropped its own text.** Its height scaled with the text, but
+  the objective line wraps to more lines at a larger size, so it lost the last
+  line. The fixed height is now a minimum.
+
+### Added
+
+- **Safe-area insets.** The app is inset by `env(safe-area-inset-*)` plus a 2px
+  gutter, with `viewport-fit=cover` in the viewport meta so those values are
+  reported. Nothing sits against the glass edge or under a rounded corner.
+
+### Verified
+
+- Backoff arithmetic: a request of 1.45 on a row that fits at 1.20 settles at
+  1.18 in five steps; a request that cannot fit at all stops at the 0.84 floor
+  rather than shrinking without bound.
+
+---
+
+## V2.5.1
+
+### Fixed
+
+- **Text scaling could push the layout wider than the screen.** The HUD is one
+  row of nowrap cells, and `#clock` was `flex:0 0 auto`, so its intrinsic width
+  set a floor for the whole row: at a larger text size the row simply grew past
+  the glass and the readout ran off both edges.
+  - `#clock` can now shrink and clip like every other cell, and `#top` clips
+    rather than growing.
+  - **The requested size is a request, not a promise.** After applying a scale
+    the game measures the row and steps back 3% at a time until it fits, down to
+    1.00. A readout whose left edge is off-screen is worse than a small one.
+  - The DISPLAY row reports what was actually applied, with `MAX` when the
+    request was cut short, so a setting that silently does less than asked says
+    so.
+  - Re-fitted on every layout pass, since rotation and the tools panel change
+    the room available.
+- **The status bar cropped its own text.** Fixed height and a fixed 30px cap on
+  the objective line meant a wrapped sentence lost its second line at any size
+  above S. The bar now grows with its contents and the cap scales with the text.
+
+### Added
+
+- **A margin at the edges.** The shell sits inside the safe area with a 2px
+  gutter, and the viewport meta carries `viewport-fit=cover` so `env()` returns
+  real numbers, so nothing runs to the physical edge of the glass.
+
+### Verified
+
+- Clamp convergence at twelve combinations of natural HUD width and requested
+  scale: every case that can fit does, in at most a handful of steps.
+
+### Known limit
+
+- If a HUD is wider than the viewport at 1.00 — a very narrow phone in landscape
+  — the clamp bottoms out and it still clips. Fixing that needs the HUD to drop
+  or stack cells, not smaller text.
+
+---
+
+## V2.5.0
+
+Text size is adjustable, and one achievement turned out to be unearnable.
+
+### Added
+
+- **DISPLAY · Text size**, cycling AUTO / S / M / L.
+  - AUTO reads the system setting. iOS does not hand a page its Dynamic Type
+    value, but it will render `-apple-system-body` at the size the reader chose,
+    so the game measures a hidden probe in that font against the 17px default.
+    The row shows the percentage it found. Re-read on window focus, so changing
+    it in Settings and coming back takes effect.
+  - S, M and L are 1.00, 1.15 and 1.32, for overriding a system setting that
+    makes the game unplayable in either direction.
+  - All 79 font sizes in the stylesheet now derive from one variable, `--ts`.
+  - Fixed-width furniture — the side column, the status bar, the FIT cell —
+    grows at 40% of the text's rate through a second variable, `--tsw`. It has to
+    grow or labels clip, but growing proportionally would hand a third of the map
+    to the panel.
+  - The setting is saved with the run.
+
+### Removed
+
+- **SOL SURVIVOR.** A reachability audit found no path to it. At one capybara the
+  morale target is 50 + 25 wallow + 10 net − 20 lone = 65, and growth needs 70,
+  so the target never clears the gate; the only route is to still be coasting
+  down from higher morale for the three consecutive turns growth requires, which
+  needs 83.21 at the moment of the loss against a maximum of 85.
+  - That 1.79-point window is then closed by the thing that causes the loss.
+    All three death causes cut the target on the same turn: brownout to 30,
+    thirst to 40, radiation to 55. Radiation is the gentlest and needs three
+    turns of exposure first, which has already pulled morale to about 79.
+  - The lone-capybara penalty is right and stays. A herd animal alone should be
+    in trouble; the achievement was asking for a recovery the model does not
+    allow. Eleven remain.
+  - `crewLow` removed with it, since nothing else read it.
+
+### Verified
+
+- Zero unscaled font-size rules remain; all 79 route through `--ts`.
+- Cost to the map on a 16 Pro in landscape: cell size falls from 21.2px at S to
+  20.4px at AUTO's ceiling, so the wallow bather (17px floor) still draws at
+  every text size.
+- The smallest text in the UI, the 7.5px banner label, reaches 9.9px at L.
+
+---
+
+## V2.4.2
+
+### Changed
+
+- **No dash between an achievement's name and its condition.** Two spaces do the
+  separating; the dash was punctuation doing work the layout already did.
+
+---
+
+## V2.4.1
+
+### Changed
+
+- **Achievement rows read as one sentence.** The name sat hard left and the
+  condition hard right, so the two halves of a single line ended up as far apart
+  as the pane would allow, with a wall of blank between them. Name and condition
+  now run together, left aligned, wrapping rather than truncating.
+- **Locked rows say `[LOCKED] — condition`** instead of an em dash standing in
+  for the hidden name. A row that reads `— · under 20 structures standing` looks
+  like a rendering fault; one that says it is locked looks like a target.
+- Hairline between rows, and the glyph column keeps its place whether or not the
+  row is earned, so the list does not shift as things unlock.
+
+---
+
+## V2.4.0
+
+Twelve achievements, latched, with a banner that gets out of the way.
+
+### Added
+
+- **Achievements.** Twelve, listed under BOARD with the ones still locked shown
+  as their condition only, so there is something to aim at rather than a row of
+  question marks.
+
+  | id | name | condition |
+  |---|---|---|
+  | `all_ratings` | THE LONG SURVEY | a night held at every rating |
+  | `brutal` | THE DARK SIDE | a night held on a 5-star site |
+  | `twice_rated` | SISTER COLONY | two sites at the same rating |
+  | `no_losses` | MOISTURIZED | self-sufficient, nobody lost |
+  | `no_brownout` | NOSE ABOVE WATER | never blacked out |
+  | `salvager` | SECOND HELPING | self-sufficient after stripping |
+  | `lean` | SKELETON CREW | under 20 structures standing |
+  | `morale_floor` | UNBOTHERED | morale never under 60 |
+  | `recovery` | SOL SURVIVOR | down to one, back to eight |
+  | `big_herd` | MAXIMUM OCCUPANCY | 40 capybaras at once |
+  | `full_wallows` | POOLS OPEN! | three bathing in every wallow |
+  | `single_reactor` | TWIN SUNS | a night carried on one reactor |
+
+- **The id is the contract.** It is what goes into storage and, if a Steam build
+  ever happens, into the API call — so ids never change while names stay free to
+  be rewritten.
+- **Latched, not derived.** Earning something is permanent, written into its own
+  record under `astrobara.achv` rather than recomputed from the board. The board
+  keeps ten rows and rolls the eleventh off, which would otherwise silently
+  revoke a trophy that had genuinely been earned.
+- **A slide-in banner** in the lower left, above the log and clear of the build
+  column. Queued, because reaching self-sufficiency often trips four at once.
+- **Per-run tracking**: `crewLow`, `moraleFloor`, `everLost`, `everBrownout`,
+  `everStripped`. Each reads state the turn loop already keeps, so an achievement
+  cannot disagree with the colony it describes.
+- The site tally is a map of seed to rating, so replaying one site can never earn
+  SISTER COLONY, and a self-sufficient colony playing on for fifty more turns
+  re-awards nothing.
+
+### Verified
+
+- Twenty turns on one 3-star site award nothing; a second, different 3-star site
+  awards SISTER COLONY. Replaying earned sites adds nothing.
+- Four run shapes against the per-run gates: win-gated awards stay locked before
+  self-sufficiency, while the free ones (herd size, recovery, full wallows) fire
+  during play.
+
+### Needs play, not code
+
+- `lean` is set at under 20 structures and `big_herd` at 40. Both are guesses.
+  The first colony to hold a night will say whether 20 is generous or impossible.
+
+---
+
+## V2.3.4
+
+### Fixed
+
+- **A machine could not be idled while CLEAR was selected.** The tile action
+  offered IDLE only when the held tool could *not* be placed there — and CLEAR is
+  legal on every building, so it never failed, so the idle branch was never
+  reached. Selecting CLEAR once meant no machine could be switched off again for
+  the rest of the session, with scrapping as the only offer on every mine,
+  processor, wallow and reactor.
+  - The two are not alternatives, so the action cell now carries both: IDLE
+    first, since switching something off is far commoner than dismantling it,
+    and STRIP with its salvage beside it.
+  - Every other tool already reached IDLE, because placing a structure on an
+    occupied tile errors out and falls through to it. CLEAR was the only tool
+    that shadowed it.
+
+### Verified
+
+- All ten tool states against a running machine: only the CLEAR case changes,
+  and IDLE is now reachable from every one of them rather than nine of ten.
+
+---
+
+## V2.3.3
+
+### Added
+
+- **A BOARD tab in the tools panel.** The board was reachable only from the
+  end-of-run overlay, which meant the only way to read it was to lose a colony.
+  It now sits beside SURVEY, IDLE, DISPLAY and RUN, readable at any time. A row
+  for the site you are currently on is highlighted, and rows written by an older
+  build carry that build's number.
+- **COPY AS TEXT.** These builds are loaded as separate files, and whether a host
+  shares local storage between two files is not something the game can determine
+  about itself. Export is the only thing that survives a host that scopes storage
+  per file, so the board offers itself as one block of text.
+- The pane says where the rows are kept — `astrobara.board`, separate from the
+  save, never cleared by a version bump — so the storage question has an answer
+  in the product rather than only in this file.
+- With an empty board the pane explains what qualifies: a whole night carried on
+  fusion, the same test as the win. Nothing else.
+
+### Verified
+
+- Tabs, panes and the switcher all agree on the same five names.
+
+---
+
+## V2.3.2
+
+### Changed
+
+- **CLEAR costs nothing but the labour.** Charging power for the action that
+  recovers resources was the one charge that could close a game out entirely: a
+  colony at zero power with no sunlit array had no legal move at all. Labour
+  still applies, so stripping remains a turn decision rather than a free action.
+- Cost lines read `free` instead of `0p`, and the build hint reads "no power"
+  rather than "0 power".
+
+### Verified
+
+- Every build-then-strip cycle is a net loss in every resource, so free
+  stripping is not a loop: an array costs 11 power to put up and take down, a
+  wallow 9 power and 35 water.
+- From zero power with the opening lander standing, stripping both arrays and
+  the battery returns 32 power — enough for the 30-power ice mine.
+
+---
+
+## V2.3.1
+
+You can dismantle your way out of a corner.
+
+### Added
+
+- **CLEAR returns half of what a structure cost**, rounded down, in power, water
+  and helium alike. Half rather than all, because a colony that can rebuild
+  freely never has to live with a decision; half rather than nothing, because a
+  site that starves you before you can reach the ice is not a hard site, it is a
+  dead one.
+  - A wallow holds 70 water and an ice mine costs 8, so stripping the pool is
+    always a route back to the ice. That is the corner this rule exists for.
+  - The action button states the return before you commit — `STRIP WALLOW ·
+    +9p +35w` — rather than leaving you to work it out.
+  - Recovered power is capped at the battery bank. Nothing returns more than it
+    cost.
+  - "Remove" became "strip" throughout, since the verb now has a payout attached.
+
+### Verified
+
+- Salvage table for all seven structures: nothing is a net gain in any resource.
+- The reported dead end — 306 power, 0 water, a wallow standing, an ice mine out
+  of reach — reopens: stripping the wallow leaves 309 power and 35 water against
+  a mine costing 30 and 8.
+
+### Known edge
+
+- CLEAR itself costs 6 power, so a colony at zero power with no array in sunlight
+  still cannot strip anything. Water is recoverable; a total power-out is not.
+
+---
+
+## V2.3.0
+
+The herd is in one place or the other, water gets the warning power has, and a
+colony that held a night goes on the board.
+
+### Added
+
+- **The board.** A colony that carried a whole night on fusion is recorded with
+  its site code, sol reached, peak crew and peak power, and the board appears on
+  the overlay when a run ends. The bar is `G.selfSufficient` — the same test as
+  the win condition — because surviving a long time on solar is something the
+  sun grants you, while a night on fusion is something you built.
+  - One row per site. A better run on the same seed replaces the old row instead
+    of filling the board with the same colony.
+  - Ranked by turns survived, then peak crew, then peak power. Turns come first
+    because the night is what this game is about.
+  - Recorded on a loss as well as a win: a colony that reached self-sufficiency
+    and later died of thirst still held a night.
+  - Every row is reproducible. Sites are seeded, so the code is the point of the
+    entry — a run on the board can be handed to someone else.
+- **Up to three capybaras in a wallow**, two of them behind the first and drawn
+  in the recessive tone, from 24px up.
+- **Water reports what a night costs**, under the water figure, the same shape
+  as the power line, red when the tank will not cover it. Water draw does not
+  change when the sun goes — crew drink and wallows evaporate at the same rate —
+  but idled mines stop replacing it, so a night costs the full outflow with
+  nothing coming back. Also added to the ledger.
+- `G.peakPower`, tracked per turn, for the board.
+
+### Fixed
+
+- **A capybara in the wallow is one fewer in the habitat.** Bathers are drawn
+  from the same crew the habitats house, so the two tiles can never add up to
+  more capybaras than the colony has. Never more than half the herd at once:
+  someone is keeping the lights on, and an empty habitat would read as a dead
+  one.
+- **Depth is drawn with an opaque tone instead of transparency.** Two
+  overlapping capybaras at 58% alpha composite twice, so the overlap went darker
+  and the seam between them became the most visible edge on the tile. An opaque
+  recessive tone cannot produce that seam at any amount of overlap.
+- **The back tier sits wider**, .28 and .72 rather than .38 and .70. At the old
+  spacing the two behind cleared each other by .008 of a cell, which is a fifth
+  of a pixel on a phone.
+
+### Verified
+
+- Crew split across every combination of 1–24 crew, 0–4 wallows and 1–5
+  habitats: the herd is always conserved, never more than three bathe per
+  wallow, never more than half bathe at once.
+- Board: one row per site, correct tie-break order, capped at ten, a worse rerun
+  on the same seed rejected and a better one promoted.
+
+---
+
+## V2.2.1
+
+### Changed
+
+- **No mouths on the capybaras, on either sprite.** At the sizes these are drawn
+  a mouth is two or three dark pixels below the eye, which reads as a smudge on
+  the face rather than as a mouth. Eyes alone carry it.
+- The V2.2.0 detail budget line about "eyes and mouth from 18px" now reads eyes
+  only. Ears at 22, leaf and floating citrus at 26 are unchanged.
+
+---
+
+## V2.2.0
+
+A wallow in use shows who is using it.
+
+### Added
+
+- **The wallow bather.** A wallow only earns its +25 morale when it sits beside
+  a habitat, and that is the single largest term in the morale model — but a
+  wallow built out of reach looked identical to one doing its job. When a wallow
+  is running and adjacent to a connected habitat, a capybara sits in it wearing a
+  citrus on its head. The tile now reports the same test the ledger runs.
+  - Drawn front on rather than in profile, which is what makes it read as
+    sitting in the water rather than walking past it.
+  - Detail by cell size, as everywhere else: citrus from 17px, eyes from 18,
+    ears from 22, leaf and a second floating citrus from 26. Below 17px a wallow
+    is a blue ellipse and nothing more.
+  - The citrus is the whole message at phone scale. Nothing else on the map is
+    that orange.
+  - The reference is the yuzu bath — capybaras sitting in an onsen with citrus
+    floating around them, as at Izu Shaboten Zoo. It is a real tradition and it
+    is what a wallow is for. No existing character design was used.
+
+### Fixed
+
+- **The herd was painted front to back.** The spots list runs the front tier
+  first, so capybaras standing behind were drawn *over* the ones in front — two
+  identical silhouettes at identical weight, overlapping the wrong way round,
+  which reads as one animal. Now sorted by depth and painted farthest first.
+- **The back tier is dimmed to 58%.** Depth, not detail, is what separates two
+  silhouettes that are the same shape.
+
+### Verified
+
+- Paint order: back tier first at both the four-capybara and two-capybara
+  layouts, front tier at full strength.
+- The bather stays inside the foundation plate and never exceeds the pool at
+  every cell size from 17px to 110px.
+
+### Not done
+
+- The rounded sprite was declined; the herd keeps its existing silhouette.
+
+---
+
+## V2.1.6
+
+### Removed
+
+- **The "NASA-STYLE VISUAL SYSTEM" line on the splash.** It claimed an
+  association the game does not have, and the splash already says what this is.
+
+---
+
+## V2.1.5
+
+### Changed
+
+- **The view diagnostics moved from the ledger to Tools · Display.** The ledger
+  is the turn's arithmetic, and how the map happens to be drawn is not part of
+  the turn — it was the only block there that said nothing about the colony. It
+  now sits under the display options, with the toggles and the reset it belongs
+  with. It refreshes from `layout()`, so the numbers stay live while the panel is
+  open and the map is being pinched.
+
+---
+
+## V2.1.4
+
+One FIT, in the bar, in the bar's own colour.
+
+### Changed
+
+- **The floating chip is gone.** It sat over the bottom-right of the map, which
+  is playable ground, and it was the element that kept vanishing under the tools
+  panel in the first place. The status bar cell replaces it entirely.
+- **FIT is bone, like the toolbar**, rather than amber. Amber is the game's
+  colour for sunlight and for things that need attention; a view control is
+  neither. It still dims when the whole colony is already in view and comes to
+  full strength when it is not — same colour, different weight.
+
+### Verified
+
+- No orphan references to the removed element remain. `#fsbtn` keeps its own
+  rule, which it previously shared with the chip.
+
+---
+
+## V2.1.3
+
+FIT moves to the status bar.
+
+### Changed
+
+- **FIT is now a cell in the bottom status bar**, between the objective line and
+  the tap-a-tile panel, rather than the fifth arrow. The arrow row is a
+  directional control and a jump-to-fit sitting in it read as a fifth direction.
+  It stays dim while the whole colony is already in view and lights up when it
+  is not, so it reports the state of the view rather than nagging about it.
+- The arrow row is back to four columns.
+- The floating chip on the map stays. It is useful when it works; it is simply
+  no longer the only way out.
+
+### Verified
+
+- The status bar keeps 453px for the objective line on the narrowest landscape
+  viewport (iPhone SE), 660px on a 16 Pro.
+
+---
+
+## V2.1.2
+
+The way out of a zoomed view stops being something that can go missing.
+
+### Fixed
+
+- **FIT moved out of the map corner and into the panel.** A chip floating over
+  the stage is reachable only if nothing covers it and the stage is exactly as
+  tall as it believes; neither has held up across iOS standalone, rotation and
+  third-party file viewers. FIT is now the fifth cell of the arrow row, laid out
+  by the same grid as END TURN. It cannot be occluded, clipped or scrolled away.
+  The floating chip stays as well — it is useful when it works.
+- **The arrow keys keep the selection on screen.** They moved the cursor without
+  moving the view, so at zoom the selection walked off the edge and the arrows
+  appeared to do nothing. `keepSelInView()` pans the minimum distance to bring
+  the selected tile back inside the stage, and is a no-op at zoom 1.
+
+### Added
+
+- **The ledger reports the view.** Zoom, whether panning is enabled, cell against
+  base cell, and stage size against map size. The zoom failure is intermittent
+  and a screenshot of a black rectangle carries no information; these three lines
+  make the next report diagnosable in one look, the way the version watermark
+  did for builds.
+
+### Changed
+
+- **Strata got their grain back.** V2.1.1 cut micro-variation to .03, which is
+  about one and a half levels of red — tiles inside a band came out identical
+  and a zoomed view read as a flat wash with no tile edges at all. Now .05,
+  still far under the .165 band step, so depth continues to win.
+
+### Verified
+
+- Every corner selection is brought into view at zoom 1, 2, 3 and 5, and pan is
+  untouched at zoom 1.
+
+---
+
+## V2.1.1
+
+Depth reads as depth, and the herd is the brightest thing on a habitat.
+
+### Changed
+
+- **Regolith is banded strata rather than a per-row fade.** Depth now steps
+  every two rows, with a faint seam at each boundary, so the column reads as
+  geology you could point at.
+- **The palette had no room in it.** `regolithDeep` was `#2A2622`, which left
+  32 levels of red between the surface and the crater floor — no gradient can be
+  distinct inside that. It is now `#191614`.
+- **Micro-variation no longer outweighs depth.** The noise term spanned .13
+  while one row of depth was worth .048, nearly three rows of noise, so a
+  shallow tile could sit darker than one well beneath it. Variation is now .03
+  against a band step of .165, and depth always wins.
+- **Tunnels moved out of the way of the new deep rock.** Open ground went from
+  `#11151b` to `#1B2430` — cooler and lighter, ten points of luminance clear of
+  the deepest regolith. Rock is warm, a tunnel is not. This matters precisely
+  where the ice is and the digging happens.
+- **Lit tunnels follow the same rule as everything else.** They warmed on
+  `G.selfSufficient`, a flag that needs twelve consecutive dark turns; they now
+  warm when a reactor is actually running, like the structure glow.
+
+### Fixed
+
+- **The habitat arch was competing with its own occupants.** A live arch is now
+  drawn at 30% as a recessive shell behind the herd. An unpowered one keeps the
+  full alarm colour, because a dead habitat has to shout.
+- **The herd is back to two staggered tiers.** V2.1.0 put four capybaras in one
+  row .19 apart while each was .26 wide, so they fused into a single animal with
+  eight legs. Body scale is .30 rather than the old .35, which is what it takes
+  to leave clear air once the heads are counted.
+
+### Verified
+
+- Band boundaries never invert across the noise range: a deeper tile is never
+  lighter than a shallower one.
+- Deepest rock and tunnel separated by 10.5 luminance and opposite in hue.
+- Closest same-tier capybara gap is positive with heads included.
+
+---
+
+## V2.1.0
+
+The visual language settles. One vocabulary for the toolbar and the map, no
+letters in it, and light on the surface now means something specific.
+
+### Changed
+
+- **The map speaks the toolbar's language.** Drawn silhouettes were a second
+  vocabulary that existed only on the map: a player learned `H` in the build
+  menu and a cylinder with portholes on the ground, and had to hold both. They
+  also blurred at the cell sizes a whole crater rim is played at. Every
+  structure now draws the same glyph the toolbar shows.
+- **No glyph is alphanumeric.** `B`, `H` and `R` were mnemonics for English
+  words — battery, habitat, refinery — and read as noise in any other language.
+  The set is now nine shapes:
+
+  | | | |
+  |---|---|---|
+  | `▒` DIG | `×` CLEAR | `◫` ARRAY |
+  | `▮` BATTERY | `∩` HABITAT | `≋` ICE MINE |
+  | `▤` PROCESSOR | `~` WALLOW | `*` FUSION |
+
+  `◫` is the two-panel wing reduced. `∩` is the pressure vessel in section.
+  `▤` shares a family with `▒` and `▮` so the set reads as one hand. `≋` and
+  `~` are deliberate siblings: the mine is buried ice and the wallow is standing
+  water, and both are why this colony survives.
+- **Two exceptions kept.** The wallow keeps its basin — a pool of standing water
+  reads as itself at any size and no glyph carries *somewhere to wallow*. The
+  herd keeps its capybaras, now in one row along the floor of the tile so they
+  stand under the habitat arch rather than through it.
+- **`Larger glyphs` does something now.** The toggle has been in the display
+  options since V2.0.2 and was wired to nothing. It scales the map glyph from
+  .58 to .74 of a cell.
+
+### Fixed
+
+- **Light on the surface meant almost nothing.** Arrays glowed whenever the sun
+  hit them, which is backwards — a lit array is *receiving* light, not casting
+  it — and every other structure glowed only after `G.selfSufficient`, which
+  needs twelve consecutive dark turns carried by fusion and so arrives long
+  after the reactor is built.
+  - A glow now means fusion is running and this structure is one of the loads it
+    is carrying: the reactor, habitats, mines and processors. Arrays, batteries
+    and wallows draw no power and never glow.
+  - Daylight produces no glow at all. Nothing on this surface makes its own
+    light.
+  - Because the check is on the live building, an idled processor goes dark the
+    turn you shed it. The lit tiles at night are exactly the ones spending your
+    helium-3.
+
+### Verified
+
+- Glyph set audited from the source: nine entries, all distinct, none
+  alphanumeric, codepoints U+2592 U+00D7 U+25EB U+25AE U+2229 U+224B U+25A4
+  U+007E U+002A.
+- Glow eligibility audited: FUSION, HAB, MINE and PROC can glow; SOLAR, BATTERY
+  and WALLOW never do, in any light.
+- No simulation, cost, site-generation, turn-resolution or persistence code was
+  touched. This release is presentation only.
+
+### Worth watching
+
+- `≋` U+224B and `◫` U+25EB are the two least common codepoints in the set. They
+  render in the system mono stack on iOS and macOS; if a device falls back to
+  tofu, `≈` and `=` are the safe substitutions.
+- The habitat arch is drawn at .42 of the cell and the herd at .70. At small
+  `cell` on a crowded hab the two may crowd; if so, drop the arch to .38.
+
+---
+
+## V2.0.4
+
+Two escapes: one from a view you could get stuck in, one from a line that
+described the terrain wrongly.
+
+### Fixed
+
+- **A zoomed map could leave you with no way back to the colony.** The FIT chip
+  was the only exit, and it was hidden two ways at once. It only appeared when
+  `zoom > 1.02`, and it sat at `z-index: 16` — beneath the tools panel, which
+  docks in the same bottom-right corner. Worse, if `baseCell` is ever computed
+  from a bad stage measurement (rotation, a standalone relaunch, a mid-layout
+  resize), the map overflows the stage while `zoom` still reads 1: no chip, no
+  panning, and pinching out clamps at a zoom you are already on.
+  - `fitView()` now re-measures the stage and rebuilds `baseCell` rather than
+    trusting the last measurement.
+  - `layout()` tracks whether the drawn map is larger than the stage, and the
+    chip shows on that, not on zoom alone.
+  - Three further ways out: the chip, now labelled **FIT** and stacked above the
+    tools panel; **DISPLAY · Reset map view**; and a double tap on the map,
+    which only fits when there is something to escape from.
+- **Panning was gated on zoom** rather than on whether the map actually
+  overflowed, which made the stuck state immovable as well as inescapable.
+- **A pinch that dropped to one finger left the gesture stuck**, swallowing the
+  taps and drags that followed.
+
+### Changed
+
+- **The crest line follows the tiles.** Built from one point per column and
+  joined left edge to left edge, it drew a diagonal across tiles that are not
+  surface tiles — lit ground above the line, shadowed ground below, on the same
+  tile. Now stepped: one horizontal cap per column, a vertical face at each
+  height change, run out to the far edge of the last column.
+- **The warm crest is rim light, so it only falls where the sun does.** Each
+  column is tested with the same `litAt()` the tile highlight and the power
+  model use. Shadowed ground keeps a dim neutral edge so the basin still reads
+  as terrain.
+
+---
