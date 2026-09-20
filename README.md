@@ -5,7 +5,7 @@ on the Shackleton crater rim, where the antagonist is the night.
 
 One HTML file. No dependencies, no build step, no network. Open it and play.
 
-**V2.10.0** · MIT · Mark Florentino LLC and Kittenmancer
+**V2.10.1** · MIT · Mark Florentino LLC and Kittenmancer
 
 ---
 
@@ -117,7 +117,8 @@ Everything else lives in one panel, `[≡]`, in five tabs.
   code for each so any run on it can be played again, and offers the rows as
   text. Eleven achievements are listed under it, locked ones included.
 - **RUN** shows this site's code and difficulty, takes a code to land somewhere
-  else, or lands somewhere random.
+  else, or lands somewhere random. Any words at all make a site; a code with a
+  slip in it is flagged, with the code it was probably meant to be.
 
 ## Sites
 
@@ -192,7 +193,7 @@ better, Copy diagnostics, which starts with it.
 `preflight.py` runs Tier 0 of the test plan: twelve static checks that need no
 device, from the script parsing to every published seed regenerating its site.
 
-    python3 preflight.py astrobara-v2_10_0.html SEEDS.txt
+    python3 preflight.py astrobara-v2_10_1.html SEEDS.txt
 
 It needs `seedcheck.js` beside it and Node on the path.
 

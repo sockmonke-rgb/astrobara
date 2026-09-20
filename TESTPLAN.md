@@ -1,6 +1,6 @@
 # Astrobara — test plan
 
-**Plan version 1.3** · 19 September 2026 · covers Astrobara V2.10.0
+**Plan version 1.4** · 20 September 2026 · covers Astrobara V2.10.1
 
 The single HTML file is the unit under test; there is no build step to verify.
 The plan is versioned separately from the game: quote both when reporting, as in
@@ -178,6 +178,15 @@ For each handedness — BALANCED, LEFT, RIGHT — with glass on and with glass o
 - **V19** — the tools button, shut, is a rounded pill, not a square inside a
   rounded shadow. Guards V2.9.11.
 
+### Typing a site code
+
+- **V21** — on the RUN tab, type `SCRAP-REGOLITH-192`. The field flags SCRAP,
+  offers SCARP-REGOLITH-192, and tapping the offer fills it in. The warning and
+  LAND THERE are in view without scrolling the panel by hand. Guards V2.10.1.
+- **V22** — type words with spaces and digits into the same field: the spaces
+  appear, no turn ends, no build tool arms, SURVEY does not toggle. Guards
+  V2.10.1, where Space in the field ended a turn.
+
 ### The end card
 
 - **V20** — lose a colony. Nothing on the card can be pressed until it has
@@ -351,7 +360,7 @@ death path left it earnable. The same arithmetic can bite any of these.
 `preflight.py` implements P1–P12. It needs `seedcheck.js` beside it and a copy
 of `SEEDS.txt`:
 
-    python3 preflight.py astrobara-v2_10_0.html SEEDS.txt
+    python3 preflight.py astrobara-v2_10_1.html SEEDS.txt
 
 It exits non-zero on any failure and prints the evidence for every check, not
 just a verdict, so a pass is auditable. Run it on every build before the build
@@ -410,6 +419,7 @@ deterministic, so a seed and a move list reproduces it exactly.
 | 1.1 | 15 Sep 2026 | V2.8.0 | Tier 0 automated as `preflight.py`. Probe section replaced: COPY DIAGNOSTICS built in V2.8.0. |
 | 1.2 | 17 Sep 2026 | V2.9.4 · V2.9.6-GLASS | Added frame-rate checks F1–F5 for the glass branch, which blurs a live canvas. Report the low, not the average. |
 | 1.3 | 19 Sep 2026 | V2.10.0 | Glass is the main line. Added *Which tiers, when* and the release-candidate rule. Tier 1 runs with glass on and off. Frame-rate bar set at 30; F6 added. V9 tightened to fit at L. New V16–V20 for fixes made on the glass line that the plan did not catch. A2 and M19 rewritten: achievements carry within a major version. M3 follows the *night* wording; M24 added for the structure count. MAXIMUM OCCUPANCY renamed FULL CAPYCITY. |
+| 1.4 | 20 Sep 2026 | V2.10.1 | V21 and V22 for the site field: mistyped codes, and keyboard shortcuts firing while typing. |
 
 When a build fixes something this plan did not catch, add the check here in the
 same commit as the fix, and note the build it was first seen in.

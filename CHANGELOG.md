@@ -1,3 +1,55 @@
+## V2.10.1
+
+### Fixed
+
+- **Typing in the site field could end turns.** The keyboard shortcuts listened
+  everywhere, text fields included, and the phone's keyboard sends the same
+  keys. So typing *any words at all* into LAND SOMEWHERE ELSE did this:
+  - **Space** ended a turn and never reached the field.
+  - **Digits** armed build tools.
+  - **V** toggled SURVEY, and three site words have a V in them.
+
+  Typing `a b c 1` ended three turns and armed DIG. The shortcuts now stand down
+  while a text field has the focus. Space still ends a turn everywhere else.
+- **A mistyped site code landed somewhere else, and went on landing there.**
+  `SCRAP-REGOLITH-192` is not a code — SCRAP is not a site word — so it was
+  hashed like any other phrase, to FLAT-PEAK-296. Typing it again landed on
+  FLAT-PEAK-296 again, which looked like the field ignoring you. The only sign
+  was a small `→ FLAT-PEAK-296`, below the fold of the panel.
+  - Text shaped like a code with a word off its list now reads, in red: *SCRAP
+    is not a site word — did you mean SCARP-REGOLITH-192? Tap to use it.* Below
+    that is where it lands as typed. One slip is caught in a short word, two in
+    a long one: swapped letters, dropped letters, extra letters, and the two
+    words the wrong way round.
+  - Anything the field would land you on reads *· you are already here* when
+    that is where you are.
+  - While you type, the panel scrolls so the echo and LAND THERE sit under
+    the field.
+  - Free text still lands where it hashes to. Only code-shaped slips are
+    questioned.
+
+### Verified
+
+- Tier 0 clean: P1–P12.
+- Headless Chromium, 750×304, typing into the real field from FLAT-PEAK-296:
+  - `SCRAP-REGOLITH-192` is flagged, offers SCARP-REGOLITH-192, and says you
+    are already where it lands. Tapping the suggestion fills the field, and
+    LAND THERE twice lands on SCARP-REGOLITH-192.
+  - `regolith-scarp-192` is flagged as the wrong way round. `scarp regolth
+    192`, with spaces, keeps its spaces and is flagged.
+  - `XYZZY-REGOLITH-192` and `hello moon` hash without complaint.
+    `SHACKLETON` and exact codes read ✓.
+  - Typing `vast vein 1` ends no turn, arms no tool and leaves SURVEY off. Space
+    outside the field still ends a turn.
+- No page errors.
+
+### Not verified
+
+- Tiers 1–3 and Safari, including how the phone's keyboard sits over the
+  panel while it is open.
+
+---
+
 ## V2.10.0
 
 Glass is the main line. The `-GLASS` suffix is gone, and V2.9.4 — the last
