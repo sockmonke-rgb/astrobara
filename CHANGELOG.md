@@ -1,3 +1,36 @@
+## V2.10.2
+
+### Changed
+
+- **The site field stops previewing codes while you type.** Every keystroke of
+  half-typed text was worked out into a fresh, unrelated site code (`WTF` showed
+  `→ NOON-DAY-699`), which was noise. The line under the field now only talks
+  about what you are typing:
+  - **Not a code yet:** `WORD-WORD-###`, the shape a code takes. The empty field
+    shows the same as its placeholder.
+  - **A real code:** a tick, `✓ SCARP-REGOLITH-192`, plus *you are already here*
+    when it is the site you are on. Spaces count as dashes.
+  - **A code with a slip in it:** the red *did you mean …? Tap to use it*, as in
+    V2.10.1. The *as typed, it lands on …* line under it is gone.
+
+  Any words still land somewhere — LAND THERE takes them as before, and THIS
+  SITE shows the code you arrived at.
+
+### Verified
+
+- Tier 0 clean: P1–P12.
+- Headless Chromium, typing into the real field: `SCARP-REGOLITH-192` letter
+  by letter shows `WORD-WORD-###` until it is a code, then ticks. `hello moon`
+  and `XYZZY-REGOLITH-192` show `WORD-WORD-###` and no code. The typo, swap
+  and dropped-letter cases still offer the fix, tapping it fills the field, and
+  LAND THERE lands on SCARP-REGOLITH-192. No page errors.
+
+### Not verified
+
+- Tiers 1–3, and Safari.
+
+---
+
 ## V2.10.1
 
 ### Fixed
