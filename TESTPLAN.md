@@ -1,6 +1,6 @@
 # Astrobara — test plan
 
-**Plan version 1.5** · 20 September 2026 · covers Astrobara V2.11.0
+**Plan version 1.6** · 21 September 2026 · covers Astrobara V2.11.1
 
 The single HTML file is the unit under test; there is no build step to verify.
 The plan is versioned separately from the game: quote both when reporting, as in
@@ -101,6 +101,15 @@ open at the time.
 Pass: the low stays at or near 30 in F2 to F6. Report the **low**, not the
 average — an average hides exactly the stutter worth finding. *First evidence,
 V2.9.7: turn 140, night, 41 crew, tools open, glass on — low 29, two dips.*
+
+### Reading the ground
+
+- **V23** — dig a shaft from the surface to the bottom of the map beside
+  untouched rock. At every depth, open ground is obviously lighter than the rock
+  next to it: in daylight, in the dark, and with a reactor running. Check it on
+  the phone in daylight rather than on a monitor — the two tones this replaced
+  sat 0.4 and 0.1 luma from the rock they were cut through, which a bright
+  screen in a dim room will still separate. Guards V2.11.1.
 
 ### Zoom stability
 
@@ -240,8 +249,22 @@ For each handedness — BALANCED, LEFT, RIGHT — with glass on and with glass o
 - **M3** — the `night` line appears under both POWER and WATER, and goes red
   when the bank will not cover it.
 - **M4** — run a night short of power: a brownout is announced and morale falls.
+- **M4b** — go into a night with the bank covering it: the POWER `night` line
+  is not red, and morale does **not** fall across the dark. Then spend the bank
+  down mid-night until that line goes red: morale falls from that turn. Morale
+  is paid for being able to hold the night, not for a positive net on the turn.
+  Guards V2.11.1, where every dark turn cost 10 morale whatever the bank held.
+- **M4c** — the ledger's `power secure` row agrees with the POWER `night` line:
+  `yes` exactly when the bank covers the figure that line names. They are the
+  same test, and if they ever disagree one of them is lying.
 - **M5** — morale is deterministic. Note the seed, play ten turns, restart the
   same seed, repeat the same moves: the same morale to the decimal.
+- **M5b** — with a crew of seven or more and one served wallow, the ledger reads
+  `wallow cover · 1 of 2 served`. Build a second wallow beside a habitat: it
+  reads `2 of 2` and morale climbs. Idle one: it drops back. One served wallow
+  per six capybaras is full marks.
+- **M5c** — a colony with a pool per six capybaras and a bank that covers the
+  dark reaches morale 100, and the ledger's work multiplier reads 1.50×.
 
 ### Actions
 
@@ -310,6 +333,11 @@ Play to self-sufficiency without losing a capybara, without a brownout, and
 keeping morale above 60 the whole way. Strip at least one structure en route,
 and carry the night on a single reactor.
 
+**UNBOTHERED needs a served wallow standing before you end turn zero.** A fresh
+colony's arrays are in shadow and its bank cannot hold a night, so the target on
+turn one is 50 and morale lands at 59.75 without one. Dig a tile beside the
+habitat and build the wallow first, ahead of everything else.
+
 | Earns | Condition |
 |---|---|
 | MOISTURIZED | self-sufficient, nobody lost |
@@ -334,7 +362,11 @@ three bathing in every wallow.
 | POOLS OPEN! | three bathing in every wallow |
 
 POOLS OPEN! needs crew ≥ 6 × the number of wallows, so build few wallows or a
-large herd.
+large herd. That is the same ratio the morale bonus wants — one served wallow
+per six capybaras — so the configuration that maxes morale is the one that fills
+every pool, but only at a crew that divides by six. At 40, FULL CAPYCITY's
+threshold, full morale wants seven pools and POOLS OPEN allows six. Take POOLS
+OPEN as the herd passes through a multiple of six.
 
 ### Run B — the second 3★ · `BLACK-WALL-719`
 
@@ -385,7 +417,7 @@ death path left it earnable. The same arithmetic can bite any of these.
 `preflight.py` implements P1–P12. It needs `seedcheck.js` beside it and a copy
 of `SEEDS.txt`:
 
-    python3 preflight.py astrobara-v2_10_1.html SEEDS.txt
+    python3 preflight.py index.html SEEDS.txt
 
 It exits non-zero on any failure and prints the evidence for every check, not
 just a verdict, so a pass is auditable. Run it on every build before the build
@@ -446,6 +478,7 @@ deterministic, so a seed and a move list reproduces it exactly.
 | 1.3 | 19 Sep 2026 | V2.10.0 | Glass is the main line. Added *Which tiers, when* and the release-candidate rule. Tier 1 runs with glass on and off. Frame-rate bar set at 30; F6 added. V9 tightened to fit at L. New V16–V20 for fixes made on the glass line that the plan did not catch. A2 and M19 rewritten: achievements carry within a major version. M3 follows the *night* wording; M24 added for the structure count. MAXIMUM OCCUPANCY renamed FULL CAPYCITY. |
 | 1.4 | 20 Sep 2026 | V2.10.1 – V2.10.7 | V21 and V22 for the site field: mistyped codes, and keyboard shortcuts firing while typing. V19b for the split IDLE/STRIP cell. V9b for AUTO text size following the system live. V13b for the XL and XXL text steps, V20b for the rotation-locked gate, V20c for the gate at large text sizes. M21b for a run that ended while the app was away. |
 | 1.5 | 21 Sep 2026 | V2.11.0 | M22b for the thin-crest rating floor. Model change: Tier 2 in full, and Tier 3 runs B and D, which turn on what a site is rated. |
+| 1.6 | 21 Sep 2026 | V2.11.1 | V23 for tunnel contrast at depth. M4b and M4c for morale paid on the night bank rather than the turn's net; M5b and M5c for wallow coverage and the 100 ceiling. Tier 3 notes on the turn-zero wallow UNBOTHERED now needs, and where POOLS OPEN and the wallow bonus part company. Preflight examples point at `index.html`, which is now the build. Model change: Tier 2 in full, and the Tier 3 runs that turn on morale. |
 
 When a build fixes something this plan did not catch, add the check here in the
 same commit as the fix, and note the build it was first seen in.

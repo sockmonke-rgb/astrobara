@@ -5,7 +5,7 @@ on the Shackleton crater rim, where the antagonist is the night.
 
 One HTML file. No dependencies, no build step, no network. Open it and play.
 
-**V2.11.0** · MIT · Mark Florentino LLC and Kittenmancer
+**V2.11.1** · MIT · Mark Florentino LLC and Kittenmancer
 
 ---
 
@@ -43,7 +43,7 @@ build menu.
 | `∩` | HABITAT | 45 power, 25 water, 2 labour | houses 4 · heating 3/turn by day, 9 at night · needs 3 rows of cover |
 | `≋` | ICE MINE | 30 power, 8 water, 2 labour | draws 7/turn while running, nothing when idled |
 | `▤` | PROCESSOR | 50 power, 2 labour | draws 22/turn while running, your heaviest load |
-| `~` | WALLOW | 18 power, 70 water, 1 labour | 4 water/turn, no power · +25 morale beside a habitat |
+| `~` | WALLOW | 18 power, 70 water, 1 labour | 4 water/turn, no power · +25 morale beside a habitat, more as the herd gets pools of its own |
 | `*` | FUSION | 140 power, 25 He-3, 3 labour | burns 1 He-3/turn for +90 power, day or night |
 
 **Idled machines draw grey**, whatever they are, so the thing you scan the map
@@ -70,14 +70,23 @@ that is random. The same seed and the same moves produce the same colony, the
 same morale, the same deaths, every time.
 
 Morale, for instance, is a target computed fresh each turn from a base of 50:
-a wallow beside a habitat is +25, positive power net +10, load shedding −12, a
-brownout −35, running dry −25, a habitat under thin cover −10, and being down to
-one capybara −20, because herd animals do badly alone. Morale then closes 35% of
-the gap to that target each turn. It never snaps, it chases — which is why it
-appears to drift when nothing obvious has changed.
+a wallow beside a habitat is +25, with up to 15 more as the rest of the herd
+gets pools of its own — one served wallow per six capybaras is full marks — and
+a bank that covers the rest of the dark is +10. Against that, load shedding −12,
+a brownout −35, running dry −25, a habitat under thin cover −10, and being down
+to one capybara −20, because herd animals do badly alone. Everything at once is
+100. Morale then closes 35% of the gap to that target each turn. It never snaps,
+it chases — which is why it appears to drift when nothing obvious has changed.
 
-Morale is not cosmetic: `work = 0.5 + morale/100` scales extraction, so a shed
-turn costs you output for several turns afterwards.
+The +10 is paid for being able to **hold** the night, not for a positive net on
+the turn. A colony spending a bank it deliberately filled is the plan working,
+and the figure it is judged against is the one already on screen under POWER —
+`night N`, the same test the sundown line runs. Actually running out still costs
+what it cost.
+
+Morale is not cosmetic: `work = 0.5 + morale/100` scales extraction, from 0.5×
+at nothing to 1.5× at 100, so a shed turn costs you output for several turns
+afterwards.
 
 ## Playing
 
@@ -87,7 +96,8 @@ turn costs you output for several turns afterwards.
 - Tap a mine, processor, wallow or reactor to get **IDLE** or **RESTART** in the
   same cell. With nothing selected the cell offers **IDLE ALL**.
 - The **ledger** (tap the day counter) lists the turn's power and water flows,
-  what the night will cost, and how many structures are standing.
+  what the night will cost, how many structures are standing, and why morale is
+  where it is — wallow cover, and whether the bank is secure for the night.
 - The **arrows** step the selected tile one at a time and keep it in view.
 - A drag that starts on or just beside the build column scrolls the column and
   never the map.
@@ -198,7 +208,7 @@ better, Copy diagnostics, which starts with it.
 `preflight.py` runs Tier 0 of the test plan: twelve static checks that need no
 device, from the script parsing to every published seed regenerating its site.
 
-    python3 preflight.py astrobara-v2_11_0.html SEEDS.txt
+    python3 preflight.py index.html SEEDS.txt
 
 It needs `seedcheck.js` beside it and Node on the path.
 
