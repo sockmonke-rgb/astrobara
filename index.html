@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  ASTROBARA V2.11.0
+  ASTROBARA V2.11.1
   A 3X lunar survival colony builder. Single file, no dependencies, no network.
 
   MIT License
@@ -40,7 +40,7 @@
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <meta name="author" content="Mark Florentino LLC, Kittenmancer">
-<meta name="description" content="Astrobara V2.11.0 — a 3X lunar survival colony builder with seeded sites. MIT licensed.">
+<meta name="description" content="Astrobara V2.11.1 — a 3X lunar survival colony builder with seeded sites. MIT licensed.">
 <style>
 :root{
   --vacuum:#07080B;
@@ -849,6 +849,8 @@ const CFG = {
   minePower: 7,   mineYield: 9,
   procPower: 22,  procYield: 2.2,
   wallowWater: 4,
+  wallowPerCrew: 6,     // capybaras one served wallow is enough for
+  wallowScaleMax: 15,   // morale on top of the first wallow's 25, at full cover
   fusionHe3: 1,   fusionPower: 90,
 
   minOverburden: 3,     // regolith rows above a hab before radiation stops biting
@@ -875,7 +877,7 @@ const COST = {
   PROC:   {p:50,  w:0,  h:0,  l:2, g:'▤', name:'PROCESSOR',  hint:'shallow ground',
            up:'22/turn while running · your heaviest load · idle it at night'},
   WALLOW: {p:18,  w:70, h:0,  l:1, g:'~', name:'WALLOW',     hint:'beside a hab',
-           up:'4 water/turn, no power · +25 morale beside a habitat, and the herd needs 70 to grow'},
+           up:'4 water/turn, no power · +25 morale beside a habitat, more as the herd gets its own pools · 70 to grow'},
   FUSION: {p:140, w:0,  h:25, l:3, g:'*', name:'FUSION',     hint:'25 He-3',
            up:'burns 1 He-3/turn for +90 power, day or night'}
 };
@@ -1756,7 +1758,7 @@ function buildLedger(turn){
     life:0, heat:0, mining:0, processing:0, use:0,
     waterIn:0, waterOut:0, he3In:0, he3Out:0,
     habs:0, arrays:0, liveArrays:0, mines:0, procs:0, wallows:0, idle:0,
-    servedWallow:false, exposedHabs:0, cap:CFG.startCap
+    servedWallow:false, servedWallows:0, exposedHabs:0, cap:CFG.startCap
   };
   const work = 0.5 + G.morale/100; // morale scales extraction
 
@@ -1788,7 +1790,7 @@ function buildLedger(turn){
       L.wallows++;
       if(!t.b.off){
         L.waterOut += CFG.wallowWater;
-        if(adjacentHab(x,y,conn)) L.servedWallow = true;
+        if(adjacentHab(x,y,conn)){ L.servedWallow = true; L.servedWallows++; }
       } else L.idle++;
     } else if(type==='FUSION'){
       if(!t.b.off && G.he3 >= CFG.fusionHe3){ L.fusion += CFG.fusionPower; L.he3Out += CFG.fusionHe3; }
@@ -1896,9 +1898,13 @@ function endTurn(){
   }
 
   // morale -----------------------------------------------------------------
+  // 50 base · 25 for a wallow beside a habitat · up to 15 more as the rest of
+  // the herd gets pools of its own · 10 for a colony that can hold the night.
+  // Full marks is 100 and takes a wallow per six capybaras plus a bank that
+  // covers the dark.
   let target = 50;
-  if(L.servedWallow) target += 25;
-  if(L.net > 0) target += 10;
+  if(L.servedWallow) target += 25 + CFG.wallowScaleMax * wallowCover(L);
+  if(powerSecure(L)) target += 10;
   if(brownout) target -= 35;
   else if(shed) target -= 12;
   if(thirst) target -= 25;
@@ -2361,9 +2367,38 @@ function draw(){
       const depth=y-G.surf[x];
 
       if(t.dug){
-        const tunnelTone = fusionLive && night ? '#211d18' : '#1B2430';
+        // Rock runs from luma 59 at the surface down to 24.5 at the bottom of
+        // the map. The old tones sat inside that range: #1B2430 was 0.4 from
+        // the depth 6-7 band and #211d18 was 0.1 from depth 8-9 — the same
+        // colour as the ground it was cut through. Both tones now clear every
+        // band by 22 or more here, and by 16 once the vignette has been over
+        // them — measured off the rendered canvas, not off these hex values,
+        // which is how the old pair passed inspection for as long as they did.
+        //
+        // One cool tone for an unlit tunnel whatever the hour, one warm tone
+        // when a reactor is carrying it, because light on this surface only
+        // ever means fusion. A separate daytime tunnel colour would be a
+        // distinction the renderer has never made.
+        const tunnelTone = (night && fusionLive) ? '#66502E' : '#3E5472';
         ctx.fillStyle=tunnelTone;
         ctx.fillRect(px,py,cell,cell);
+
+        // A hairline on every face where open ground meets solid rock. Tone
+        // alone separates them in a swatch; at tile size on a phone, in
+        // daylight, the edge is what actually does it.
+        if(cell>6){
+          const rim=Math.max(1,cell*.045);
+          ctx.fillStyle='rgba(216,210,198,.30)';
+          const solid=(ax,ay)=>{
+            if(!inb(ax,ay)) return false;
+            const n=G.tiles[idx(ax,ay)];
+            return n.rock && !n.dug && !n.b;
+          };
+          if(solid(x,y-1)) ctx.fillRect(px,py,cell,rim);
+          if(solid(x,y+1)) ctx.fillRect(px,py+cell-rim,cell,rim);
+          if(solid(x-1,y)) ctx.fillRect(px,py,rim,cell);
+          if(solid(x+1,y)) ctx.fillRect(px+cell-rim,py,rim,cell);
+        }
 
         // Tunnel roof/floor detail.
         ctx.fillStyle='rgba(220,211,194,.055)';
@@ -3042,6 +3077,31 @@ function nightLoad(L, running){
   return Math.max(0, n - L.fusion);
 }
 
+// Can the bank carry the colony to sunrise at the idled draw? This is the
+// same figure the readout already prints as "night N", and the same test the
+// sundown line runs. Spending a bank you deliberately filled is the plan
+// working, not the colony failing, so this — and not a positive net on the
+// turn — is what morale is paid for.
+function powerSecure(L){
+  const need = nightLoad(L, false);
+  if(need <= 0) return true;
+  const t = G.turn % CFG.solLength;
+  const darkLeft = t >= CFG.dayLength ? (CFG.solLength - t)
+                                      : (CFG.solLength - CFG.dayLength);
+  return G.power >= need * darkLeft;
+}
+
+// How much of the herd has somewhere to bathe. One served wallow per six
+// capybaras is full marks; a single pool for forty is not.
+function wallowCover(L){
+  if(!L.servedWallow) return 0;
+  const want = Math.max(1, Math.ceil(G.crew / CFG.wallowPerCrew));
+  return clamp(L.servedWallows / want, 0, 1);
+}
+function wallowsWanted(){
+  return Math.max(1, Math.ceil(G.crew / CFG.wallowPerCrew));
+}
+
 // Says the one thing standing between you and another capybara.
 function growthBlocker(L){
   const cap = L.habs * CFG.habCap;
@@ -3096,7 +3156,8 @@ function paintProbe(){
     '<hr>'+
     row('he-3 in / burn', '+'+L.he3In.toFixed(2)+' / -'+L.he3Out.toFixed(1))+
     row('work multiplier', (0.5+G.morale/100).toFixed(2)+'×')+
-    row('wallow served', L.servedWallow?'yes':'no')+
+    row('wallow cover', L.servedWallows+' of '+wallowsWanted()+' served')+
+    row('power secure', powerSecure(L)?'yes':'no')+
     row('habs exposed', L.exposedHabs)+
     '<hr>'+
     row('housing', G.crew+'/'+(L.habs*CFG.habCap))+
@@ -4697,7 +4758,7 @@ function showOverCard(won, entry){
 // Everything in G is plain data, so the run round-trips through JSON as-is.
 const SAVE_KEY = 'astrobara.run';
 const SAVE_VERSION = 2;
-const BUILD = 'V2.11.0';
+const BUILD = 'V2.11.1';
 let saveWorks = true;
 
 // Awards belong to a major version. Dev builds and release candidates inside one
