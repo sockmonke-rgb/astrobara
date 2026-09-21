@@ -1,0 +1,103 @@
+ASTROBARA — SEED LIST
+Two sites per difficulty rating. Type the code into TOOLS · THIS SITE ·
+LAND SOMEWHERE ELSE. Codes are exact: they round-trip to the same seed
+every time, on any device, in any build.
+
+Measured against 9,000 generated sites, not chosen by eye. Each pair sits
+near the 33rd and 67th percentile of its band, so they are typical of the
+rating rather than sites that barely scraped into it.
+
+Columns: crest = columns in permanent sun · ice = minable ice tiles ·
+dist = columns from crest to nearest ice · depth = mean rows down to it ·
+he-3 = minable helium tiles · lander = starting power plus battery bank
+
+==================================================================
+
+1 STAR · MILD
+
+  HEARTH-HELIUM-752
+      a wide crest, ice to spare
+      crest 8 · ice 12 · dist 8 · depth 4.7 · he-3 28 · lander 296
+      opens with 2 arrays, 1 battery, 176 power, 209 water
+
+  DAWN-KEEL-290
+      a wide crest, helium to spare
+      crest 9 · ice 8 · dist 10 · depth 4.4 · he-3 34 · lander 334
+      opens with 2 arrays, 1 battery, 214 power, 186 water
+
+
+2 STAR · FAIR
+
+  PALE-PROBE-299
+      a wide crest, ice close by
+      crest 8 · ice 8 · dist 7 · depth 5.3 · he-3 21 · lander 448
+      opens with 1 array, 2 batteries, 208 power, 214 water
+
+  IRON-REFUGE-689
+      ice close by
+      crest 5 · ice 10 · dist 7 · depth 5.0 · he-3 30 · lander 325
+      opens with 2 arrays, 1 battery, 205 power, 170 water
+
+
+3 STAR · LEAN
+
+  SLOPE-BASALT-82
+      little ice, thin crest
+      crest 5 · ice 6 · dist 9 · depth 4.6 · he-3 52 · lander 301
+      opens with 2 arrays, 1 battery, 181 power, 207 water
+
+  BLACK-WALL-719
+      light lander, deep ice
+      crest 5 · ice 23 · dist 7 · depth 5.2 · he-3 17 · lander 198
+      opens with 3 arrays, 0 batteries, 198 power, 208 water
+
+
+4 STAR · HARSH
+
+  SLOW-PEAK-538
+      thin crest, little ice
+      crest 4 · ice 6 · dist 9 · depth 4.7 · he-3 36 · lander 184
+      opens with 3 arrays, 0 batteries, 184 power, 203 water
+
+  BLACK-RILLE-106
+      ice lies far, thin crest
+      crest 4 · ice 9 · dist 28 · depth 4.7 · he-3 31 · lander 443
+      opens with 1 array, 2 batteries, 203 power, 206 water
+
+
+5 STAR · BRUTAL
+
+  GLASS-HERD-935
+      ice lies far, little ice
+      crest 6 · ice 3 · dist 23 · depth 4.2 · he-3 40 · lander 186
+      opens with 3 arrays, 0 batteries, 186 power, 218 water
+
+  SCARP-REGOLITH-192
+      thin crest, ice lies far
+      crest 3 · ice 4 · dist 19 · depth 4.3 · he-3 27 · lander 307
+      opens with 2 arrays, 1 battery, 187 power, 229 water
+
+==================================================================
+
+NOTES
+
+The hand-authored Shackleton site rates 3 stars, which is what anchors the
+scale. Type SHACKLETON to land there.
+
+Ratings weight six factors: distance from crest to ice (0.22) and how much
+minable ice exists (0.22) matter most, then crest width (0.20), ice depth
+(0.13), lander contents (0.12) and helium (0.11). Star cuts are the 12th,
+32nd, 68th and 88th percentiles of that score across 20,000 seeds.
+
+One rule overrides that score, added in V2.11.0: a site with fewer than five
+columns in permanent sun is never rated below 3 stars. Arrays only go on
+sunlit ground, so a thin crest makes every night a power problem however
+generous the ice is — and a weighted average can vote that away. It did:
+VAST-GATE-900 scored 0.240 against a 2-star cut of 0.235, on a crest of four,
+with ice close and plentiful and a heavy lander. Across a 4,000-site sample
+the floor lifts 3% of sites, all of them from 2 stars to 3, and no seed
+published above changes rating.
+
+A 5-star site is not a harder version of a 1-star one. It usually fails in
+a specific way — ice too far to reach before the first night, or a crest
+too thin to carry arrays. The reason line for each seed says which.

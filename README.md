@@ -5,7 +5,7 @@ on the Shackleton crater rim, where the antagonist is the night.
 
 One HTML file. No dependencies, no build step, no network. Open it and play.
 
-**V2.10.2** · MIT · Mark Florentino LLC and Kittenmancer
+**V2.11.0** · MIT · Mark Florentino LLC and Kittenmancer
 
 ---
 
@@ -131,7 +131,7 @@ typical sites per rating.
 
 ## Display options
 
-Switches: high-contrast ore, larger glyphs, tile grid lines, glass panels, FPS
+Switches: high-contrast ore and larger glyphs (both on), tile grid lines, glass panels, FPS
 meter, objective hints, reveal map (review only), and rotate view in portrait.
 
 - **Objective hints** are off by default. Working out that the night needs
@@ -152,8 +152,12 @@ meter, objective hints, reveal map (review only), and rotate view in portrait.
 
   BALANCED gives each thumb one job: arrows on the left, building on the right.
   FIT is in the lane with glass on, and a chip over the map with glass off.
-- **Text size** cycles AUTO / S / M / L. A tile is the same size at every
-  setting; the view pans instead.
+- **Text size** cycles AUTO / S / M / L / XL / XXL. A tile is the same size at
+  every setting; the view pans instead. AUTO follows the phone's own text size,
+  live, up to 145%; XL and XXL go past that, where the top readout scrolls
+  sideways rather than fitting. They are there for hosts that refuse to let you
+  pinch-zoom the page. The portrait gate ignores that ceiling and follows the
+  phone's setting up to 220%, since it is a card of words with no map to fit.
 - **FPS meter** shows `now · low · avg` and a count of dips under 30 — a
   turn-based game needs nothing more than a steady 30. It skips
   two seconds of warm-up, restarts when glass is toggled, and costs nothing
@@ -194,7 +198,7 @@ better, Copy diagnostics, which starts with it.
 `preflight.py` runs Tier 0 of the test plan: twelve static checks that need no
 device, from the script parsing to every published seed regenerating its site.
 
-    python3 preflight.py astrobara-v2_10_2.html SEEDS.txt
+    python3 preflight.py astrobara-v2_11_0.html SEEDS.txt
 
 It needs `seedcheck.js` beside it and Node on the path.
 

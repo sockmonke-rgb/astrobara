@@ -1,6 +1,6 @@
 # Astrobara — test plan
 
-**Plan version 1.4** · 20 September 2026 · covers Astrobara V2.10.2
+**Plan version 1.5** · 20 September 2026 · covers Astrobara V2.11.0
 
 The single HTML file is the unit under test; there is no build step to verify.
 The plan is versioned separately from the game: quote both when reporting, as in
@@ -134,12 +134,16 @@ Guards V2.7.1.
 
 ### Text size
 
-For each of S, M, L and AUTO:
+For each of S, M, L, XL, XXL and AUTO:
 
 - **V9** — the top readout fits without scrolling at AUTO, M and L. At larger
   sizes it may scroll sideways, but every figure must be reachable; clipped
   with no way to see it is a failure. Guards V2.6.0 and V2.9.14, where LABOR
   was cut off at 135%.
+- **V9b** — with Text size on AUTO, change Dynamic Type from Control Centre
+  while the game is on screen. The app follows within a second or two, without
+  leaving the app or touching anything, and the DISPLAY row shows the new
+  percentage. On a fixed size, nothing changes. Guards V2.10.4.
 - **V10** — the objective line wraps rather than cutting.
 - **V11** — build rows are two lines each, name above cost, all the same height.
 - **V12 — the map tiles are the same size at every setting.** Open TOOLS ·
@@ -147,6 +151,9 @@ For each of S, M, L and AUTO:
   single most useful number in the app for layout bugs.
 - **V13** — the arrow row is no shorter than a build row and comfortably
   thumb-sized.
+- **V13b** — at XL and XXL, every row in the tools panel reads in full, the
+  panel stays over the map, and the build column's names and costs are not
+  cut off. The top readout may scroll sideways at these sizes. Guards V2.10.5.
 
 Guards V2.5.3 (constant cell), V2.6.0 (readout clipping), V2.6.4 (arrows).
 
@@ -177,6 +184,9 @@ For each handedness — BALANCED, LEFT, RIGHT — with glass on and with glass o
   V2.9.7, where turning glass off left a transparent build column.
 - **V19** — the tools button, shut, is a rounded pill, not a square inside a
   rounded shadow. Guards V2.9.11.
+- **V19b** — select a running or idled machine with CLEAR held: IDLE or RESTART
+  and STRIP sit side by side, each glyph over word, neither word cut off, both
+  the full height of the lane. Check at text L. Guards V2.10.3.
 
 ### Typing a site code
 
@@ -191,6 +201,12 @@ For each handedness — BALANCED, LEFT, RIGHT — with glass on and with glass o
 
 ### The end card
 
+- **V20b** — with the phone rotation-locked in portrait, the gate offers both
+  ways out: unlock rotation, or the switch on the card. Guards V2.10.5.
+- **V20c** — set the phone's text size large and hold it in portrait: every
+  line of the gate is large, in proportion, and the card fits or scrolls.
+  Changing the setting while the gate is on screen moves it without a tap.
+  The HUD in landscape does not follow past 145%. Guards V2.10.6.
 - **V20** — lose a colony. Nothing on the card can be pressed until it has
   finished; one tap speeds it up, a second ends it. The run sits in two
   columns, the hints line is one line at AUTO, M and L, and the attribution
@@ -267,7 +283,14 @@ For each handedness — BALANCED, LEFT, RIGHT — with glass on and with glass o
 - **M20** — portrait shows the gate; the rotate control on it turns the view, and
   the same switch in TOOLS · DISPLAY turns it back.
 - **M21** — reload mid-run: same turn, same colony, same site code.
+- **M21b** — end a run, win or lose, then leave the app and come back before
+  answering the card. The card is there again, END TURN is not dead, and the
+  board and the lost-colony count have not moved. In review, no card. Guards
+  V2.10.7.
 - **M22** — start a colony by code from `SEEDS.txt`; the rating matches the file.
+- **M22b** — land on a site whose crest is four columns or fewer (the ledger's
+  arrays-live line and the map show it): it is never rated below 3 stars, and
+  the reason line names the thin crest. Guards V2.11.0.
 - **M23** — the file opens from `file://` in aeroplane mode.
 
 ---
@@ -421,7 +444,8 @@ deterministic, so a seed and a move list reproduces it exactly.
 | 1.1 | 15 Sep 2026 | V2.8.0 | Tier 0 automated as `preflight.py`. Probe section replaced: COPY DIAGNOSTICS built in V2.8.0. |
 | 1.2 | 17 Sep 2026 | V2.9.4 · V2.9.6-GLASS | Added frame-rate checks F1–F5 for the glass branch, which blurs a live canvas. Report the low, not the average. |
 | 1.3 | 19 Sep 2026 | V2.10.0 | Glass is the main line. Added *Which tiers, when* and the release-candidate rule. Tier 1 runs with glass on and off. Frame-rate bar set at 30; F6 added. V9 tightened to fit at L. New V16–V20 for fixes made on the glass line that the plan did not catch. A2 and M19 rewritten: achievements carry within a major version. M3 follows the *night* wording; M24 added for the structure count. MAXIMUM OCCUPANCY renamed FULL CAPYCITY. |
-| 1.4 | 20 Sep 2026 | V2.10.1 · V2.10.2 | V21 and V22 for the site field: mistyped codes, and keyboard shortcuts firing while typing. |
+| 1.4 | 20 Sep 2026 | V2.10.1 – V2.10.7 | V21 and V22 for the site field: mistyped codes, and keyboard shortcuts firing while typing. V19b for the split IDLE/STRIP cell. V9b for AUTO text size following the system live. V13b for the XL and XXL text steps, V20b for the rotation-locked gate, V20c for the gate at large text sizes. M21b for a run that ended while the app was away. |
+| 1.5 | 21 Sep 2026 | V2.11.0 | M22b for the thin-crest rating floor. Model change: Tier 2 in full, and Tier 3 runs B and D, which turn on what a site is rated. |
 
 When a build fixes something this plan did not catch, add the check here in the
 same commit as the fix, and note the build it was first seen in.

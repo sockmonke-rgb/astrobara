@@ -1,3 +1,262 @@
+## V2.11.0
+
+A model change: site ratings move. Per the test plan that means Tier 2 in full
+and the Tier 3 runs it could affect — B and D, which turn on what a site is
+rated — before this goes near a release candidate.
+
+### Changed
+
+- **A thin crest floors the rating at 3 stars.** The rating averages six
+  factors, and ice carries 44% of it, so a site could be generous with ice,
+  hand you a heavy lander, and still be brutal to power — because the crest it
+  gives you for arrays is four columns wide, and the average votes that away.
+  - Measured on the site that prompted this, VAST-GATE-900: crest 4, ice close
+    and plentiful, score 0.240 against a 2-star cut of 0.235. It rated 2 stars.
+  - A site with fewer than five columns in permanent sun is now never rated
+    below 3 stars, whatever the score says. Arrays only go on sunlit ground, so
+    below that there is no amount of ice that makes the nights easy.
+  - VAST-GATE-900 now reads **3★ LEAN · thin crest, deep ice** — the reason line
+    names the crest, because the flooring makes it the loud factor.
+- **High-contrast ore and larger glyphs are on by default.** Both were
+  switchable because they were guesses. Neither has a downside on a phone in
+  daylight, which is where this is played. Anyone who turns them off keeps them
+  off: a saved run carries its own settings.
+
+### Verified
+
+- Tier 0 clean: P1–P12, including P11 against the real `SEEDS.txt` — all ten
+  published codes still regenerate the site and the rating the file claims.
+  None of them has a crest under five, so the floor does not touch them.
+- 4,000 generated sites, before and after: 1★ 12% → 12%, 2★ 20% → 17%,
+  3★ 35% → 39%, 4★ and 5★ unchanged. 137 sites move, all from 2 stars to 3.
+  After the change, no 1★ or 2★ site anywhere in the sample has a crest of
+  four or fewer, where before 22% of 2★ sites did.
+- The hand-authored Shackleton site still rates 3 stars, which is what anchors
+  the scale.
+- A fresh colony starts with contrast and large glyphs on; a run saved with
+  them switched off resumes with them off, and the DISPLAY rows agree.
+- No page errors.
+
+### Not verified
+
+- Tiers 1–3, and Safari.
+
+### Worth watching
+
+- The band proportions have shifted: 3 stars is now 39% of sites. If that
+  reads as too broad, the fix is to re-derive the cuts against the floored
+  distribution rather than to weaken the floor.
+
+---
+
+## V2.10.7
+
+### Fixed
+
+- **A run that ended while the app was away came back unplayable.** END TURN
+  refused every tap and nothing said why. `finish()` did two jobs — mark the run
+  over, and draw the card that asks what to do next — and only the first
+  survived a reload: `G.won` and `G.dead` are saved, the card is not. Coming
+  back to a won or lost colony therefore meant `endTurn()` returning at its
+  first line, for good.
+  - Drawing the card is now its own function, called on the way out and on the
+    way back in. It records nothing, so a resumed card cannot re-count a loss
+    or re-add a board row.
+  - A tap on END TURN in a state that outlived its card brings the card back
+    rather than being swallowed.
+  - Review mode is untouched: a lost run being reviewed stays open on the map.
+
+### Verified
+
+- Tier 0 clean: P1–P12.
+- Headless Chromium, reloading mid-state as the viewer does when the app is
+  left and returned to:
+  - win, reload → the card is back, KEEP PLAYING works, END TURN then advances
+    the turn. V2.10.6 through the same sequence: two taps on END TURN, still
+    turn 0, no card.
+  - loss, reload → the loss card is back, the lost-colony count stays at 1 and
+    the board stays at one row.
+  - REVIEW THE RUN, reload → no card, still in review on the map.
+- No page errors.
+
+### Not verified
+
+- Tiers 1–3, and Safari.
+
+---
+
+## V2.10.6
+
+### Fixed
+
+- **The portrait gate under-read the reader's text size.** Two causes:
+  - Its heading and the rotate arrow used `--tsb`, the damped scale. That
+    damping exists to protect the map — the HUD's height is the map's height
+    subtracted — and the gate has no map. At a system setting of 145% the
+    heading had grown 14%, which left it *smaller* than the line beneath it.
+  - The gate was also held to the same 145% ceiling as the HUD, which exists so
+    the top readout still fits across the screen. The gate is a card of words
+    with nothing to fit.
+- **The gate now has its own scale, `--tsg`**, which follows the reader's
+  setting whole, up to 220%, and moves every line of the card together. The
+  gate also starts a step larger: heading 15px, subtitle 12px, the switch 11.5px
+  and the notes 10px, before scaling. It scrolls rather than clipping if it
+  ever outgrows the screen.
+  - A fixed size — S to XXL — drives the gate the same way, so XXL enlarges it
+    too.
+  - The HUD is untouched: AUTO still caps at 145% there, and a tile is still
+    the same size at every setting.
+
+### Verified
+
+- Tier 0 clean: P1–P12, with P8 now recognising `--tsg` as a scaled size.
+- Headless Chromium, portrait 395×750, driving the system probe and touching
+  nothing else:
+  - at 100%: heading 15px, notes 10px.
+  - at 145%: heading 21.8px, notes 14.5px — every line grown by the same
+    proportion, and the heading larger than the subtitle again.
+  - at 310%: `--tsg` 2.2, heading 33px, notes 22px; the card is 343×579 and
+    still fits the screen, with nothing cut off at either width.
+  - at 304×750, the narrowest fixture, the same 310% card is 286×680 and fits.
+  - the change lands without a tap, a rotation or leaving the app.
+- Landscape at the same 310% system setting: `--ts` stays 1.45, the top row
+  stays 63px, and the map cell stays 21.9 — the cap still does its job.
+- Manual XXL drives the gate too: heading 26.3px.
+- No page errors.
+
+### Not verified
+
+- Tiers 1–3, and Safari.
+
+---
+
+## V2.10.5
+
+### Added
+
+- **Two larger text steps, XL (150%) and XXL (175%).** Text size now cycles
+  AUTO / S / M / L / XL / XXL. Page zoom is not always available — an embedded
+  viewer can refuse the pinch outright — so the app's own text has to go far
+  enough to read the panels without it.
+  - AUTO still tops out at 145%, because past that the top readout no longer
+    fits across the screen. XL and XXL are a deliberate choice, not something
+    the system setting can impose.
+
+### Changed
+
+- **The portrait gate names rotation lock.** With the phone locked in portrait,
+  turning it does nothing and *TURN YOUR PHONE* is advice that cannot be
+  followed. The gate now reads *Rotation locked? Unlock it in Control Centre*,
+  above the line naming the DISPLAY switch. The switch on the gate is still the
+  other way out.
+  - A page cannot force or unlock an orientation on iOS: `screen.orientation
+    .lock()` exists only where the Fullscreen API does, and iOS Safari has no
+    element fullscreen. Saying so is the whole fix available.
+
+### Verified
+
+- Tier 0 clean: P1–P12.
+- Headless Chromium, 750×304, tools open on DISPLAY at every step from S to
+  XXL: no row in the panel clips, the panel stays inside the map area, no build
+  row clips, and the map cell stays 21.9 — check V12 — at all six settings. The
+  panel grows from 278px wide to 461px and scrolls, as it already did.
+- The gate at 395×750 and 304×750, AUTO, L and XXL: the card fits the screen at
+  all of them, and both notes read in full.
+- No page errors.
+
+### Not verified
+
+- Tiers 1–3, and Safari.
+
+### Worth watching
+
+- Whether the pinch works at all is the host's decision, not the game's: the
+  panel asks for `pinch-zoom` and the viewport allows it. In an embedded viewer
+  that refuses page zoom, XL and XXL are the way to read the panels; opening the
+  same build in Safari gets the pinch back.
+
+---
+
+## V2.10.4
+
+### Fixed
+
+- **AUTO text size did not follow the system setting while the game was open.**
+  Changing Dynamic Type from Control Centre left the game at the old size until
+  something else re-laid it out — leaving the app and coming back, rotating, or
+  cycling the Text size row by hand.
+  - The cause: the probe that measures the setting, a hidden element rendered
+    at `-apple-system-body`, was built and thrown away on each measurement, and
+    a measurement only ever happened as part of a layout.
+  - The probe now stays in the document, and a `ResizeObserver` watches it.
+    Changing Dynamic Type re-renders the probe at the new size, which resizes
+    it, which is the event. No polling and no waiting for the app to be
+    revisited. A two-second timer is the fallback where there is no observer,
+    and it does not run while the app is off screen.
+  - The DISPLAY row repaints with the new percentage if it is open at the time.
+  - A fixed size — S, M or L — still ignores the system entirely.
+
+### Verified
+
+- Tier 0 clean: P1–P12.
+- Headless Chromium, the tools panel open on DISPLAY, driving the probe and
+  touching nothing else — no focus, no resize, no tap:
+  - probe at 140% → the app is at 140% within 250ms, and the row reads
+    `AUTO · 140%`.
+  - back to 100% → 100%.
+  - 160% → 145%, the cap.
+  - switched to fixed M, probe moved again → stays at 115%.
+  - the map cell stays 21.9 throughout, which is check V12.
+- V2.10.3 through the same sequence never leaves 100%.
+- No page errors.
+
+### Not verified
+
+- Tiers 1–3, and Safari. Chromium has no `-apple-system-body`, so the test
+  drives the probe with a stylesheet instead: what is proven is that the app
+  follows the probe, not that iOS resizes it. That part is the playtest.
+
+### Worth watching
+
+- AUTO is capped at 145%, which is why a phone set to 310% reads `AUTO · 145%`.
+  Past that the top readout scrolls sideways rather than fitting. The cap is one
+  number if a bigger ceiling is wanted.
+
+---
+
+## V2.10.3
+
+### Fixed
+
+- **RESTART and STRIP were squeezed and cut off.** With CLEAR held on a machine,
+  the action cell splits into two buttons. It stayed 108px wide, but at 135%
+  text the two words need 137px, so they clipped to `ESTART` and `STRI`. They
+  were also only 24px tall.
+  - The cell now takes the width its two halves need, about 145px at 135%, from
+    the objective line beside it. It goes back to 108px when it holds one
+    action.
+  - Each half is glyph over word, like every other action in the lane: the
+    machine's own glyph over IDLE or RESTART, `×` over STRIP.
+  - Each half is the full lane height, about 43px, and is a rounded glass
+    button with glass on.
+
+### Verified
+
+- Tier 0 clean: P1–P12.
+- Headless Chromium, 750×304, an idled mine selected with CLEAR held. Glass on
+  at text 100%, 135% and 150%, glass off at 135%, and LEFT and RIGHT at 135%:
+  - Neither half clips, and each takes a tap at its centre.
+  - The cell stays inside the lane.
+  - The objective line keeps 311px or more.
+- V2.10.2 on the same setup: halves 76 + 57px inside a 108px cell, 24px tall.
+- No page errors.
+
+### Not verified
+
+- Tiers 1–3, and Safari.
+
+---
+
 ## V2.10.2
 
 ### Changed
