@@ -5,7 +5,7 @@ on the Shackleton crater rim, where the antagonist is the night.
 
 One HTML file. No dependencies, no build step, no network. Open it and play.
 
-**V2.12.11** · MIT · Mark Florentino LLC and Kittenmancer
+**V2.12.12** · MIT · Mark Florentino LLC and Kittenmancer
 
 ---
 
@@ -277,6 +277,18 @@ device, from the script parsing to every published seed regenerating its site.
     python3 preflight.py index.html SEEDS.txt
 
 It needs `seedcheck.js` beside it and Node on the path.
+
+`verify.js` runs those checks again inside a real page, adds P13 and P14 on the
+achievement table, and reads the tunnel and rock tones back off the rendered
+canvas:
+
+    node verify.js index.html SEEDS.txt verify-out
+
+Three more harnesses run the game rather than read it — `cine-check.js` for the
+opening and the survey replay, `achv-check.js` for the unlock card, and
+`survival.js` for 400 colonies against the agreed baseline. All five run on
+every push through `.github/workflows/ci.yml`; each needs Playwright and
+Chromium.
 
 ## License
 

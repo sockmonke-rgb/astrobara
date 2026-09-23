@@ -1,3 +1,84 @@
+## V2.12.12
+
+**The clue text promised something the code does not test.** A colony came
+through the dark on sol 1 and the list still read `0 of 11`. That is the code
+behaving correctly and the copy saying otherwise.
+
+In the build, *"held a night"* is a term of art: `fusionNightTurns >= 12` —
+twelve consecutive dark turns on a live reactor, the same test as the win.
+Reaching sunrise on stored power is not it. Nine of the eleven awards sit
+behind
+
+```
+if(!G.selfSufficient) return;
+```
+
+including the line that writes the per-site ratings tally, which is why the
+diagnostics also read `held none` after a night that plainly happened. Only
+FULL CAPYCITY and POOLS OPEN! are reachable before that return, and they were
+the only two whose clues were already honest about it.
+
+Three vocabularies were in the table for one condition — *a night held*, *a
+night carried*, *self-sufficient* — and two clues named no condition at all.
+NOSE ABOVE WATER was the worst of them: "never blacked out" reads as something
+you either did or did not do, with no hint that it only counts once you have
+won.
+
+### Changed
+
+- The board states the condition once, above a group, instead of nine times
+  inside it:
+
+  ```
+  UNLOCKED · 0 of 11
+  A NIGHT CARRIED ON FUSION
+    · [LOCKED]  at every rating
+    · [LOCKED]  on a 5-star site
+    · [LOCKED]  two different sites, same rating
+    ...
+  ANY TIME
+    · [LOCKED]  40 capybaras at once
+    · [LOCKED]  three bathing in every wallow
+  ```
+
+  The clues get shorter rather than longer, which is what the docked 268px
+  panel needs. The grouping reads a new `w` flag on each award.
+- **Two clue strings where one surface is not enough.** The board has the
+  heading above it and takes the short form; the unlock card floats over the
+  map with nothing above it and takes `cf`, the long form — *"a night carried
+  at every rating"*. A card reading "at every rating" would only have moved the
+  bug one surface across.
+- SISTER COLONY keeps *"two different sites, same rating"* in full: it was
+  reworded in V2.12.10 for exactly this reason and shortening it would undo
+  that. TWIN SUNS keeps *"a night carried on one reactor"* — it is the award
+  most often seen, so the verb is worth repeating there.
+- Every remaining user-facing string moves to the same verb: the empty board
+  now reads *"No colony has carried a night yet."* and the exported board is
+  headed *"colonies that carried a night"*.
+- One CSS rule, `#pane-board .ghead`. No new markup, no new ids, no logic in
+  the turn loop. The model is untouched.
+
+### Verified
+
+- Tier 0 clean at V2.12.12. `cine-check.js` 27/27, `achv-check.js` 5/5,
+  survival bot identical to the V2.11.1 baseline — nothing here can move it.
+- **New: P13 in `verify.js`.** The gold heading is a promise about the code, so
+  the flag is checked against the code: `checkAchv()` is split on the
+  self-sufficiency return and the awards on each side are compared with the `w`
+  flags. A flag on the wrong side of that line is the same bug printed in gold.
+  **Fails on V2.12.11 with all nine listed as "gated but unflagged".**
+- **New: P14 in `verify.js`.** A clue under four words, or one that opens with
+  a preposition, must declare `cf` — otherwise it is a card that says "after
+  stripping" and nothing else. Concatenated clues are skipped, since the
+  literal in the source is a fragment rather than the clue. **Fails on V2.12.11
+  on three rows.**
+
+### Not changed
+
+The gate itself. Twelve dark turns on fusion is the win condition and the unit
+the whole ladder is built on; the fault was never that the rule is wrong, only
+that nothing said it.
+
 ## V2.12.11
 
 **The unlock card was being shown where nobody could see it.** Reaching

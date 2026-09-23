@@ -118,6 +118,49 @@ function staticChecks() {
   // P12
   const open = (style.match(/\{/g) || []).length, close = (style.match(/\}/g) || []).length;
   check('P12', open === close, open + ' open, ' + close + ' close');
+
+  // P13 — the w flag against the gate it claims to describe.
+  //
+  // The board groups the awards on ACHV[].w and prints "A NIGHT CARRIED ON
+  // FUSION" over the flagged ones, so the clues underneath don't have to say
+  // it. That heading is a promise about the code: checkAchv() returns at
+  // `if(!G.selfSufficient) return;` and everything below is unreachable until
+  // a night has been carried. A flag on the wrong side of that line is the
+  // same bug V2.12.12 fixed, printed in gold. This splits checkAchv on the
+  // return and compares the two halves with the flags.
+  const fn = (src.match(/function checkAchv\(\)\{([\s\S]*?)\n\}/) || [])[1] || '';
+  const gate = fn.indexOf('if(!G.selfSufficient) return;');
+  const flagged = [...src.matchAll(/\{id:'([a-z_]+)'[^}]*?\bw:1/g)].map(m => m[1]).sort();
+  let gateWrong;
+  if (gate < 0) {
+    gateWrong = ['the self-sufficiency return is gone'];
+  } else {
+    const early = new Set([...fn.slice(0, gate).matchAll(/award\('([a-z_]+)'\)/g)].map(m => m[1]));
+    const late = [...new Set([...fn.slice(gate).matchAll(/award\('([a-z_]+)'\)/g)].map(m => m[1]))].sort();
+    gateWrong = late.filter(i => !flagged.includes(i)).map(i => i + ' gated but unflagged')
+      .concat(flagged.filter(i => !late.includes(i)).map(i => i + ' flagged but not gated'))
+      .concat(flagged.filter(i => early.has(i)).map(i => i + ' flagged but awarded early'));
+  }
+  check('P13', gateWrong.length === 0,
+    flagged.length + ' flagged of ' + declared.length +
+    ', mismatched: ' + (gateWrong.join('; ') || 'none'));
+
+  // P14 — a short clue needs its long form for the unlock card, which floats
+  // over the map with no heading above it to lean on. "at every rating" on a
+  // card is the bug V2.12.12 fixed, moved one surface across. Anything under
+  // four words, or opening with a preposition, has to declare cf.
+  const rows = [...src.matchAll(/\{id:'([a-z_]+)',[^}]*?\sc:'([^']*)'(\+?)([^}]*)\}/g)];
+  const needCf = rows.filter(m => {
+    const clue = m[2];
+    // c:'under '+ACHV_LEAN_MAX+' structures standing' — the literal here is a
+    // fragment, not the clue, so word-counting it says nothing.
+    if (!clue || m[3] === '+') return false;
+    const short = clue.split(/\s+/).length < 4;
+    const leads = /^(at|on|in|after|under|over|with|by|for)\b/.test(clue);
+    return (short || leads) && !/\bcf:'/.test(m[4]);
+  }).map(m => m[1] + " (\"" + m[2] + "\")");
+  check('P14', needCf.length === 0,
+    rows.length + ' clues, need a card form: ' + (needCf.join('; ') || 'none'));
 }
 
 /* ---------------- SEEDS.txt expectations ---------------- */

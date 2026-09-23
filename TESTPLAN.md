@@ -1,6 +1,6 @@
 # Astrobara — test plan
 
-**Plan version 1.17** · 23 September 2026 · covers Astrobara V2.12.11
+**Plan version 1.18** · 23 September 2026 · covers Astrobara V2.12.12
 
 The single HTML file is the unit under test; there is no build step to verify.
 The plan is versioned separately from the game: quote both when reporting, as in
@@ -64,6 +64,17 @@ version, RCs included, and are cleared once when the major version changes
 P8 would have caught V2.6.2's sky label, unreadable because it alone did not
 scale. P9 would have caught V2.7.1 without a device. P10 catches an achievement
 renamed out from under its check.
+
+Two more run in `verify.js` rather than `preflight.py`, because they read the
+source the same way but belong beside the rendered checks:
+
+| # | Check | How |
+|---|---|---|
+| P13 | The grouping flag matches the gate | Split `checkAchv()` on `if(!G.selfSufficient) return;`; every `award()` below it must carry `w:1` in `ACHV`, and none above it may |
+| P14 | A short clue declares its card form | A clue under four words, or opening with a preposition, must also declare `cf` — the board has a heading above it and the unlock card does not |
+
+P13 exists because the gold group heading is a promise about the code: a flag
+on the wrong side of that return prints the V2.12.12 bug back out in gold.
 
 ---
 
@@ -239,6 +250,19 @@ agree, and the device is the one that counts.*
   on an award that lands while the opening animatic is still playing. Guards
   V2.12.11, where the card ran its 3.6 seconds behind the verdict at z-index 30
   and took itself away.
+
+- **V34 — a clue says what the code tests.** Open TOOLS · BOARD on a colony
+  that has not won yet. The locked list is in two groups: everything under
+  **A NIGHT CARRIED ON FUSION** is unreachable until twelve dark turns have run
+  on a live reactor, and the two under **ANY TIME** are not. Read each clue as
+  someone who has not seen the source: none of them should imply a condition
+  the group heading contradicts, and none should be so short it means nothing
+  on its own — which is what the unlock card shows, so check the card text too
+  when one is earned. The test this guards: a colony that reaches sunrise on
+  stored power has carried nothing and is *correct* to receive no award.
+  Guards V2.12.12. Check at 135% and at XXL text — the grouping added markup to
+  the pane, and short clues exist so the docked 268px panel keeps one line per
+  award.
 
 ### Zoom stability
 
@@ -653,6 +677,8 @@ deterministic, so a seed and a move list reproduces it exactly.
 | 1.16 | 23 Sep 2026 | V2.12.11 | V33: the unlock card must not be announced underneath an overlay. `achv-check.js` added — it reaches self-sufficiency on a reactor and watches `#achvslot` — and joins CI. Note that a check asserting "nothing appeared while an overlay was up" is the wrong assertion: the card legitimately appears just before the verdict opens. |
 
 | 1.17 | 23 Sep 2026 | V2.12.11 | V23's automated half in `verify.js` now measures distance in RGB rather than difference in brightness, after it passed here at 20.8 and failed on the CI runner at 11.0 on the same row. No build change. Brightness is the wrong question for this palette: the tunnel is blue, dry regolith is brown and ice-bearing rock is blue-grey, so most of what separates them is hue. The old metric scored the warm fusion tunnel against blue-grey ice — two colours nobody could confuse — the same as the cold tunnel against that ice, which is the genuinely close pair. Threshold 18, against a floor of 23.3 on the runner and 32.6 here, and 12.7 for a tunnel repainted to within a shade of the rock. The manual check is unchanged: the phone, in daylight, is still what decides. |
+
+| 1.18 | 23 Sep 2026 | V2.12.12 | V34 for the achievement clue text saying what the code tests. Reported from a real run: a colony came through the dark on sol 1 and the list read 0 of 11, which was correct — "held a night" means twelve dark turns on fusion, not reaching sunrise. Nine of eleven awards sit behind the self-sufficiency return and only four admitted it. The board now states the condition once above a group. P13 and P14 added to `verify.js`: P13 checks the grouping flag against which side of that return each `award()` is on, P14 that a short clue declares the long form the unlock card needs. Both fail on V2.12.11. |
 
 When a build fixes something this plan did not catch, add the check here in the
 same commit as the fix, and note the build it was first seen in.
