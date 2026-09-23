@@ -9,10 +9,17 @@ on:
   pull_request:
   workflow_dispatch:
 
+# A push supersedes the run before it. Without this, two commits a minute
+# apart leave the first run grinding away on a build nobody is looking at.
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   preflight:
     name: Tier 0 — static
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -27,6 +34,7 @@ jobs:
   verify:
     name: Tier 0 in the page, and tunnel contrast
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -46,6 +54,7 @@ jobs:
   cine:
     name: The animatic gives the colony back
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -61,6 +70,7 @@ jobs:
   achv:
     name: The unlock card is actually seen
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -77,6 +87,7 @@ jobs:
   survival:
     name: Survival bot
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
