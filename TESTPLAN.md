@@ -1,6 +1,6 @@
 # Astrobara — test plan
 
-**Plan version 1.16** · 23 September 2026 · covers Astrobara V2.12.11
+**Plan version 1.17** · 23 September 2026 · covers Astrobara V2.12.11
 
 The single HTML file is the unit under test; there is no build step to verify.
 The plan is versioned separately from the game: quote both when reporting, as in
@@ -122,6 +122,11 @@ agree, and the device is the one that counts.*
   the phone in daylight rather than on a monitor — the two tones this replaced
   sat 0.4 and 0.1 luma from the rock they were cut through, which a bright
   screen in a dim room will still separate. Guards V2.11.1.
+
+  The close pair is not the shallow one. Dry regolith is brown and the tunnel
+  is blue, so the two are never in doubt; it is the ice-bearing rock at the
+  bottom of the map, which is blue-grey, that sits nearest the tunnel. Look
+  there first.
 
 ### What has been surveyed
 
@@ -646,6 +651,8 @@ deterministic, so a seed and a move list reproduces it exactly.
 | 1.15 | 23 Sep 2026 | V2.12.10 | SISTER COLONY reworded to "two different sites" after it was read as two runs; the Tier 3 note now says the tally is keyed by seed and points at the `held` line in Copy diagnostics. Behaviour unchanged. |
 
 | 1.16 | 23 Sep 2026 | V2.12.11 | V33: the unlock card must not be announced underneath an overlay. `achv-check.js` added — it reaches self-sufficiency on a reactor and watches `#achvslot` — and joins CI. Note that a check asserting "nothing appeared while an overlay was up" is the wrong assertion: the card legitimately appears just before the verdict opens. |
+
+| 1.17 | 23 Sep 2026 | V2.12.11 | V23's automated half in `verify.js` now measures distance in RGB rather than difference in brightness, after it passed here at 20.8 and failed on the CI runner at 11.0 on the same row. No build change. Brightness is the wrong question for this palette: the tunnel is blue, dry regolith is brown and ice-bearing rock is blue-grey, so most of what separates them is hue. The old metric scored the warm fusion tunnel against blue-grey ice — two colours nobody could confuse — the same as the cold tunnel against that ice, which is the genuinely close pair. Threshold 18, against a floor of 23.3 on the runner and 32.6 here, and 12.7 for a tunnel repainted to within a shade of the rock. The manual check is unchanged: the phone, in daylight, is still what decides. |
 
 When a build fixes something this plan did not catch, add the check here in the
 same commit as the fix, and note the build it was first seen in.

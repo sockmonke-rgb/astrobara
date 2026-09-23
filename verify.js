@@ -18,6 +18,17 @@
  * Then the thing hex values cannot settle: the tunnel tones are read back off
  * the rendered canvas and compared with the rock beside them, at every depth,
  * lit and unlit.
+ *
+ * The comparison is a distance in RGB, not a difference in brightness. Until
+ * V2.12.12 it was brightness alone, which is the wrong question for this
+ * palette: the tunnel is blue, dry regolith is brown and ice-bearing rock is
+ * blue-grey, so most of what separates them is hue. Brightness alone scored
+ * the warm fusion tunnel against blue-grey ice at 21 — two colours you could
+ * not possibly confuse — and the same blue-grey at depth 4 against the cold
+ * tunnel at 21 as well, when those two really are the close pair. It passed
+ * here at 20.8 and failed on the CI runner at 11.0 off a few units of
+ * rendering difference, because it was reading the one number the two
+ * surfaces happen to share.
  */
 
 const fs = require('fs');
@@ -238,6 +249,7 @@ function parseSeeds(text) {
         return [d[0], d[1], d[2]];
       };
       const luma = p => 0.2126 * p[0] + 0.7152 * p[1] + 0.0722 * p[2];
+      const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
       let live = false;
       for (let i = 0; i < G.tiles.length; i++) {
         const b = G.tiles[i].b;
@@ -254,7 +266,9 @@ function parseSeeds(text) {
         rows.push({
           depth: y - G.surf[x],
           tunnel: tun, rock: rock,
-          sep: Math.abs(luma(tun) - luma(rock))
+          ice: +((G.tiles[idx(x + 2, y)].ice || 0).toFixed(2)),
+          sep: dist(tun, rock),
+          lum: Math.abs(luma(tun) - luma(rock))
         });
       }
       return { rows, fusionLive: live };
@@ -265,12 +279,15 @@ function parseSeeds(text) {
   for (const [name, res] of Object.entries(probe)) {
     let worst = Infinity, at = null;
     for (const r of res.rows) if (r.sep < worst) { worst = r.sep; at = r; }
-    const ok = worst >= 14;
+    // 18 against a floor of 23.3 on the CI runner and 32.6 here, both on the
+    // ice-bearing rock at depth 4, which is the genuinely close pair. A
+    // tunnel repainted to within a shade of the rock lands under 10.
+    const ok = worst >= 18;
     check(name.toUpperCase().padEnd(6), ok,
       'reactor ' + (res.fusionLive ? 'lit ' : 'off ') +
-      '· closest at depth ' + at.depth +
+      '· closest at depth ' + at.depth + (at.ice ? ' (ice ' + at.ice + ')' : '') +
       ': tunnel rgb(' + at.tunnel.join(',') + ') vs rock rgb(' + at.rock.join(',') + ')' +
-      ' — separation ' + worst.toFixed(1));
+      ' — distance ' + worst.toFixed(1) + ', brightness ' + at.lum.toFixed(1));
   }
 
   await page.screenshot({ path: path.join(OUT, 'map.png'), clip: { x: 0, y: 0, width: 900, height: 420 } });
