@@ -1,0 +1,50 @@
+{
+  "build": "V2.11.1",
+  "sites": 400,
+  "turns": 290,
+  "tolerance": 8,
+  "stats": {
+    "1": {
+      "n": 33,
+      "survived": 93.9,
+      "ss": 93.9,
+      "peak": 20.3,
+      "morale": 57.1
+    },
+    "2": {
+      "n": 80,
+      "survived": 96.3,
+      "ss": 96.3,
+      "peak": 19.7,
+      "morale": 58.8
+    },
+    "3": {
+      "n": 150,
+      "survived": 91.3,
+      "ss": 90,
+      "peak": 17.9,
+      "morale": 59.2
+    },
+    "4": {
+      "n": 82,
+      "survived": 86.6,
+      "ss": 85.4,
+      "peak": 16.1,
+      "morale": 56.9
+    },
+    "5": {
+      "n": 55,
+      "survived": 85.5,
+      "ss": 83.6,
+      "peak": 14.4,
+      "morale": 56.2
+    },
+    "all": {
+      "n": 400,
+      "survived": 90.8,
+      "ss": 89.8,
+      "peak": 17.6,
+      "morale": 58.1
+    }
+  }
+}
