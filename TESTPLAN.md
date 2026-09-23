@@ -1,6 +1,6 @@
 # Astrobara — test plan
 
-**Plan version 1.6** · 21 September 2026 · covers Astrobara V2.11.1
+**Plan version 1.16** · 23 September 2026 · covers Astrobara V2.12.11
 
 The single HTML file is the unit under test; there is no build step to verify.
 The plan is versioned separately from the game: quote both when reporting, as in
@@ -97,10 +97,22 @@ open at the time.
 - **F5** — the same four with the text size at L, which enlarges every pane.
 - **F6** — a night turn with a built-up colony (thirty crew or more), glass on,
   tools open.
+- **F7** — *fog, on a site you have barely opened.* A new colony has the most
+  unsurveyed ground it will ever have, and the glass fog blurs the canvas a
+  second time under a path of its own. Glass ON, fog ON, tone ASH: land, FIT,
+  and pan continuously for ten seconds. Then repeat with **Glass panels** off
+  and note both lows — that pair is the number that decides whether the glass
+  fog stays.
+- **F8** — the same pan at tone SMOKE, which draws the largest sheet, and with
+  the tools panel open over it.
 
-Pass: the low stays at or near 30 in F2 to F6. Report the **low**, not the
+Pass: the low stays at or near 30 in F2 to F8. Report the **low**, not the
 average — an average hides exactly the stutter worth finding. *First evidence,
 V2.9.7: turn 140, night, 41 crew, tools open, glass on — low 29, two dips.*
+*V2.12.1, iPhone 16 Pro, glass and fog both on, ASH: low 29, avg 54 over 34
+seconds, one dip, on a glass toggle at three seconds. Headless Chromium had
+put the glass fog at 14ms a frame against 1.5ms flat; the device did not
+agree, and the device is the one that counts.*
 
 ### Reading the ground
 
@@ -110,6 +122,118 @@ V2.9.7: turn 140, night, 41 crew, tools open, glass on — low 29, two dips.*
   the phone in daylight rather than on a monitor — the two tones this replaced
   sat 0.4 and 0.1 luma from the rock they were cut through, which a bright
   screen in a dim room will still separate. Guards V2.11.1.
+
+### What has been surveyed
+
+- **V24 — the fog covers, it does not hollow out.** On a fresh site, look at
+  the ground under the crest. It is one sheet at one strength, not a patchwork:
+  no tile edges showing through where the alpha doubled, no seam where two
+  regions meet. The outline is **rounded where the region ends and square
+  inside it** — the only curve on a board of squares, which is the whole point
+  of it. With glass on, the terrain is blurred through the sheet and the top
+  edges carry a bright hairline; with **Glass panels** off it flattens to a
+  plain tint and neither should look broken. Guards V2.12.0.
+- **V24b — every tone is legible, and none of them wins.** Cycle **Fog tone**
+  through SLATE, ASH, STONE and SMOKE, glass on and off, in daylight on the
+  phone. At each one the fog is lighter than the terrain, and the question to
+  answer is whether the unexplored part of the map is pulling the eye away from
+  the colony. If SLATE reads as a hole rather than a cover, or SMOKE disappears
+  into the sky, say so — the alphas are two numbers per tone and are cheap to
+  move. Guards V2.12.0.
+- **V25 — digging lifts it.** Drive a drift out from the colony and watch the
+  sheet retreat four tiles ahead of the face. Ore specks and strata appear as
+  it goes and never before. The surface — crest, basin, profile — is visible
+  from turn one and never covered, because the probe surveyed it: if the
+  skyline is ever fogged, the opening decision has been broken and that is a
+  stop. Guards V2.12.0.
+
+### The opening, and replaying it
+
+- **V26 — the opening plays once, on BEGIN.** Land somewhere new. Dark, then a
+  probe crossing with a frustum of scan light, and the ground exists only
+  behind it, skyline included. No sun during the pass.
+  **The sky does not wait for the beam:** stars and Earth are there ahead of the
+  probe as well as behind it, at the same brightness, with **no edge of any
+  kind** around the unsurveyed part — no line under it, none down its side. Hold
+  the phone in portrait, which is where the bottom edge used to show. The beam
+  must not touch ground that has not arrived: no bright contact mark out in the
+  dark ahead of the reveal. Guards V2.12.5. Warm caps on the columns
+  the sun will reach, cold on the ones it never will. Then dawn, the lander,
+  the shaft and habitat and arrays going in, and the HUD sliding back. One
+  touch speeds it up, a second ends it, and the board it leaves is the colony
+  you then play. **Close and reopen the app: a resumed colony must not play
+  it.** Guards V2.12.0.
+- **V26b — the switches.** `TOOLS · DISPLAY · Opening animatic` off, then land
+  somewhere new: the board is there immediately. Turn the phone's Reduce Motion
+  on and land again: the same. Guards V2.12.0.
+- **V27 — `Replay the survey` leaves the colony alone.** On a colony well into
+  a run — thirty crew or more, several sols in — note the sol and day on the
+  counter, then tap `TOOLS · DISPLAY · Replay the survey`. The probe crosses
+  your colony as it stands. **Nothing is built and nothing is un-built**, and
+  when it ends the counter reads the same sol and day it did before. Then
+  background the app and reopen it: still the same sol.
+  **Every structure must be the one you left there.** Before replaying, note a
+  tile where you have built something *different* from what the colony started
+  with — a processor where an array was, or a stripped array — and check it
+  after. `cineSet()` reverts birth tiles and only birth tiles, so a structure
+  on ground the colony was not born with proves nothing; pick one it was.
+  Guards V2.12.8, where the replay wound the opening's layout back over the
+  colony before drawing a frame.
+  **And it reframes.** Zoom well in, pan into a corner, then replay: the pass
+  should snap to the whole-map view first — the same framing FIT gives and a
+  new colony opens with — play there, and leave it there. Guards V2.12.9. *V2.12.0 re-enacted the
+  landing on top of the colony and reset the turn to zero, and the next save
+  wrote that down — this check is the one that would have caught it.* Guards
+  V2.12.1.
+- **V28 — LAND HERE AGAIN.** On the RUN tab, under THIS SITE. Two taps, same as
+  the other two: the first arms it, the second discards the colony and lands a
+  fresh one **on the same code**, on the splash, with the full opening. Check
+  the code on the line above is the code you get. Guards V2.12.2.
+
+- **V29 — the achievement card is a pane.** Earn one, or tap one that is
+  already listed on the BOARD tab, and look at the card that slides in at the
+  lower left. With glass on: the terrain is blurred through it, the corners are
+  rounded, there is a bright hairline along the top and the gold rule down the
+  left follows the curve rather than tapering into a crescent. Tap it to hold
+  it — the whole outline goes gold and TAP TO DISMISS appears. Glass off, and
+  with the phone's Reduce Transparency on, it is the flat card it always was,
+  gold edge included. It is a new blurred surface that can arrive mid-pan, so
+  watch the FPS meter while one is on screen. Guards V2.12.3.
+
+- **V30 — the sky is one sky.** At turn zero, in daylight, the stars are
+  visible on the phone without cupping a hand over the screen — check it in a
+  lit room, not a dark one. Then end turns through to sundown and watch the
+  transition: the stars should come **up**, not appear. No star arrives that
+  was not already there, and none moves. Land on the same code twice and the
+  sky is identical; land on a different one and it is not. Guards V2.12.4,
+  where day drew 28 stars at a seventh of the alpha and sundown popped in 64
+  more. Watch the FPS meter through the same pan as F3 — this is 92 arcs a
+  frame in daylight where it used to be 28.
+
+- **V31 — nothing moves except together.** Zoom in past FIT and pan the map
+  slowly, in daylight, with fog and glass on. The stars, Earth, the terrain and
+  the fog sheet all travel as one: no part of the picture sits still while the
+  rest slides, and nothing crawls inside the fog. Do it slowly — a flick hides
+  this, and it was reported off a slow drag. Guards V2.12.6, where the star
+  field was laid out in screen space and stayed put while the ground panned.
+
+- **V32 — nothing lit survives the survey.** Build something that glows — a
+  reactor, or a habitat with a reactor running somewhere — **hard against the
+  first or last column of the map**, then `Replay the survey`. Ahead of the
+  probe there must be nothing but sky: no warm smear hanging off the end of the
+  map beside the edge column. Check both ends, and check it on a colony large
+  enough that the arrays reach the edges too. Guards V2.12.7, where the sky
+  repaint was clipped to the map and a glow drawn 1.2 cells wider than its tile
+  came through it.
+
+- **V33 — every award is announced where it can be seen.** Reach
+  self-sufficiency, which fires several at once and raises the verdict in the
+  same breath. Nothing should slide in underneath the verdict; the cards come
+  after it is dismissed, one at a time, and the count on the BOARD tab matches
+  the number of cards you actually read. Same check on a colony that dies, and
+  on an award that lands while the opening animatic is still playing. Guards
+  V2.12.11, where the card ran its 3.6 seconds behind the verdict at z-index 30
+  and took itself away.
 
 ### Zoom stability
 
@@ -374,7 +498,7 @@ Reach self-sufficiency again, nothing else required.
 
 | Earns | Condition |
 |---|---|
-| SISTER COLONY | two sites at the same rating |
+| SISTER COLONY | two different sites, same rating |
 
 ### Run C — brutal · `GLASS-HERD-935` (5★)
 
@@ -394,6 +518,10 @@ Three more colonies to self-sufficiency, one at each remaining rating.
 
 - **A1** — replaying an earned site awards nothing new. Twenty turns on an
   already-held site must not re-award SISTER COLONY.
+  **It is two seeds, not two runs.** The tally is keyed by seed, so replaying a
+  site overwrites its own entry — SHACKLETON twice is one 3-star site, not two.
+  `Copy diagnostics` has the tally on the `held` line (`held 3★×1`), which is
+  the only place progress toward this and THE LONG SURVEY is visible.
 - **A2** — an achievement survives any build within a major version, release
   candidates included, and is cleared once when the major version changes.
   `astrobara.run` is cleared on every build change; `astrobara.board` never is.
@@ -440,6 +568,14 @@ is already legible:
 What is missing is **portability**. A tester can see all of it and cannot send
 any of it. The board has COPY AS TEXT; nothing else does.
 
+**Do not write a probe that reads the canvas.** WebKit treats a canvas on a
+`file://` page as tainted, so `getImageData` throws, and a probe that catches
+that quietly will report a clean screen while the fault is in plain sight on
+it. V2.12.6-PROBE-CINE did exactly that and cost a round trip. Draw the
+diagnosis instead: V2.12.6-PROBE-FOG tinted the surveyed columns cyan, the
+repainted ones magenta and everything off the ends of the map green, and one
+screenshot named the culprit.
+
 **Built in V2.8.0: TOOLS · DISPLAY · Copy diagnostics.** One block covering the
 build stamp, the site code and seed, the turn and colony state, the view
 numbers, the text scale requested against the scale applied, the page and
@@ -454,6 +590,17 @@ it, which is the point: nothing in a report should have to be typed out by hand
 and got wrong.
 
 ---
+
+### What CI runs on every push
+
+`.github/workflows/checks.yml` runs four jobs against `index.html`, so a commit
+made on a phone is still checked: `preflight.py` (Tier 0 static), `verify.js`
+(Tier 0 in a real page, plus V23 measured off the rendered canvas),
+`cine-check.js` (V26's sky assertion, V27, V28, V31's pan residual and V32's
+glow overhang, on a colony set to turn 706), `achv-check.js` (V33, on a colony
+driven to self-sufficiency), and `survival.js`
+(400 colonies against the agreed survival table). None of them replaces a
+device: every check in Tier 1 is here because it can only be seen on the phone.
 
 ## Reporting a failure
 
@@ -479,6 +626,26 @@ deterministic, so a seed and a move list reproduces it exactly.
 | 1.4 | 20 Sep 2026 | V2.10.1 – V2.10.7 | V21 and V22 for the site field: mistyped codes, and keyboard shortcuts firing while typing. V19b for the split IDLE/STRIP cell. V9b for AUTO text size following the system live. V13b for the XL and XXL text steps, V20b for the rotation-locked gate, V20c for the gate at large text sizes. M21b for a run that ended while the app was away. |
 | 1.5 | 21 Sep 2026 | V2.11.0 | M22b for the thin-crest rating floor. Model change: Tier 2 in full, and Tier 3 runs B and D, which turn on what a site is rated. |
 | 1.6 | 21 Sep 2026 | V2.11.1 | V23 for tunnel contrast at depth. M4b and M4c for morale paid on the night bank rather than the turn's net; M5b and M5c for wallow coverage and the 100 ceiling. Tier 3 notes on the turn-zero wallow UNBOTHERED now needs, and where POOLS OPEN and the wallow bonus part company. Preflight examples point at `index.html`, which is now the build. Model change: Tier 2 in full, and the Tier 3 runs that turn on morale. |
+
+| 1.7 | 23 Sep 2026 | V2.12.0 – V2.12.2 | *What has been surveyed* and *The opening, and replaying it*, neither of which existed. V24 and V24b for the fog as a covering and its four tones; V25 for digging lifting it and the surface never being covered. V26 and V26b for the opening animatic and its switches; V27 for the survey replay leaving a live colony alone, which V2.12.0 did not; V28 for LAND HERE AGAIN. F7 and F8 for frame rate with the glass fog, which blurs the canvas a second time — the pair of lows, glass on and off, is what decides whether it stays. First device evidence recorded against F7. `cine-check.js` added to CI beside `verify.js` and `survival.js`. |
+
+| 1.8 | 23 Sep 2026 | V2.12.3 | V29 for the achievement card on glass — the last surface still on the opaque theme, and a new blurred surface that can arrive mid-pan. |
+
+| 1.9 | 23 Sep 2026 | V2.12.4 | V30 for the star field: visible in daylight, the same stars all sol, seeded per site, and the pop at sundown gone. |
+
+| 1.10 | 23 Sep 2026 | V2.12.5 | V26 extended: the sky ahead of the probe, no edge around the unsurveyed region, and no contact mark on ground that has not arrived. `cine-check.js` gained a pixel assertion for the first of those — it reads the frozen sweep frame and fails on V2.12.4. |
+
+| 1.11 | 23 Sep 2026 | V2.12.6 | V31: nothing on the board may move independently of the map when it pans. `cine-check.js` measures it — pan by several widths, shift the previous frame back, count what still disagrees — and fails on V2.12.5. |
+
+| 1.12 | 23 Sep 2026 | V2.12.7 | V32: a lit structure on an end column must not throw its glow past the map during the survey pass. `cine-check.js` measures it and fails on V2.12.6. Note against V26 on how it was found — a tinted diagnostic build, after a pixel-reading one returned nothing because `getImageData` throws on a `file://` canvas in WebKit. |
+
+| 1.13 | 23 Sep 2026 | V2.12.8 | V27 extended: the survey replay must not revert birth tiles. Third fault out of `endCine()` — V2.12.1 was the turn, this is the board — so the note there now says to check both. `cine-check.js` rebuilds and strips birth tiles to catch it, and its glow-overhang check was made deterministic after it was found to be racy. |
+
+| 1.14 | 23 Sep 2026 | V2.12.9 | V27 extended again: the replay fits the view before it plays and leaves it fitted. `cine-check.js` zooms to 2.4x and pans off first, then compares the view afterwards against a fresh fit. |
+
+| 1.15 | 23 Sep 2026 | V2.12.10 | SISTER COLONY reworded to "two different sites" after it was read as two runs; the Tier 3 note now says the tally is keyed by seed and points at the `held` line in Copy diagnostics. Behaviour unchanged. |
+
+| 1.16 | 23 Sep 2026 | V2.12.11 | V33: the unlock card must not be announced underneath an overlay. `achv-check.js` added — it reaches self-sufficiency on a reactor and watches `#achvslot` — and joins CI. Note that a check asserting "nothing appeared while an overlay was up" is the wrong assertion: the card legitimately appears just before the verdict opens. |
 
 When a build fixes something this plan did not catch, add the check here in the
 same commit as the fix, and note the build it was first seen in.

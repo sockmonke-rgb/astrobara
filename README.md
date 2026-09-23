@@ -5,7 +5,7 @@ on the Shackleton crater rim, where the antagonist is the night.
 
 One HTML file. No dependencies, no build step, no network. Open it and play.
 
-**V2.11.1** · MIT · Mark Florentino LLC and Kittenmancer
+**V2.12.11** · MIT · Mark Florentino LLC and Kittenmancer
 
 ---
 
@@ -63,6 +63,51 @@ idled processor goes dark the turn you shed it.
 and only falls on columns the sun actually reaches, tested with the same
 function the power model uses. Shadowed ground keeps a dim neutral edge.
 
+**The stars are up at noon**, because there is no air here to scatter sunlight
+across the sky — which is also why the sky is drawn near-black in daylight.
+They are dimmer by day than at night, since that is what an eye exposed for
+sunlit regolith would see, and the sun's halo still washes out the ones around
+the disc. Their positions come from the site's seed, so every site has its own
+sky and it is the same sky every time you play it. Earth sits in it as a fixed
+landmark. Both travel with the ground when you pan: the sky is pinned to the
+site, not to the screen, so nothing on the board moves except together.
+
+## What you can see
+
+A probe surveys the site before you land, so the skyline is always yours: the
+crest, the basin and the profile are on the map from turn one. What is under
+them is not. Rock below the surface shows no strata and no ore until something
+has been opened within four tiles of it, which is the same reach that has
+always governed the ore readouts.
+
+Unsurveyed ground is drawn as a **covering rather than a hole** — a tinted
+sheet laid over the tiles, rounded only where the region ends, so the curve of
+its outline is the one thing on a board of squares that is not square. With
+glass on it is frosted: the ground beneath is blurred through it and the top
+edges carry a specular, the same treatment the floating panels get. Turning
+**Glass panels** off, or asking the system for less transparency, flattens it
+to a plain tint.
+
+**A new colony opens with the survey.** The probe crosses in the dark with a
+frustum of scan light, and the ground exists behind it — the sky does not wait
+its turn, so the stars and Earth are there ahead of the beam as well as behind
+it. Where the sun will reach takes a warm cap, where it never does takes a cold
+one. Then dawn, the
+lander, and the shaft and habitat and arrays going in exactly as the colony was
+built. It is skippable at a touch and it is the same canvas as the game — there
+is no video in this file, because there are no files.
+
+**Replaying it later shows the survey, not the landing.** A colony that is
+already standing has landed; re-enacting that means putting the first shaft
+back under a colony that grew past it. So a replay keeps the dark, the probe
+and the hold, and what the beam uncovers is the colony as it is today, in
+today's light. To watch the landing again, land on the site again:
+**LAND HERE AGAIN** on the RUN tab does that without typing the code.
+
+Either one fits the view first. The probe crosses the whole map, so the
+animatic is composed for the whole map, and it opens and closes on the framing
+a new colony opens with rather than on whatever corner you were zoomed into.
+
 ## Everything is deterministic
 
 The only `Math.random()` in the file picks a seed for a new game. Nothing after
@@ -98,6 +143,8 @@ afterwards.
 - The **ledger** (tap the day counter) lists the turn's power and water flows,
   what the night will cost, how many structures are standing, and why morale is
   where it is — wallow cover, and whether the bank is secure for the night.
+- **Digging lifts the fog.** Everything within four tiles of open ground is
+  read, so a drift out from the colony is how the map gets made.
 - The **arrows** step the selected tile one at a time and keep it in view.
 - A drag that starts on or just beside the build column scrolls the column and
   never the map.
@@ -126,10 +173,12 @@ Everything else lives in one panel, `[≡]`, in five tabs.
 - **BOARD** lists colonies that carried a whole night on fusion, with the site
   code for each so any run on it can be played again, and offers the rows as
   text. Eleven achievements are listed under it, locked ones included.
-- **RUN** shows this site's code and difficulty, takes a code to land somewhere
-  else, or lands somewhere random. Codes look like `WORD-WORD-###`; any words
-  at all also make a site. A code with a slip in it is flagged, with the code
-  it was probably meant to be.
+- **RUN** shows this site's code and difficulty, lands on it again, takes a
+  code to land somewhere else, or lands somewhere random. **LAND HERE AGAIN**
+  starts the site you are on over without typing its code, splash and opening
+  included. Codes look like `WORD-WORD-###`; any words at all also make a site.
+  A code with a slip in it is flagged, with the code it was probably meant to
+  be. All three take two taps, because all three throw a colony away.
 
 ## Sites
 
@@ -142,7 +191,13 @@ typical sites per rating.
 ## Display options
 
 Switches: high-contrast ore and larger glyphs (both on), tile grid lines, glass panels, FPS
-meter, objective hints, reveal map (review only), and rotate view in portrait.
+meter, objective hints, the opening animatic, subsurface fog (both on), reveal map
+(review only), and rotate view in portrait.
+
+**Glass panels** covers every floating surface, not only the lanes: the panes,
+the splash and the end card, the achievement card that slides in at the lower
+left, and the sheet over unsurveyed ground. Off is off everywhere, and so is
+the system's own reduce-transparency setting.
 
 - **Objective hints** are off by default. Working out that the night needs
   batteries is the game. The offer is made once, after a colony is lost.
@@ -172,6 +227,17 @@ meter, objective hints, reveal map (review only), and rotate view in portrait.
   turn-based game needs nothing more than a steady 30. It skips
   two seconds of warm-up, restarts when glass is toggled, and costs nothing
   while off.
+- **Fog tone** cycles SLATE, ASH, STONE and SMOKE — four greys for the sheet
+  over unsurveyed ground, from nearly opaque to nearly clear. Each carries two
+  alphas, one for the flat sheet and a lighter one for when the glass is doing
+  the covering. Every one of them is lighter than the terrain, so the tone you
+  pick decides how much the unexplored part of the map pulls the eye; ASH is
+  the default for that reason.
+- **Replay the survey** sends the probe across the colony you are on — the
+  dark, the beam and the survey caps, without the landing. Your turn, your
+  ground and your structures are exactly where you left them. For the whole
+  opening, landing included, use **LAND HERE AGAIN** on the RUN tab; that
+  starts the site over.
 - **Reset map view** and **Fix touch alignment** — the second for when iOS
   standalone mode desynchronises the hit test.
 - **Copy diagnostics** puts one block on the clipboard: build, site, turn, view

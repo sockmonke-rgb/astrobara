@@ -1,3 +1,594 @@
+## V2.12.11
+
+**The unlock card was being shown where nobody could see it.** Reaching
+self-sufficiency awards several achievements and raises the verdict in the same
+breath:
+
+```
+G.selfSufficient = true;
+checkAchv();          // queues the cards, the first starts its 3.6s timer
+finish(true);         // .overlay at z-index 30, over #achvslot at z-index 21
+```
+
+The card slid in, the verdict covered it, the timer ran out behind it and the
+card removed itself. The board showed the awards because `award()` had written
+them — only the announcement was lost, and it was lost at the biggest moment in
+a run.
+
+### Fixed
+
+- `pumpAchv()` holds while any overlay owns the screen — the verdict, the
+  splash, the portrait gate — and while the animatic is playing, since the HUD
+  is out for that too.
+- A card already on screen when an overlay opens is taken down and put back at
+  the **front** of the queue. The gate alone would not have caught this one:
+  `checkAchv()` runs before `finish()`, so at the instant the card appears
+  there is no overlay up yet.
+- The queue is pumped again when the verdict closes, when a restart clears it,
+  and when the animatic ends.
+
+### Verified
+
+- Tier 0 clean at V2.12.11: P1–P12, unchanged counts. No DOM, no CSS.
+  `cine-check.js` 27/27. Survival bot identical to the V2.11.1 baseline.
+- **New: `achv-check.js`.** It holds a night on a reactor to reach
+  self-sufficiency for real — `fusionNightTurns` is reset on every dark turn
+  fusion is not carrying, so the win cannot be poked in from outside — then
+  watches `#achvslot` with a MutationObserver and records what was announced
+  before the verdict closed and what after. **V2.12.10 loses MOISTURIZED:
+  announced once, underneath the verdict, never again. V2.12.11 announces it
+  again when the verdict closes.** Added to CI.
+  - The first version of the check asserted "no card was inserted while an
+    overlay was up", which failed on the fixed build too — the card legitimately
+    appears a moment *before* the verdict opens. What matters is not the instant
+    of insertion but whether the player ever saw it with nothing on top, so the
+    check now compares what was announced before the verdict closed against
+    what was announced after.
+
+---
+
+## V2.12.10
+
+### Changed
+
+- **SISTER COLONY now reads "two different sites, same rating."** It said "two
+  sites at the same rating", and two people running the same site twice read
+  that as two runs. The behaviour was always right — the tally is a map of seed
+  to rating, so replaying a site overwrites its own entry and can never count
+  twice — but the sentence was not saying so. Text only: the id, the name and
+  the award logic are untouched, so awards already held carry as normal.
+  - Worth knowing when this comes up again: the held tally is already in **Copy
+    diagnostics** as `held 3★×1`, and that line is the progress meter for both
+    SISTER COLONY and THE LONG SURVEY. It is not on the BOARD tab, where a
+    locked entry shows the description and nothing else.
+
+### Verified
+
+- Tier 0 clean at V2.12.10: P1–P12. P10 still reads 11 achievements and 11
+  awarded, because only the description string moved. `cine-check.js` 27/27.
+  Survival bot identical to the V2.11.1 baseline.
+- `buildMajor()` takes the major only, so a two-digit patch number changes
+  nothing about whether achievements carry.
+
+---
+
+## V2.12.9
+
+### Fixed
+
+- **The survey replay now plays on the view the game opens with.** The probe
+  crosses the whole map and the reveal is column by column, so the animatic is
+  composed for the whole site — and it was playing on whatever view the colony
+  happened to be sitting on. Zoomed in and panned into a corner, the sweep runs
+  off the edges of the frame and the pass hands the colony back wherever you
+  were, which is not where the opening leaves it.
+  - `startCine()` calls `fitView()` first, which is exactly what `newGame()`
+    does. A replay is framed the way the opening is framed and ends there.
+  - The opening itself is unchanged: it runs on a view that was just fitted, so
+    the call is a no-op on that path.
+  - Before the `.cine` class goes on, because `fitView()` measures the panes
+    through `glassInset()` and they should be measured sitting normally.
+
+### Verified
+
+- Tier 0 clean at V2.12.9: P1–P12, unchanged counts. No new block — one call.
+  Survival bot identical to the V2.11.1 baseline. Tunnel contrast unmoved.
+- **`cine-check.js`, 27 assertions.** The test colony is now zoomed to 2.4×
+  and panned off before the replay, and the view afterwards is compared against
+  a fresh `fitView()` of the same board. V2.12.8 comes back at zoom 2.4, pan
+  140,−64 where a fresh fit is zoom 1, pan −80,3, and fails. V2.12.9 lands on
+  the fit exactly. Three consecutive clean runs.
+
+---
+
+## V2.12.8
+
+**Replaying the survey was overwriting structures.** A processor standing on a
+tile `newGame()` had put an array on came back as an array. Every tap of
+`Replay the survey` did it, on every colony, since V2.12.1.
+
+### Fixed
+
+- `startCine()` calls `endCine()` first, to clear anything already running. On
+  that call nothing is playing: `cineTurn` is null and `cineSurvey` is false,
+  because the previous run cleared it. The turn restore was guarded on
+  `cineTurn`. The board restore was not:
+
+  ```
+  if(cineTurn !== null){ G.turn = cineTurn; cineTurn = null; }
+  if(!cineSurvey) cineSet((G.birth||[]).length);      // runs anyway
+  ```
+
+  `cineSet()` winds `G.birth` back and lays it again. On a fresh colony that is
+  a no-op, which is why it never showed in the opening it was written for. On a
+  colony that has been played it reverts every birth tile to what `newGame()`
+  put there — a structure built over one is replaced, a birth structure
+  stripped from one is restored — and it ran before a single frame was drawn,
+  which is why it looked like the replay doing it.
+- Both restores now sit inside the same guard. `endCine()` touches the board
+  only when a cinematic was actually running. No new block: the guard was
+  already there and the call was outside it.
+- **This is the third fault from the same two lines** — V2.12.1 was the turn
+  reset, this is the board. The survey replay shares an exit path with an
+  opening that runs once on a colony with no history, and every assumption that
+  exit path makes about the board is wrong on a colony that has one.
+
+### Verified
+
+- Tier 0 clean at V2.12.8: P1–P12, unchanged counts. Survival bot identical to
+  the V2.11.1 baseline. Tunnel contrast unmoved.
+- **`cine-check.js`, 26 assertions.** Two new ones, and a fix to the harness
+  that mattered more than either: the test colony now rebuilds one tile
+  `newGame()` laid as a different structure, and strips another. Structures on
+  tiles birth never touched cannot catch this — `cineSet()` only reverts birth
+  tiles — which is exactly why the existing "every structure still standing"
+  check passed on every build that had the bug. Against **V2.12.7 it now fails
+  four assertions**, against V2.12.6 five.
+- The glow-overhang check from V2.12.7 was flaky: three runs failed and five
+  passed on the same build, because it polled for the dark beat and froze the
+  clock from outside, racing the animation. It now freezes in the same tick the
+  cinematic starts, so the frame under test is always the first one. Six
+  consecutive clean runs, and it still reports 336 warm pixels on V2.12.6.
+
+---
+
+## V2.12.7
+
+### Fixed
+
+- **A lit structure at either end of the map threw its glow out past the map,
+  into ground the survey had not reached.** `cineDrawFog()` builds its clip
+  from one rect per unsurveyed column, so the clip stopped dead at the first
+  and last column boundary. Anything drawn wider than the map came through the
+  sky repaint untouched — and `structureGlow()` reaches 1.2 cells past its tile
+  on every side. Build a reactor on the edge column and the survey pass runs
+  with a warm square hanging in the dark beside it.
+  - The first and last unsurveyed columns now extend their rect to the edge of
+    the stage. `Math.min`/`Math.max` against the map bounds, so a map wider
+    than the stage keeps exactly the rect it had. Same columns covered, no
+    longer cut off at the map boundary.
+
+### Verified
+
+- Tier 0 clean at V2.12.7: P1–P12, unchanged counts. No new block, no new
+  brace — two ternaries and a rect.
+- **`cine-check.js`, 24 assertions now.** A drift out to both edges with a
+  reactor on each end, zoomed out so there is margin off the ends, frozen on
+  the dark beat, counting warm pixels outside the map: **V2.12.6 → 336, peak
+  R 45. V2.12.7 → 0.**
+  - Two false passes had to be worked through first, both worth recording. The
+    reactors were placed unconnected, so `conn.has()` made them unlit and
+    `structureGlow()` returned before drawing anything — a check that passes
+    because the thing it tests never happened. Then the warmth threshold was
+    set at R > 26, and the overhang is at about 5% alpha, so it peaks around
+    R 45 and most of it sits under 26. A check that reports zero is only worth
+    something if it has been made to report non-zero on a build that has the
+    fault.
+- Survival bot identical to the V2.11.1 baseline. Tunnel contrast unmoved.
+
+### Worth watching
+
+- This was found with a diagnostic build that tinted the three regions —
+  surveyed, repainted, off the end of the map — and asked for one screenshot.
+  The build before it tried to read the canvas with `getImageData` and reported
+  nothing at all, because WebKit treats a canvas on a `file://` page as tainted
+  and the call throws. **Pixel-reading diagnostics do not work on the device
+  this game is tested on.** Draw the diagnosis instead.
+
+---
+
+## V2.12.6
+
+### Fixed
+
+- **The sky is pinned to the ground now, not to the screen.** Reported as
+  movement in the fog while panning, and the fog was innocent: `drawSky()` laid
+  the star field out in screen space, so the terrain slid out from under a sky
+  that stayed exactly where it was. Earth never had this problem — it is placed
+  at `offX + cell*28.5`, in map space, two lines below the star loop. On a
+  board where everything else moves together, one thing that does not reads as
+  crawl, and it reads worst through the fog, because the sheet travels with the
+  ground while the blur under it keeps collecting stars that do not.
+  - The stars are offset by the pan and wrapped, so they travel with the
+    terrain and the field never runs out at an edge. Not scaled by zoom: a star
+    has no size to magnify, and wrapping keeps the count constant however far
+    you pan.
+  - V2.12.4 is where this became visible, because that is where the daylight
+    star field went from 28 nearly-invisible specks to 92 legible ones. The
+    fault was older than that; it just had nothing to show with.
+
+### Changed
+
+- **Fogged tiles are no longer given detail nobody can see.** The stratum seam,
+  the material patches, the dust specks and the grid line were all drawn and
+  then covered by the sheet. A grid line marks a tile boundary, and unsurveyed
+  ground has no tile boundaries to show yet. The depth shade stays — depth is
+  geometry, not a finding, and the basin is visibly lower than the crest from
+  turn one.
+  - **Be clear about what this bought: nothing you can see.** Rendered at the
+    cell size the phone plays at, the before and after differ by at most 1 in
+    255 and by more than 2 on zero pixels. It went in because it is the right
+    thing to draw and because it is less work per frame, not because it fixed
+    the report — the stars did that.
+
+### Verified
+
+- Tier 0 clean at V2.12.6: P1–P12, unchanged counts. Canvas only.
+- **New in `cine-check.js`, 23 assertions now: the pan residual.** It pans the
+  map by 1, 2, 3, 5 and 7 pixels, shifts the previous frame back by the same
+  amount, and counts pixels that still disagree — anything moving against the
+  map. V2.12.6: **0.000%**. V2.12.5: **0.129%**, and the check fails.
+  - The measurement took four wrong turns worth recording, because each one
+    produced a confident number that meant nothing: sampling above the map
+    rectangle (which the old fog never covered), sampling at a fitted cell of
+    11.7 rather than the 20.8 a phone plays at, sampling from behind the
+    portrait gate, and — the worst — setting `panX` without calling `layout()`,
+    so nothing panned and the residual was an image compared against a shifted
+    copy of itself. Any pan measurement in this file calls `layout()`.
+- Survival bot identical to the V2.11.1 baseline. Tunnel contrast unmoved.
+
+---
+
+## V2.12.5
+
+Two faults in the survey pass, one cause, both reported off a phone in
+portrait.
+
+### Fixed
+
+- **The sky went out ahead of the probe.** `cineDrawFog()` painted the unseen
+  columns with flat `C.vacuum`, which took the stars and Earth with them — so
+  the pass ran across a black void and the sky only arrived behind the beam,
+  when the sky is the one thing on that site that was never in question. The
+  unseen columns are now repainted with the sky itself: one more `drawSky()` on
+  the sweep frames, clipped to those columns. It cannot mismatch, because it is
+  the same gradient, the same seeded stars in the same places and the same
+  Earth. The site arrives out of a sky that was there all along.
+- **A line drawn ahead of the probe.** The same rectangle. It covered the map
+  rows only, so its bottom edge sat against the background below the map and
+  read as a line being ruled across the dark — which in portrait is exactly
+  where the eye is. Its right edge did the same down the last column. The
+  clip is now the full stage height and there is nothing to have an edge:
+  sky against sky.
+- **The beam touched ground that had not arrived.** The footprint rounds up by
+  one column past the reveal, and the contact bar was drawn on all of them — a
+  bright mark on terrain nobody could see yet, giving away the skyline one
+  column early. It now skips any column the survey has not reached.
+
+### Verified
+
+- Tier 0 clean at V2.12.5: P1–P12, unchanged counts. The patch asserts no div,
+  no id, no CSS rule and no font size moved — this is canvas drawing only —
+  and that `drawSky` has exactly two call sites.
+- **New in `cine-check.js`, 22 assertions now.** It freezes a real sweep frame
+  at 35%, finds the last revealed column, and counts lit pixels in the band
+  three columns ahead of it, inside the map and above the terrain — the exact
+  rectangle that used to be filled black. V2.12.5: 127 lit pixels, peak luma
+  156. V2.12.4: **0 lit pixels, peak luma 8**, and the check fails.
+- Survival bot identical to the V2.11.1 baseline. Tunnel contrast 19.6 / 16.8 /
+  16.8.
+
+---
+
+## V2.12.4
+
+### Changed
+
+- **The stars stay up in daylight.** They were never removed — `drawSky()` drew
+  92 at night and 28 by day at roughly a seventh of the brightness, which on a
+  phone is an empty sky. The opening animatic runs on a night turn, so it
+  showed the full field and then handed over to a game that appeared to take it
+  away.
+  - There is no atmosphere here to scatter sunlight across the sky, and the
+    sky is already drawn near-black at noon for exactly that reason. What dims
+    stars on a lit surface is the exposure an eye is holding for sunlit
+    regolith, and the sun's own halo — which is drawn over them a few lines
+    later and still washes out the ones near the disc. So the day sky keeps all
+    92 and only loses brightness: alpha `.13–.43` against the night's
+    `.20–.75`, radius `.45–.90` against `.55–1.30`.
+  - **Sundown no longer pops.** The old day and night fields were different
+    sizes, so 64 stars came into existence the turn the sun went down. Now they
+    are the same stars in the same places all sol and dusk only brings them up.
+  - Night is byte-identical. Positions are still seeded off `G.seed`, so a
+    site's sky is the same sky every time it is played.
+
+### Verified
+
+- Tier 0 clean at V2.12.4: P1–P12, unchanged counts — the patch asserts no div,
+  no id, no CSS rule and no font size moved, because this is eight characters
+  of canvas drawing.
+- `cine-check.js` 21/21. Survival bot identical to the V2.11.1 baseline.
+  Tunnel contrast 19.6 / 16.8 / 16.8.
+
+### Worth watching
+
+- 92 arcs a frame in daylight instead of 28. They are sub-pixel fills with no
+  blur and no filter, so this should not register next to the fog, but F3 is
+  the pan test and the star field is now drawn on every frame of it.
+
+---
+
+## V2.12.3
+
+### Changed
+
+- **The achievement card is glass.** It is the one surface that floats over the
+  map without belonging to a lane, and it was the last thing in the file still
+  wearing the opaque theme — flat panel, square corners, no specular — while
+  everything around it had moved on. It now takes the same recipe as every
+  other pane: `blur(16px) saturate(1.25)`, a `rgba(214,218,220,.14)` hairline,
+  the 14px corner and the top specular. The glyph box becomes a small pane of
+  its own, the way the portrait gate's options are.
+  - **The gold edge moved from a border to an inset shadow.** A 3px straight
+    border on a 14px corner tapers into a crescent; `inset 3px 0 0` follows the
+    curve instead. The card is the only rounded thing in the file with a rule
+    down one side, so it is the only place that needs the trick.
+  - A held card still goes gold all the way round. The glass rule outranks
+    `.achvcard.held`, so that is restated rather than left to luck.
+  - Both ways back are wired the same as the panes: `prefers-reduced-
+    transparency` and a browser without `backdrop-filter` each get the flat
+    card, and the gold edge survives both.
+  - The opaque theme is untouched. Glass off is the card exactly as it was.
+
+### Verified
+
+- Tier 0 clean at V2.12.3: P1–P12. **346 CSS braces**, up six — the six new
+  rules and nothing else. The patch asserts no div, no id, no font size and no
+  `touch-action` was added, so P3, P4, P8 and P9 could not have moved, and P3
+  and P4 read 70 and 56 exactly as in V2.12.2.
+- `cine-check.js` 21/21. Survival bot identical to the V2.11.1 baseline:
+  93.9 / 96.3 / 91.3 / 86.6 / 85.5, 90.8 overall.
+
+### Not verified
+
+- The card on a device, and in Safari. It is a new `backdrop-filter` surface
+  that can appear while the map is being panned, which is the case F3 exists
+  for — if there is a cost, that is where it shows.
+
+---
+
+## V2.12.2
+
+### Added
+
+- **LAND HERE AGAIN**, on the RUN tab, under THIS SITE. Re-lands on the seed you
+  are already on without reading its code off the line above and typing it back
+  in. Two taps to fire, the same as the other two, because it throws the colony
+  away like they do — and because it goes through `restart()` it comes back to
+  the splash, so BEGIN plays the full opening with the landing in it. The
+  plumbing already existed: `restart()` has always defaulted to the current
+  seed, and the end card's AGAIN button has always used it. It was only ever
+  missing from the panel you reach mid-run.
+
+### Changed
+
+- **`Replay the opening` is now `Replay the survey`.** It stopped being the
+  opening in V2.12.1 and the label did not follow. The two are different films
+  and there are now two ways to ask for them: the survey pass over the colony
+  you are on, from DISPLAY; and the whole opening on a fresh colony, from LAND
+  HERE AGAIN. The row's wording is also the quickest way to tell which build is
+  loaded — if it still says *the opening*, the page is V2.12.0 or older.
+
+### Verified
+
+- Tier 0 clean at V2.12.2: P1–P12. **70 ids and 56 `getElementById` targets**,
+  up one each, both of them the new button; the patch asserts exactly one div
+  and exactly one id were added and that no font size, `touch-action` or CSS
+  rule moved, so P8, P9 and P10 cannot have.
+- `cine-check.js` now runs 21 assertions, five of them new: the button is
+  there, it arms before it fires, it lands on the same seed, the colony it
+  lands is fresh, and the splash comes back so the opening plays.
+- Survival bot identical to the V2.11.1 baseline: 93.9 / 96.3 / 91.3 / 86.6 /
+  85.5, 90.8 overall. Tunnel contrast 19.6 / 16.8 / 16.8.
+
+### Worth watching
+
+- **A report that the replay still builds structures could not be reproduced.**
+  In V2.12.1 there is one call site (`startCine(true, true)`), the survey order
+  has no `land`, `build` or `settle` beat, and `cineSet()` is never reached on
+  that path; a frame-by-frame capture holds 7 dug and 4 built from the first
+  frame to the last, and the same check fails on V2.12.0. The likeliest
+  explanation is a page served from cache. **The label is the tell:** DISPLAY
+  reading *Replay the survey* means V2.12.2, *Replay the opening* means an
+  older file. The build stamp is on the splash watermark, in the ledger header
+  and in Copy diagnostics.
+
+---
+
+## V2.12.1
+
+A replay is a different film from an opening, and V2.12.0 shipped one function
+for both. Two defects, one of them a save-corrupting one.
+
+### Fixed
+
+- **Replaying the opening on a live colony reset it to sol 1.** `endCine()`
+  ended with a bare `G.turn = 0`, correct for the only case it was written for
+  — the opening, where the turn is 0 anyway — and wrong for the button added
+  in the same build. Worse, it took effect the instant `Replay the opening`
+  was tapped, because `startCine()` calls `endCine()` first, and the next
+  `saveRun()` (a pane action, or the page going to the background) wrote sol 1
+  down over a colony on sol 25. The turn the animatic borrows is now saved and
+  handed back, in both modes; `cineTurn` is null when nothing is playing, so
+  the restore cannot fire on a turn it never took.
+- **A replay re-enacted the landing on top of a standing colony.** The build
+  beats wind `G.birth` back to bare rock and lay it again, so the original
+  shaft, habitat and arrays vanished and were re-placed underneath a colony
+  that had grown well past them. Reported as "weird", which undersells it.
+
+### Changed
+
+- **`Replay the opening` is now a survey pass, not a landing.** It keeps the
+  beats that are about looking at the site — dark, the probe and its frustum,
+  then a hold — and drops the three that are about building it. The ground is
+  never wound back: what the beam uncovers is the colony as it stands today,
+  and past the sweep the turn goes back to the colony's own, so the light and
+  the shadows are the ones it is living in. The warm and cold survey caps still
+  come with the beam and fade out as the panels come in. About 5.9 seconds
+  against the opening's 9.4.
+  - The opening itself is untouched: all eight beats, the lander, the build
+    replay, ending on turn 0 with the birth colony exactly as `newGame()` left
+    it.
+
+### Verified
+
+- Tier 0 clean: P1–P12, stamps at V2.12.1, 69 ids, 55 targets, 340 braces
+  balanced, no page errors, 10/10 seed codes.
+- Survival bot identical to the V2.11.1 baseline again — 93.9 / 96.3 / 91.3 /
+  86.6 / 85.5, 90.8 overall. This is a view change; nothing in a turn moved.
+- Tunnel contrast unmoved: 19.6 / 16.8 / 16.8.
+- **New: `cine-check.js`.** Sixteen assertions on a colony set to turn 706 with
+  ground `newGame()` never laid. Mid-sweep and after: every dug tile, every
+  structure, the turn, crew, power, water, he-3 and morale are the values that
+  went in; `cineTurn` is released and the survey flag cleared; and the full
+  opening still runs eight beats and ends on turn 0 with the birth colony
+  intact. Run against V2.12.0 it fails on the first assertion, which is the
+  point of having it.
+- **Frame rate, on device.** iPhone 16 Pro, dpr 3, glass and fog both on, ASH:
+  `now 60 · low 29 · avg 54` over 34 seconds, one dip under 30, at three
+  seconds, on a glass toggle. The 14ms headless figure did not survive contact
+  with the hardware — it holds.
+
+### Not verified
+
+- The replay on a device. Tier 1 F1–F6 again if the opening is going to be
+  watched more than once.
+
+---
+
+## V2.12.0
+
+Two things arrive together, and they turned out to be one thing: the site is
+unknown until something looks at it. Nothing in a turn resolves differently, so
+this is not a model change by the test plan's definition — but it changes what
+the player can see, which is not nothing. Tier 1 in full, and a playtest.
+
+### Added
+
+- **An opening animatic, after BEGIN.** `dark → probe sweep → hold → lander →
+  build → settle → rest → HUD`, about nine seconds, and a touch skips it — one
+  speeds it up four times, a second ends it. The same grammar as the end card,
+  so a run opens and closes the same way.
+  - **No media of any kind.** The same canvas, the same terrain and the same
+    sun the game already computes. A few paths and a gradient.
+  - **The probe surveys in the dark.** A craft crosses the sky with a frustum
+    of scan light spreading to the ground, and its footprint is what reveals
+    the site — unsurveyed columns are painted out to vacuum, skyline included,
+    so the crest arrives as the beam reaches it. The sweep runs on a night
+    turn, so nothing on the surface is lit by anything but the beam.
+  - **What the probe leaves behind is the survey, not the light.** Each column
+    it crosses takes a warm cap if `maxAnnualSun()` ever reaches it and a cold
+    one if it never does — the same function that decides where helium can be
+    implanted and where ice survives. Sunlit rim, sunk basin, wordlessly, in
+    three seconds. The splash has been saying it in prose since V1.
+  - **The build replays `G.birth`**, the list `newGame()` writes as it digs the
+    shaft, drifts, sets the habitat and puts the arrays up on the dimmest
+    columns. The animatic cannot disagree with the colony it produces, because
+    it is that colony being produced — including the lander making the mistake
+    that the whole opening is about.
+  - Dawn arrives on the hold beat, on a site already mapped.
+  - `TOOLS · DISPLAY · Opening animatic` switches it off; `Replay the opening`
+    plays it again on the current site. A resumed colony has already landed and
+    never sees it, and `prefers-reduced-motion` goes straight to the finished
+    state.
+
+- **Fog of war under the skyline.** The probe mapped the surface on the way in,
+  so the skyline, the crest and the basin are always yours — the opening
+  decision is unchanged. What is under them is not: no strata, no seams, no
+  specks and no ore until something has been opened within `scanRadius`. Half
+  of this already existed, since `known()` has gated ore since V1; now it gates
+  the ground as well, and SURVEY is an instrument rather than a shading toggle.
+  - **Drawn as a covering, not a hole.** One path, one fill, laid over the
+    ground after the tiles — so the alpha cannot double where tiles meet — and
+    the corners round *only* where the region ends. Interior corners stay
+    square. On a board made of squares, that outline is the only curved thing
+    on screen, which is what separates a sheet from a dark tile.
+  - **Liquid glass, by hand.** Canvas has no `backdrop-filter`, so the backdrop
+    is made: the frame so far is blurred into a quarter-scale buffer and drawn
+    back under the sheet, with the tint over it, a hairline on every boundary
+    edge and a specular on the top edges only — the same
+    `inset 0 1px 0 rgba(255,255,255,.22)` the panes carry. It samples outside
+    the clip as well, so ground beyond the edge smears in underneath the way a
+    pane picks up what it overlaps.
+  - It follows `Glass panels`. Glass off in DISPLAY means glass off everywhere,
+    and `prefers-reduced-transparency` or a browser without `ctx.filter` gets
+    the flat sheet without having to find a setting.
+  - `TOOLS · DISPLAY · Subsurface fog` switches it; `Fog tone` cycles SLATE,
+    **ASH** (default), STONE and SMOKE. Each carries two alphas — one for the
+    flat sheet, a lighter one for when the glass is doing the covering.
+
+### Changed
+
+- **`known()` is dilated once and cached.** It used to be asked only about
+  tiles that might show ore; the fog asks it about every rock tile on every
+  frame, which is 374 tiles against an 81-tile scan each. It is now computed
+  from the handful of tiles actually open and invalidated on `recompute()`.
+
+### Verified
+
+- Tier 0 clean: P1–P12. 69 unique ids, 55 `getElementById` targets present, 139
+  divs in `#app` — unchanged from V2.11.1 — three storage keys, no network, 85
+  scaled font sizes, 9 justified `touch-action` declarations, 11 achievement
+  ids matching the awarded set, 340 CSS braces balanced. P1 and P11 in the
+  page: no errors, and all ten published codes still regenerate their site and
+  rating.
+- **The survival bot, in the shipped build, is identical to the V2.11.1
+  baseline across all five bands** — 93.9 / 96.3 / 91.3 / 86.6 / 85.5 survived,
+  90.8 overall. Nothing in a turn resolves differently.
+- Tunnel contrast, read off the rendered canvas, unmoved: 19.6 by day, 16.8 at
+  night, 17.9 with a reactor lit.
+- The animatic leaves the board exactly as `newGame()` left it: same dug tiles,
+  same structures, turn 0, `#app` back to its own classes and the splash gone.
+- The patch asserts structurally that no DOM, no ids, no font sizes and no
+  `touch-action` were added, so P3, P4, P5, P8 and P9 cannot have moved. The
+  quarter-scale blur buffer is created but never appended to the document.
+
+### Not verified
+
+- Tiers 1–3 on a device, and Safari. **Frame rate above all** — see below.
+
+### Worth watching
+
+- **The glass fog costs about 14ms a frame against 1.5ms for the flat sheet**,
+  measured in headless Chromium at dpr 3 on a 1740×796 backing store. That is a
+  65fps ceiling on a desktop; a phone will be slower, and the bar here is a
+  steady 30. The expense is not the blur and not the clip — both are under
+  0.2ms — it is the GPU round trip of sampling the canvas back into a buffer,
+  and a masked-buffer variant that removes the clip entirely measured *slower*.
+  Run F1–F6 with the FPS meter on and read the low. If it will not hold, `Glass
+  panels` off keeps the fog and drops the blur.
+- **Every fog tone is lighter than the terrain**, so unexplored ground is now
+  the brightest mass on the board. STONE and SMOKE pull the eye hard toward the
+  part of the map you are not working in. ASH is the default for that reason.
+- **The survival bot can see through the fog.** It reads `t.ice` directly and
+  never looks at the screen, which is exactly why "identical to baseline"
+  proves the model is untouched — and exactly why it says nothing about whether
+  the fog makes the game harder to play. Measuring that needs a bot that picks
+  targets only from known ground and digs toward the dark basin on the strength
+  of the skyline alone.
+
+---
+
 ## V2.11.1
 
 A model change: morale moves. Per the test plan that means Tier 2 in full and
