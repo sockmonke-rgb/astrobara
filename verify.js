@@ -143,8 +143,22 @@ function parseSeeds(text) {
 
   await page.goto('file://' + path.resolve(BUILD_PATH));
   await page.waitForTimeout(600);
-  await page.evaluate(() => { const b = document.getElementById('begin'); if (b) b.click(); });
+  // The opening animatic arrived in V2.12.0, after this script was written.
+  // It runs for about 9.4 seconds and rewrites the board through cineSet() on
+  // every frame, so measuring the rendering while it plays is a race: it wins
+  // on a fast machine and loses on a CI runner. Turn it off before BEGIN, and
+  // stop anything already running afterwards. The animatic has its own harness
+  // in cine-check.js; nothing here is about it.
+  await page.evaluate(() => {
+    try { OPT.cine = false; } catch (e) {}
+    const b = document.getElementById('begin');
+    if (b) b.click();
+    try { if (typeof endCine === 'function') endCine(); } catch (e) {}
+  });
   await page.waitForTimeout(400);
+  await page.evaluate(() => {
+    try { if (typeof endCine === 'function') endCine(); } catch (e) {}
+  });
 
   console.log('\nTier 0 — in the page');
   check('P1', errors.length === 0, errors.length ? errors.join(' | ') : 'parsed, no page errors');
@@ -172,7 +186,11 @@ function parseSeeds(text) {
     // rock, so every depth band has a tunnel next to it.
     const x = 6;
     const top = G.surf[x];
-    for (let y = top; y < CFG.rows; y++) { const t = G.tiles[idx(x, y)]; t.dug = true; t.rock = false; }
+    for (let y = top; y < CFG.rows; y++) {
+      const t = G.tiles[idx(x, y)];
+      if (!t) continue;
+      t.dug = true; t.rock = false;
+    }
     // Zoom in so a tile is comfortably bigger than the sampling window.
     zoom = 1; panX = 0; panY = 0;
     baseCell = 28; cell = 28;
@@ -186,8 +204,28 @@ function parseSeeds(text) {
         if (b && b.type === 'FUSION') b.off = true;
       }
       if (fusion) {
-        const fy = G.hy;
-        G.tiles[idx(G.sx + 1, fy)].b = { type: 'FUSION' };
+        // Put a reactor on the first open, connected tile next to a habitat,
+        // found by scanning — the real build keeps no landing coordinates on G.
+        let placed = false;
+        for (let yy = 0; yy < CFG.rows && !placed; yy++) {
+          for (let xx = 0; xx < CFG.cols && !placed; xx++) {
+            const h = G.tiles[idx(xx, yy)];
+            if (!h.b || h.b.type !== 'HAB') continue;
+            for (const d of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+              const nx = xx + d[0], ny = yy + d[1];
+              if (!inb(nx, ny)) continue;
+              const t = G.tiles[idx(nx, ny)];
+              // inb() and idx() agree on a finished board, so a missing tile
+              // means the board is not finished — mid-newGame, or mid-rewind.
+              // Skip it rather than throw: this loop is looking for somewhere
+              // to put a reactor, and there is always another candidate.
+              if (!t || t.b) continue;
+              t.dug = true; t.rock = false;      // open it if it was not already
+              t.b = { type: 'FUSION' };
+              placed = true; break;
+            }
+          }
+        }
         G.he3 = 200;
       }
       recompute();
@@ -200,7 +238,13 @@ function parseSeeds(text) {
         return [d[0], d[1], d[2]];
       };
       const luma = p => 0.2126 * p[0] + 0.7152 * p[1] + 0.0722 * p[2];
+      let live = false;
+      for (let i = 0; i < G.tiles.length; i++) {
+        const b = G.tiles[i].b;
+        if (b && b.type === 'FUSION' && !b.off && connectedSet().has(i)) live = true;
+      }
       const rows = [];
+      rows.fusionLive = live;
       for (let y = G.surf[x] + 1; y < CFG.rows; y++) {
         // Middle of the tile vertically, avoiding the roof highlight and the
         // dark floor band the renderer draws inside every tunnel.
@@ -213,17 +257,18 @@ function parseSeeds(text) {
           sep: Math.abs(luma(tun) - luma(rock))
         });
       }
-      return rows;
+      return { rows, fusionLive: live };
     }
     return { unlit: sample(false, false), night: sample(true, false), fusion: sample(true, true) };
   });
 
-  for (const [name, rows] of Object.entries(probe)) {
+  for (const [name, res] of Object.entries(probe)) {
     let worst = Infinity, at = null;
-    for (const r of rows) if (r.sep < worst) { worst = r.sep; at = r; }
-    const ok = worst >= 12;
-    check(name.toUpperCase().slice(0, 5), ok,
-      'closest at depth ' + at.depth +
+    for (const r of res.rows) if (r.sep < worst) { worst = r.sep; at = r; }
+    const ok = worst >= 14;
+    check(name.toUpperCase().padEnd(6), ok,
+      'reactor ' + (res.fusionLive ? 'lit ' : 'off ') +
+      '· closest at depth ' + at.depth +
       ': tunnel rgb(' + at.tunnel.join(',') + ') vs rock rgb(' + at.rock.join(',') + ')' +
       ' — separation ' + worst.toFixed(1));
   }
