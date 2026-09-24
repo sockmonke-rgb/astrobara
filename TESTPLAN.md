@@ -1,6 +1,6 @@
 # Astrobara — test plan
 
-**Plan version 1.19** · 23 September 2026 · covers Astrobara V2.12.13
+**Plan version 1.20** · 24 September 2026 · covers Astrobara V2.12.14
 
 The single HTML file is the unit under test; there is no build step to verify.
 The plan is versioned separately from the game: quote both when reporting, as in
@@ -15,7 +15,7 @@ Four tiers, in order of cost:
   not fit, a control you could not reach, and two crashes. About fifteen minutes.
 - **Tier 2 — model and loop.** The simulation, and the tiles that report it.
   About twenty minutes.
-- **Tier 3 — achievements.** Proof that all eleven can actually be earned. Four
+- **Tier 3 — achievements.** Proof that all twelve can actually be earned. Four
   runs, an hour or so. Run this before any release that changes the model.
 
 The build stamp appears on the splash watermark, in the ledger header, and in
@@ -274,6 +274,22 @@ agree, and the device is the one that counts.*
   panel that can be left open: DISPLAY and RUN both repaint themselves, BOARD
   did not, and nothing in the plan asked.
 
+- **V36 — the twelfth award lands, from either direction.** ESCAPE VELOCITY
+  needs the other eleven and is checked two ways, because either alone leaves a
+  hole. **Earning the eleventh:** it should appear on the same turn, not the
+  next one, and announce itself like any other. **Arriving with eleven already
+  earned:** load a build that has this award onto a profile that finished the
+  set before it existed — there is no twelfth award left to fire the check, so
+  it has to land on an ordinary END TURN instead. Test both; the second is the
+  one a fresh install will never show you. It sits below both groups behind a
+  rule, and the count reads **12 of 12**. Guards V2.12.14.
+
+- **V36b — the board shows the site's rating.** Every row on the BOARD tab and
+  on the end card carries the star rating between the code and the run, in
+  gold, and COPY AS TEXT carries it too. A row written before V2.12.14 has no
+  rating stored: it must render with no star and no gap, not `0★`. Check at
+  268px docked, where the extra token is most likely to wrap.
+
 ### Zoom stability
 
 Hold each pinch for a slow count of five. A flick will not reproduce either
@@ -483,9 +499,13 @@ For each handedness — BALANCED, LEFT, RIGHT — with glass on and with glass o
 
 ## Tier 3 — achievements are obtainable
 
-Eleven achievements. A release that changes the model can make one unreachable
+Twelve achievements. A release that changes the model can make one unreachable
 without any error appearing anywhere — which is exactly what happened to
 SOL SURVIVOR, removed in V2.5.0 after an audit found no path to it at all.
+
+The twelfth, ESCAPE VELOCITY, is the other eleven. It cannot be run for on its
+own: it lands when the last of them does, which makes it the one award whose
+check has no colony to read. See V36.
 
 Clear `astrobara.achv` before starting, or read the count in TOOLS · BOARD and
 work from there.
@@ -691,6 +711,8 @@ deterministic, so a seed and a move list reproduces it exactly.
 | 1.18 | 23 Sep 2026 | V2.12.12 | V34 for the achievement clue text saying what the code tests. Reported from a real run: a colony came through the dark on sol 1 and the list read 0 of 11, which was correct — "held a night" means twelve dark turns on fusion, not reaching sunrise. Nine of eleven awards sit behind the self-sufficiency return and only four admitted it. The board now states the condition once above a group. P13 and P14 added to `verify.js`: P13 checks the grouping flag against which side of that return each `award()` is on, P14 that a short clue declares the long form the unlock card needs. Both fail on V2.12.11. |
 
 | 1.19 | 23 Sep 2026 | V2.12.13 | V35 for a panel left open while you play. Reported at turn 239: nine of eleven earned, the store and the diagnostics both right, the BOARD pane still showing SKELETON CREW locked — `paintBoardPane()` had one caller, `showTab`. Older than the grouping; V2.12.12 only gave you a reason to sit on that tab. Three assertions added to `achv-check.js`, two of which fail on V2.12.12. Also the heading V2.12.12's case-sensitive sweep missed. |
+
+| 1.20 | 24 Sep 2026 | V2.12.14 | V36 for ESCAPE VELOCITY, the twelfth award — every other award earned — and for the star rating now on every board row. Tier 3 is twelve runs' worth of awards, not eleven. THE LONG SURVEY renamed ABUNDANCE; same id, same condition, so nothing already earned is affected. Model change: achievement conditions, so Tier 3 in full before release. |
 
 When a build fixes something this plan did not catch, add the check here in the
 same commit as the fix, and note the build it was first seen in.

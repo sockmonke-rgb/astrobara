@@ -5,7 +5,7 @@ on the Shackleton crater rim, where the antagonist is the night.
 
 One HTML file. No dependencies, no build step, no network. Open it and play.
 
-**V2.12.13** · MIT · Mark Florentino LLC and Kittenmancer
+**V2.12.14** · MIT · Mark Florentino LLC and Kittenmancer
 
 ---
 
@@ -172,7 +172,10 @@ Everything else lives in one panel, `[≡]`, in five tabs.
 - **DISPLAY** — below.
 - **BOARD** lists colonies that carried a whole night on fusion, with the site
   code for each so any run on it can be played again, and offers the rows as
-  text. Eleven achievements are listed under it, locked ones included.
+  text. Each row carries the site's star rating. Twelve achievements are listed
+  under it, locked ones included, grouped by what they ask of you: nine need a
+  night carried on fusion, two can be earned any time, and ESCAPE VELOCITY —
+  below both, behind a rule — needs the other eleven.
 - **RUN** shows this site's code and difficulty, lands on it again, takes a
   code to land somewhere else, or lands somewhere random. **LAND HERE AGAIN**
   starts the site you are on over without typing its code, splash and opening

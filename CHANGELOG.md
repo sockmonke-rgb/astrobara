@@ -1,3 +1,63 @@
+## V2.12.14
+
+**A twelfth award, a rename, and the star rating on the board.**
+
+### ESCAPE VELOCITY
+
+Every other award earned. It sits below both groups, behind a rule, with no
+heading of its own — the list then reads in the order you earn it, and a
+heading over a single row is furniture.
+
+It could not have gone in the fusion group whatever it was called. Every award
+under **A NIGHT CARRIED ON FUSION** *is* an escape velocity — that is what the
+heading says — so the name would have described eight of its neighbours as well
+as itself and distinguished nothing. Outside the groups it has none to compete
+with.
+
+**Checked two ways, and both are needed:**
+
+- `checkAchv()` runs it every turn, in the ungated part. This is what catches a
+  player who already had all eleven when this build arrived — there is no
+  twelfth award left to fire the check, so it has to land on an ordinary END
+  TURN.
+- `award()` runs it too, because `checkAchv()`'s ungated part runs *before* the
+  gated awards. Without this, the eleventh landing on a given turn would not be
+  seen until the next one.
+
+The clue stays literal — `every other award` — with `cf:'every other award
+earned'` for the card, per V2.12.12's rule.
+
+### THE LONG SURVEY becomes ABUNDANCE
+
+Same id, same condition: a night carried at every rating. Nothing already
+earned is affected, because `all_ratings` never moved. The ratings are
+difficulty, so the 1-star end is generous ground and the 5-star end is BRUTAL —
+carrying a night on all five is making a colony out of plenty and out of almost
+nothing alike.
+
+### The star rating on the board
+
+Between the code and the run, in gold, because it is a property of the site
+rather than of the run and it is the thing the row is worth scanning for. All
+three renderers: the BOARD tab, the end card, and COPY AS TEXT. A row written
+before this build has no rating stored and renders with no star and no gap —
+never `0★`.
+
+### Verified
+
+- Both capstone paths, headless: eleven already earned then an ordinary
+  `checkAchv()` → awarded; the eleventh landing live → awarded the same turn.
+  The count reads `12 of 12` and the row draws below **ANY TIME**.
+- P10 now reads 12 of 12, P13 nine flagged of twelve with no mismatch — the
+  capstone is in neither group and P13 agrees, because `award('all_awards')`
+  lives in `checkCapstone()` rather than on either side of the
+  self-sufficiency return. P14 clean: the short clue declares its card form.
+- `cine-check.js` 27/27, `achv-check.js` 8/8, survival bot identical to the
+  V2.11.1 baseline.
+- Two CSS rules, no markup, no ids. **The model is untouched** — but this
+  changes achievement conditions, so by the release-candidate rule it wants
+  Tier 3 before it ships.
+
 ## V2.12.13
 
 **The BOARD tab never repainted itself.** Reported from a colony at turn 239
