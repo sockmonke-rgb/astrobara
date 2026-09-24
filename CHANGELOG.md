@@ -1,3 +1,46 @@
+## V2.12.13
+
+**The BOARD tab never repainted itself.** Reported from a colony at turn 239
+with five structures standing: SKELETON CREW was in the store, Copy diagnostics
+listed it, and the pane on screen still read `[LOCKED] under 20 structures
+standing` and `UNLOCKED · 0 of 11`.
+
+`paintBoardPane()` had exactly one caller — `showTab('board')`. Open the tab,
+keep playing, and the list is frozen at whatever it said the moment you opened
+it. The other two panes were already handled: `paintDisplayPane()` repaints on a
+system text-size change and `paintRunPane()` from half a dozen places. The board
+was the one that only ever painted on the way in, which is also the one whose
+contents change while you are not touching it.
+
+The fault is older than the grouping — it has been there since the pane existed.
+V2.12.12 only made it visible, by giving you a reason to sit on that tab.
+
+### Fixed
+
+- `refreshBoardPane()` repaints from two events, and only those: `award()`, and
+  `recordScore()` writing a row. Nothing on the turn loop — a repaint every
+  recompute would rebuild the list sixty turns a sol to no purpose.
+- It returns immediately when the tab is not showing, and **restores
+  `scrollTop`** when it is. The pane scrolls; earning an award is not a reason
+  to lose your place in the list.
+
+### Also
+
+- `COLONIES THAT HELD A NIGHT`, the heading over the board rows, becomes
+  `COLONIES THAT CARRIED A NIGHT`. V2.12.12 swept for the old wording
+  case-sensitively and this one is upper case, so it shipped. The check that
+  let it through is now case-insensitive — it is the heading directly above the
+  rows, so it was the most visible one left.
+
+### Verified
+
+- Three new assertions in `achv-check.js`: the open pane's count goes up on an
+  award, the row it belongs to stops reading `[LOCKED]`, and the scroll position
+  survives the repaint. **The first two fail on V2.12.12** (`5/11 -> 5/11`,
+  `[LOCKED] rows 6 -> 6`). 8/8 on V2.12.13.
+- Tier 0 clean, `cine-check.js` 27/27, survival bot identical to the V2.11.1
+  baseline. No markup, no CSS, no model.
+
 ## V2.12.12
 
 **The clue text promised something the code does not test.** A colony came

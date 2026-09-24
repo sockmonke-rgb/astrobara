@@ -5,7 +5,7 @@ on the Shackleton crater rim, where the antagonist is the night.
 
 One HTML file. No dependencies, no build step, no network. Open it and play.
 
-**V2.12.12** · MIT · Mark Florentino LLC and Kittenmancer
+**V2.12.13** · MIT · Mark Florentino LLC and Kittenmancer
 
 ---
 

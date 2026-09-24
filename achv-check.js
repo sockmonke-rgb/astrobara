@@ -98,7 +98,58 @@ const file = process.argv[2] || 'astrobara-v2_12_11.html';
     .concat(during.filter(c => !c.covered).map(c => c.name)));
   const lost = during.filter(c => c.covered && !seenClear.has(c.name)).map(c => c.name);
 
+  // The BOARD tab, left open while you play. paintBoardPane() had one caller —
+  // showTab('board') — so the list froze at whatever it said when the tab was
+  // opened: [LOCKED] rows that were no longer locked, and a count that never
+  // moved. Reported from a real run at V2.12.12 with nine of eleven earned and
+  // the pane still showing SKELETON CREW locked.
+  const board = await page.evaluate(() => {
+    const tools = document.getElementById('tools');
+    if (tools) tools.classList.remove('shut');
+    showTab('board');
+    const pane = document.getElementById('pane-board');
+    const read = () => {
+      const txt = pane.innerText;
+      const m = txt.match(/UNLOCKED[^\n]*of\s+(\d+)/);
+      return {
+        count: Number((txt.match(/UNLOCKED\s*\u00b7\s*(\d+)/) || [])[1]),
+        locked: (txt.match(/\[LOCKED\]/g) || []).length,
+        of: m ? Number(m[1]) : 0
+      };
+    };
+    const before = read();
+
+    // Something not yet earned, awarded the way the game awards it.
+    const id = ACHV.map(a => a.id).filter(i => !loadAchv().got[i])[0] || null;
+    if (!id) return { skipped: 'everything was already awarded' };
+    award(id);
+    const after = read();
+
+    // And the reader's place in the list is kept across the repaint.
+    const body = document.getElementById('toolsbody');
+    let scrollKept = true;
+    if (body && body.scrollHeight > body.clientHeight + 4) {
+      body.scrollTop = 20;
+      const id2 = ACHV.map(a => a.id).filter(i => !loadAchv().got[i])[0];
+      if (id2) { award(id2); scrollKept = body.scrollTop === 20; }
+    }
+    return { before, after, id, scrollKept, stored: !!loadAchv().got[id] };
+  });
+  if (board.skipped) {
+    console.log('  note  board repaint not exercised: ' + board.skipped);
+  } else {
+    console.log(`  board pane on award of ${board.id}: ` +
+                `${board.before.count}/${board.before.of} -> ${board.after.count}/${board.after.of}, ` +
+                `[LOCKED] rows ${board.before.locked} -> ${board.after.locked}`);
+  }
+
   const checks = [
+    ['the open board pane counts the new award',
+      !!board.skipped || (board.stored && board.after.count === board.before.count + 1)],
+    ['the row it belongs to stops saying [LOCKED]',
+      !!board.skipped || board.after.locked === board.before.locked - 1],
+    ['the repaint keeps the reader\'s scroll position',
+      !!board.skipped || board.scrollKept === true],
     ['self-sufficiency awarded something', awarded > 0],
     ['a card was announced', total.length > 0],
     ['nothing was announced only underneath the verdict', lost.length === 0],

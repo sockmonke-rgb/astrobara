@@ -1,6 +1,6 @@
 # Astrobara — test plan
 
-**Plan version 1.18** · 23 September 2026 · covers Astrobara V2.12.12
+**Plan version 1.19** · 23 September 2026 · covers Astrobara V2.12.13
 
 The single HTML file is the unit under test; there is no build step to verify.
 The plan is versioned separately from the game: quote both when reporting, as in
@@ -263,6 +263,16 @@ agree, and the device is the one that counts.*
   Guards V2.12.12. Check at 135% and at XXL text — the grouping added markup to
   the pane, and short clues exist so the docked 268px panel keeps one line per
   award.
+
+- **V35 — a panel open while you play keeps up.** Open TOOLS · BOARD and leave
+  it open. Earn something — SKELETON CREW on a small colony is the easy one —
+  and watch the pane you are already looking at: the row stops saying
+  `[LOCKED]` and the `UNLOCKED · n of 11` count goes up, without switching tabs
+  or reopening anything. Then scroll partway down the list and earn another:
+  you stay where you were. Finish a run and the new board row appears the same
+  way. Guards V2.12.13. The general form of this check is worth running on any
+  panel that can be left open: DISPLAY and RUN both repaint themselves, BOARD
+  did not, and nothing in the plan asked.
 
 ### Zoom stability
 
@@ -679,6 +689,8 @@ deterministic, so a seed and a move list reproduces it exactly.
 | 1.17 | 23 Sep 2026 | V2.12.11 | V23's automated half in `verify.js` now measures distance in RGB rather than difference in brightness, after it passed here at 20.8 and failed on the CI runner at 11.0 on the same row. No build change. Brightness is the wrong question for this palette: the tunnel is blue, dry regolith is brown and ice-bearing rock is blue-grey, so most of what separates them is hue. The old metric scored the warm fusion tunnel against blue-grey ice — two colours nobody could confuse — the same as the cold tunnel against that ice, which is the genuinely close pair. Threshold 18, against a floor of 23.3 on the runner and 32.6 here, and 12.7 for a tunnel repainted to within a shade of the rock. The manual check is unchanged: the phone, in daylight, is still what decides. |
 
 | 1.18 | 23 Sep 2026 | V2.12.12 | V34 for the achievement clue text saying what the code tests. Reported from a real run: a colony came through the dark on sol 1 and the list read 0 of 11, which was correct — "held a night" means twelve dark turns on fusion, not reaching sunrise. Nine of eleven awards sit behind the self-sufficiency return and only four admitted it. The board now states the condition once above a group. P13 and P14 added to `verify.js`: P13 checks the grouping flag against which side of that return each `award()` is on, P14 that a short clue declares the long form the unlock card needs. Both fail on V2.12.11. |
+
+| 1.19 | 23 Sep 2026 | V2.12.13 | V35 for a panel left open while you play. Reported at turn 239: nine of eleven earned, the store and the diagnostics both right, the BOARD pane still showing SKELETON CREW locked — `paintBoardPane()` had one caller, `showTab`. Older than the grouping; V2.12.12 only gave you a reason to sit on that tab. Three assertions added to `achv-check.js`, two of which fail on V2.12.12. Also the heading V2.12.12's case-sensitive sweep missed. |
 
 When a build fixes something this plan did not catch, add the check here in the
 same commit as the fix, and note the build it was first seen in.
