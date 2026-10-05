@@ -12,7 +12,7 @@
 
 const { chromium } = require('playwright');
 const path = require('path');
-const file = process.argv[2] || 'astrobara-v2_12_11.html';
+const file = process.argv[2] || 'index.html';
 
 (async () => {
   const browser = await chromium.launch();

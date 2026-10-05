@@ -652,7 +652,7 @@ and got wrong.
 
 ### What CI runs on every push
 
-`.github/workflows/checks.yml` runs four jobs against `index.html`, so a commit
+`.github/workflows/ci.yml` runs five jobs against `index.html`, so a commit
 made on a phone is still checked: `preflight.py` (Tier 0 static), `verify.js`
 (Tier 0 in a real page, plus V23 measured off the rendered canvas),
 `cine-check.js` (V26's sky assertion, V27, V28, V31's pan residual and V32's

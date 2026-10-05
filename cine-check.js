@@ -7,7 +7,7 @@
 const { chromium } = require('playwright');
 const path = require('path');
 
-const file = process.argv[2] || 'astrobara-v2_12_1.html';
+const file = process.argv[2] || 'index.html';
 
 function snap() {
   // Runs in the page.
