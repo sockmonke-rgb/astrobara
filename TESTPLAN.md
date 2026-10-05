@@ -438,7 +438,7 @@ For each handedness — BALANCED, LEFT, RIGHT — with glass on and with glass o
 | iPad | 768×1024 | 1024×768 | width in portrait |
 | Rotated view (portrait gate ON) | 402×844 | — | both |
 | Claude app file preview, iPad | 580×586 | — | width; plays upright |
-| claude.ai artifact viewer, iPad | 580×650, top inset ~60 | — | width; host pads the root |
+| claude.ai artifact viewer, iPad | 580×650, top inset 64 | — | width; host pads the root |
 | iPad split view | 678×744 | — | width; plays upright |
 
 ---
