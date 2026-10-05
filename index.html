@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  ASTROBARA V2.12.14
+  ASTROBARA V2.12.15
   A 3X lunar survival colony builder. Single file, no dependencies, no network.
 
   MIT License
@@ -40,7 +40,7 @@
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <meta name="author" content="Mark Florentino LLC, Kittenmancer">
-<meta name="description" content="Astrobara V2.12.14 — a 3X lunar survival colony builder with seeded sites. MIT licensed.">
+<meta name="description" content="Astrobara V2.12.15 — a 3X lunar survival colony builder with seeded sites. MIT licensed.">
 <style>
 :root{
   --vacuum:#07080B;
@@ -2415,19 +2415,40 @@ function referenceBaseCell(){
   return val;
 }
 
-// A colony opens looking at its crest, which is where the sun is and where the
-// first decision is. Centring showed the middle of a map twice the height of the
-// screen, most of it ground nobody has dug yet.
-function cornerView(){
-  const st = document.getElementById('stage');
-  if(st && st.clientWidth > 8){ stageW = st.clientWidth; stageH = st.clientHeight; }
-  baseCell = referenceBaseCell();
-  zoom = 1;
-  cell = baseCell;
+// The view a colony opens on: FIT, then the shortest pan that brings the sun
+// into the clear area between the panels, then the same for the habitat the
+// lander set down.
+//
+// The sun rises on column 0 of every site. The map is as wide as the screen,
+// so FIT — which centres it on the clear area — leaves the west edge, and the
+// sun, under the glass. The habitat goes last so it wins: about one site in six
+// lands the colony at the east edge, and on a phone the two do not both fit
+// beside the build column. The herd is what you are playing for.
+function startView(){
+  fitView();
   const gi = glassInset();
-  panX = (cell*CFG.cols - stageW)/2 + gi.l;
-  panY = (cell*CFG.rows - stageH)/2 + gi.t;
-  layout(); draw();
+  const L = gi.l, R = stageW - gi.r, T = gi.t, B = stageH - gi.b;
+  // the shift that brings [lo, hi] inside [min, max], or none if it is there
+  const into = function(lo, hi, min, max){
+    if(lo < min) return min - lo;
+    if(hi > max) return max - hi;
+    return 0;
+  };
+  const sun = sunGeom(G.turn);
+  if(sun.up){
+    const d = sunDisc(sun);
+    panX += into(d.x - d.r, d.x + d.r, L, R);
+    panY += into(d.y - d.r, d.y + d.r, T, B);
+    layout();
+  }
+  const hab = (G.birth || []).filter(function(s){ return s.k === 'b' && s.type === 'HAB'; })[0];
+  if(hab){
+    const hx = offX + hab.x*cell, hy = offY + hab.y*cell;
+    panX += into(hx, hx + cell, L, R);
+    panY += into(hy, hy + cell, T, B);
+    layout();
+  }
+  draw();
 }
 
 function fitView(){
@@ -3256,6 +3277,15 @@ function roundRect(x,y,w,h,r){
 }
 
 
+// Where drawSky() puts the sun, in stage pixels. One function, so the view
+// that frames the sun and the sky that paints it cannot disagree.
+function sunDisc(sun){
+  const skyRows=Math.min(...G.surf);
+  return { x: offX+sun.col*cell+cell*.5,
+           y: offY+cell*(skyRows*(1-sun.sin*.86)*.90+.40),
+           r: Math.max(4,cell*.48) };
+}
+
 function drawSky(sun,night){
   const w=stageW,h=stageH;
 
@@ -3327,10 +3357,8 @@ function drawSky(sun,night){
   ctx.restore();
 
   if(!night){
-    const sxp=offX+sun.col*cell+cell*.5;
-    const skyRows=Math.min(...G.surf);
-    const syp=offY+cell*(skyRows*(1-sun.sin*.86)*.90+.40);
-    const r=Math.max(4,cell*.48);
+    const disc=sunDisc(sun);
+    const sxp=disc.x, syp=disc.y, r=disc.r;
 
     // Broad polar glare.
     const halo=ctx.createRadialGradient(sxp,syp,0,sxp,syp,r*8);
@@ -4882,7 +4910,9 @@ function beginRun(){
   resize();
   // The splash comes first and BEGIN is the cue. A resumed colony has already
   // landed and never sees the splash, so it never sees the opening either.
-  if(first) startCine(false);
+  // Framed here as well as in startCine(), so a colony with the animatic off,
+  // or with Reduce Motion on, opens on the same view as one that plays it.
+  if(first){ startView(); startCine(false); }
 }
 document.getElementById('begin').addEventListener('click', beginRun);
 document.getElementById('splash').addEventListener('click', beginRun);
@@ -4928,8 +4958,7 @@ function closePanels(){
   if(over){ endOverIntro(); over.style.display = 'none'; }
   pumpAchv();
   setSurvey(false);
-  fitView();
-  cornerView();
+  startView();
 }
 
 function restart(seed){
@@ -5562,14 +5591,16 @@ function startCine(force, survey){
   endCine();
   // The probe crosses the whole map, so the animatic is composed for the whole
   // map. Played on a zoomed-in, panned-off view it sweeps past the edges of
-  // the frame and hands the colony back in a corner. fitView() is what
-  // newGame() does, so a replay now opens and closes framed the way the
-  // opening does — and on the opening itself this is a no-op, because the view
-  // was just fitted.
+  // the frame and hands the colony back in a corner, so a replay is fitted.
   //
-  // Before the .cine class goes on: fitView measures the panes through
+  // The opening is not. It ends on turn 0 with the sun rising on column 0,
+  // which FIT puts under the glass on a map as wide as the screen, so it gets
+  // the view a colony opens on. V2.12.9 fitted both and called it a no-op on
+  // the opening; restart() had left the view on the sun, and it was not.
+  //
+  // Before the .cine class goes on: both measure the panes through
   // glassInset(), and they should be measured sitting normally.
-  fitView();
+  if(survey) fitView(); else startView();
   cineClock = 0; cineLast = 0; cineSpeed = 1;
   cineLit = null; cineSeen = null; cineHudIn = false;
   cineSurvey = !!survey;
@@ -5635,7 +5666,7 @@ function endCine(){
 // Everything in G is plain data, so the run round-trips through JSON as-is.
 const SAVE_KEY = 'astrobara.run';
 const SAVE_VERSION = 2;
-const BUILD = 'V2.12.14';
+const BUILD = 'V2.12.15';
 let saveWorks = true;
 
 // Awards belong to a major version. Dev builds and release candidates inside one

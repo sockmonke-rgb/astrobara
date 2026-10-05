@@ -1,6 +1,6 @@
 # Astrobara — test plan
 
-**Plan version 1.20** · 24 September 2026 · covers Astrobara V2.12.14
+**Plan version 1.21** · 5 October 2026 · covers Astrobara V2.12.15
 
 The single HTML file is the unit under test; there is no build step to verify.
 The plan is versioned separately from the game: quote both when reporting, as in
@@ -196,11 +196,20 @@ agree, and the device is the one that counts.*
   Guards V2.12.8, where the replay wound the opening's layout back over the
   colony before drawing a frame.
   **And it reframes.** Zoom well in, pan into a corner, then replay: the pass
-  should snap to the whole-map view first — the same framing FIT gives and a
+  should snap to the whole-map view first — the same framing FIT gives, not a
   new colony opens with — play there, and leave it there. Guards V2.12.9. *V2.12.0 re-enacted the
   landing on top of the colony and reset the turn to zero, and the next save
   wrote that down — this check is the one that would have caught it.* Guards
   V2.12.1.
+- **V37 — a colony opens with the sun in view.** Land somewhere new and let
+  the opening play through. When the panels come back, the sun is on screen at
+  the west edge, clear of the panels, at dawn — on the phone and on the iPad,
+  and with **Controls** on LEFT, where the build column is on that side. Then
+  switch the animatic off and land again: the same view. Then land on a site
+  whose colony sets down at the east edge (`RUN · LAND SOMEWHERE RANDOM` until
+  one does — about one in six): the habitat must be in view and clear of the
+  build column, and there the sun is allowed to be off the left edge. Guards
+  V2.12.15, where the opening fitted the map and put the sun under the glass.
 - **V28 — LAND HERE AGAIN.** On the RUN tab, under THIS SITE. Two taps, same as
   the other two: the first arms it, the second discards the colony and lands a
   fresh one **on the same code**, on the splash, with the full opening. Check
@@ -656,7 +665,8 @@ and got wrong.
 made on a phone is still checked: `preflight.py` (Tier 0 static), `verify.js`
 (Tier 0 in a real page, plus V23 measured off the rendered canvas),
 `cine-check.js` (V26's sky assertion, V27, V28, V31's pan residual and V32's
-glow overhang, on a colony set to turn 706), `achv-check.js` (V33, on a colony
+glow overhang, on a colony set to turn 706, and V37 at the phone and iPad
+shapes), `achv-check.js` (V33, on a colony
 driven to self-sufficiency), and `survival.js`
 (400 colonies against the agreed survival table). None of them replaces a
 device: every check in Tier 1 is here because it can only be seen on the phone.
@@ -713,6 +723,8 @@ deterministic, so a seed and a move list reproduces it exactly.
 | 1.19 | 23 Sep 2026 | V2.12.13 | V35 for a panel left open while you play. Reported at turn 239: nine of eleven earned, the store and the diagnostics both right, the BOARD pane still showing SKELETON CREW locked — `paintBoardPane()` had one caller, `showTab`. Older than the grouping; V2.12.12 only gave you a reason to sit on that tab. Three assertions added to `achv-check.js`, two of which fail on V2.12.12. Also the heading V2.12.12's case-sensitive sweep missed. |
 
 | 1.20 | 24 Sep 2026 | V2.12.14 | V36 for ESCAPE VELOCITY, the twelfth award — every other award earned — and for the star rating now on every board row. Tier 3 is twelve runs' worth of awards, not eleven. THE LONG SURVEY renamed ABUNDANCE; same id, same condition, so nothing already earned is affected. Model change: achievement conditions, so Tier 3 in full before release. |
+
+| 1.21 | 5 Oct 2026 | V2.12.15 | V37: a colony opens with the sun in view, unless the lander set down at the east edge, where the habitat comes first. Reported off an iPad; V2.12.9 had fitted the opening, which puts the west edge — where the sun rises on every site — under the glass. `cine-check.js` checks it at the phone and iPad shapes, animatic on and off, on a west and an east site, and fails on V2.12.14. V27's note no longer says FIT and a new colony share a framing. The glow-overhang check in `cine-check.js` now draws the frame it reads, after it was found failing one run in two on a sound build. |
 
 When a build fixes something this plan did not catch, add the check here in the
 same commit as the fix, and note the build it was first seen in.

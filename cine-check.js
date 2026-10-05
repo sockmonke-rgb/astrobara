@@ -328,6 +328,12 @@ function snap() {
     null, { polling: 8, timeout: 20000 });
   await wide.waitForTimeout(200);
   const over = await wide.evaluate(`(() => {
+    // The frame under test is drawn here, and read in the same tick. Reading
+    // whatever the canvas held at the time raced anything else that calls
+    // draw() — the boot's delayed resize() lands mid-animatic and repaints the
+    // night map without the sky over it, until the next cineFrame(). That
+    // failed this check one run in two, on builds with and without the fault.
+    cineFrame(performance.now());
     const c = ctx.canvas, kx = c.width / stageW;
     const mapL = Math.round(offX * kx);
     const mapR = Math.round((offX + CFG.cols * cell) * kx);
@@ -356,6 +362,80 @@ function snap() {
   checks.push(
     ['no glow past the ends of the map during the survey',
      over.skipped === true || over.warm === 0]
+  );
+
+  // The view a colony opens on. The sun rises on column 0 of every site, and
+  // FIT centres a map as wide as the screen on the clear area between the
+  // panels — which puts the west edge, and the sun, under the glass. V2.12.9
+  // fitted the opening and the sun went with it. The habitat outranks the
+  // sun: on a site that lands at the east edge the two do not both fit beside
+  // the build column on a phone, and the habitat is the one that has to be
+  // there. Phone and iPad shapes, opening played and switched off, a site that
+  // lands west and one that lands east.
+  //
+  // Measured from the arithmetic drawSky() uses, written out here rather than
+  // read from the build, so the check does not depend on the code under test.
+  const openView = `(() => {
+    const sun = sunGeom(G.turn);
+    const skyRows = Math.min(...G.surf);
+    const sx = offX + sun.col*cell + cell*.5;
+    const sy = offY + cell*(skyRows*(1-sun.sin*.86)*.90+.40);
+    const r = Math.max(4, cell*.48);
+    const gi = glassInset();
+    const L = gi.l - 0.5, R = stageW - gi.r + 0.5, T = gi.t - 0.5, B = stageH - gi.b + 0.5;
+    const hab = G.birth.filter(s => s.k === 'b' && s.type === 'HAB')[0];
+    const hx = offX + hab.x*cell, hy = offY + hab.y*cell;
+    return {
+      turn: G.turn, habCol: hab.x, offX: Math.round(offX),
+      sunIn: sun.up && sx - r >= L && sx + r <= R && sy - r >= T && sy + r <= B,
+      habIn: hx >= L && hx + cell <= R && hy >= T && hy + cell <= B
+    };
+  })()`;
+  const opened = [];
+  for (const dev of [{ n: 'phone', w: 812, h: 402, dpr: 3 }, { n: 'ipad', w: 1133, h: 712, dpr: 2 }]) {
+    for (const cine of [true, false]) {
+      const p = await browser.newPage({ viewport: { width: dev.w, height: dev.h },
+                                        deviceScaleFactor: dev.dpr, hasTouch: true, isMobile: true });
+      p.on('pageerror', e => errs.push(String(e)));
+      await p.goto('file://' + path.resolve(file));
+      await p.waitForFunction(() => typeof G !== 'undefined' && !!G);
+      // One site whose lander sets down at the west edge, one at the east.
+      const sites = await p.evaluate(() => {
+        let west = null, east = null;
+        for (let s = 1; s < 4000 && (west === null || east === null); s++) {
+          const hab = generateSite(s * 7919).sx + 2;
+          if (west === null && hab <= 6) west = s * 7919;
+          if (east === null && hab >= CFG.cols - 2) east = s * 7919;
+        }
+        return { west, east };
+      });
+      for (const [kind, seed] of [['west', sites.west], ['east', sites.east]]) {
+        await p.evaluate(`(() => { saveWorks = false; OPT.cine = ${cine}; restart(${seed}); })()`);
+        await p.waitForTimeout(150);
+        // BEGIN, the way a player starts a colony.
+        await p.evaluate(() => document.getElementById('begin').click());
+        if (cine) {
+          await p.waitForFunction(() => !!cineRaf, null, { timeout: 5000 });
+          await p.evaluate(() => { cineSpeed = 8; });
+          await p.waitForFunction(() => !cineRaf, null, { timeout: 20000 });
+        }
+        await p.waitForTimeout(150);
+        const v = await p.evaluate(openView);
+        opened.push(Object.assign({ dev: dev.n, cine, kind }, v));
+      }
+      await p.close();
+    }
+  }
+  for (const o of opened) {
+    console.log(`  opens ${o.dev.padEnd(5)} ${o.cine ? 'animatic' : 'no anim '} ${o.kind} ` +
+                `(hab col ${o.habCol}): sun ${o.sunIn ? 'in view' : 'OUT'}, ` +
+                `habitat ${o.habIn ? 'in view' : 'OUT'}, offX ${o.offX}, turn ${o.turn}`);
+  }
+  const west = opened.filter(o => o.kind === 'west'), east = opened.filter(o => o.kind === 'east');
+  checks.push(
+    ['a colony opens with the sun in view', west.every(o => o.sunIn && o.habIn)],
+    ['an east-edge colony opens with its habitat in view', east.every(o => o.habIn)],
+    ['every opening ends on turn 0', opened.every(o => o.turn === 0)]
   );
 
   let bad = 0;

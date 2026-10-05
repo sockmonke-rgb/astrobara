@@ -1,3 +1,82 @@
+## V2.12.15
+
+**A colony opens with the sun in view.** Reported off an iPad on DARK-POND-34:
+the opening ended with the sun off the left edge of the screen, and it took a
+pan to find it.
+
+The sun rises on column 0 of every site — `sunGeom(0)` puts it there. The map
+is as wide as the screen, and FIT centres it on the clear area between the
+panels, so the west edge goes under the glass and the sun goes with it. On the
+iPad the opening ended at `offX -80`, the sun's disc at x −63.
+
+This was V2.12.9. It put `fitView()` at the top of `startCine()` so the survey
+replay would not play on a zoomed-in corner, and said that on the opening the
+call was a no-op "because the view was just fitted". It was not: `restart()`
+had left the view on `cornerView()`, anchored to the west edge, and the fit
+moved it. The splash showed the sun and the opening took it away.
+
+### Changed
+
+- **`startView()` is the view a colony opens on.** FIT's framing, then the
+  shortest pan that puts the sun's disc inside the clear area, then the shortest
+  pan that puts the lander's habitat inside it.
+- **The habitat wins.** Landers set down near one edge or the other, and about
+  one site in six lands the colony at the east edge: of 3,000 sites, 510 put
+  the habitat past column 27, which is where a phone's clear area ends, and 382
+  past column 29, where an iPad's does. On those, the sun and the habitat do not
+  both fit beside the build column, so the habitat is in view and the sun is off
+  the left edge, as before.
+- It is used by `restart()`, by BEGIN and by the opening. Framing on BEGIN too
+  means a colony with the animatic off, or with Reduce Motion on, opens on the
+  same view as one that plays it. `cornerView()` is gone; `startView()` replaces
+  it.
+- **The survey replay is still fitted.** It plays mid-run, under a sun that is
+  wherever the turn has put it.
+- **`sunDisc()`** is where `drawSky()` draws the sun, lifted out of `drawSky()`
+  so the view that frames the sun and the sky that paints it are the same
+  arithmetic.
+- FIT, the double tap and Reset map view are untouched. No markup, no CSS,
+  nothing in a turn.
+
+### Fixed
+
+- **A colony at either edge could open with its habitat cut off.** Found by the
+  new check rather than reported. On V2.12.14, after the opening, on a phone
+  812 wide: a west-edge colony's habitat on column 3 sat 9px off the left edge,
+  and an east-edge one on column 32 was under the build column — on the iPad as
+  well. Both are in view now.
+
+### Verified
+
+- **New in `cine-check.js`, 30 assertions now.** Phone 812×402 and iPad
+  1133×712, opening played and switched off, on a site that lands west and one
+  that lands east: the sun's disc inside the clear area after the opening on the
+  west site, the habitat inside it on both. The sun is measured with
+  `drawSky()`'s arithmetic written out in the test, not read from the build.
+  **V2.12.14 fails two of the three**: sun out on every played opening, habitat
+  out on every east site and on the phone's west site.
+- **The glow-overhang check is deterministic now.** It failed one run in two,
+  on V2.12.14 as much as here, with exactly the faulty build's numbers. That
+  turned out to be a real frame rather than a stale one: the boot's delayed
+  `resize()` lands mid-animatic and calls `draw()` on the borrowed night turn,
+  which paints the glow with no sky over it until the next `cineFrame()`. The
+  check now draws the frame it tests and reads it in the same tick. Five runs
+  clean here, and five failures at 239 warm pixels with V2.12.7's fault put
+  back.
+- Tier 0 clean, `verify.js` passing, `achv-check.js` 8/8. The survival bot
+  matches the V2.11.1 baseline exactly — 93.9 / 96.3 / 91.3 / 86.6 / 85.5,
+  90.8 overall.
+
+### Worth watching
+
+- **A one-frame flash during the opening.** The race above is in the game, not
+  only the test: anything that calls `draw()` while the animatic holds a night
+  turn — a rotation, the boot's delayed resize — shows one frame of the bare
+  night map. It is about 16ms and has not been reported. If it ever is, the fix
+  is for `draw()` to defer to `cineFrame()` while `cineRaf` is live.
+- On the phone, Earth (column 28.5) now opens under the build column on a
+  west-edge site. It is a landmark, not a control.
+
 ## V2.12.14
 
 **A twelfth award, a rename, and the star rating on the board.**

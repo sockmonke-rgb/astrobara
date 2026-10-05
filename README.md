@@ -5,7 +5,7 @@ on the Shackleton crater rim, where the antagonist is the night.
 
 One HTML file. No dependencies, no build step, no network. Open it and play.
 
-**V2.12.14** · MIT · Mark Florentino LLC and Kittenmancer
+**V2.12.15** · MIT · Mark Florentino LLC and Kittenmancer
 
 ---
 
@@ -104,9 +104,11 @@ and the hold, and what the beam uncovers is the colony as it is today, in
 today's light. To watch the landing again, land on the site again:
 **LAND HERE AGAIN** on the RUN tab does that without typing the code.
 
-Either one fits the view first. The probe crosses the whole map, so the
-animatic is composed for the whole map, and it opens and closes on the framing
-a new colony opens with rather than on whatever corner you were zoomed into.
+A new colony opens with the sun in view. It rises on the west edge of every
+site, and the opening ends with that edge clear of the panels — unless the
+lander set down at the east edge, where the sun and the habitat do not both fit
+beside the build column on a phone. Then the habitat wins. A replay fits the
+whole map first, so it never plays on whatever corner you were zoomed into.
 
 ## Everything is deterministic
 
@@ -152,7 +154,7 @@ afterwards.
   arithmetic, line by line, and the log. Nothing in this game is hidden from
   you.
 - Pinch to zoom, drag to pan. **FIT**, a double tap, or **DISPLAY · Reset map
-  view** returns to the whole colony. A new colony opens on its crest.
+  view** returns to the whole colony. A new colony opens with the sun in view.
 - When a colony ends, the card reads itself out: the verdict fills from the
   top, the run types line by line, and the buttons appear once it is done. A
   tap speeds it up; a second tap ends it.
