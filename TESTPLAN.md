@@ -1,6 +1,6 @@
 # Astrobara — test plan
 
-**Plan version 1.22** · 5 October 2026 · covers Astrobara V2.12.16
+**Plan version 1.23** · 5 October 2026 · covers Astrobara V2.12.17
 
 The single HTML file is the unit under test; there is no build step to verify.
 The plan is versioned separately from the game: quote both when reporting, as in
@@ -404,6 +404,13 @@ For each handedness — BALANCED, LEFT, RIGHT — with glass on and with glass o
   phone held upright: the gate, or the rotated view when the switch is on,
   exactly as before. Guards V2.12.16, where any frame at least as tall as it
   was wide counted as portrait. `verify.js` checks five frame shapes.
+- **V39** — open the build as a claude.ai artifact on the iPad. The bottom lane
+  is there — arrows, FIT, the objective line and the action cell — and the top
+  readout sits just under the viewer's header rather than a header's height
+  below it. Copy diagnostics: the `inset` line names the top inset and reads
+  `body at 0`. Then the Home Screen build, which must look the same as it did.
+  Guards V2.12.17, where the artifact service's own padding and the game's took
+  the top inset twice. `verify.js` checks it with the service's wrapper.
 - **V20b** — with the phone rotation-locked in portrait, the gate offers both
   ways out: unlock rotation, or the switch on the card. Guards V2.10.5.
 - **V20c** — set the phone's text size large and hold it in portrait: every
@@ -431,6 +438,7 @@ For each handedness — BALANCED, LEFT, RIGHT — with glass on and with glass o
 | iPad | 768×1024 | 1024×768 | width in portrait |
 | Rotated view (portrait gate ON) | 402×844 | — | both |
 | Claude app file preview, iPad | 580×586 | — | width; plays upright |
+| claude.ai artifact viewer, iPad | 580×650, top inset ~60 | — | width; host pads the root |
 | iPad split view | 678×744 | — | width; plays upright |
 
 ---
@@ -671,8 +679,8 @@ and got wrong.
 
 `.github/workflows/ci.yml` runs five jobs against `index.html`, so a commit
 made on a phone is still checked: `preflight.py` (Tier 0 static), `verify.js`
-(Tier 0 in a real page, plus V23 measured off the rendered canvas and V38 at
-five frame shapes),
+(Tier 0 in a real page, plus V23 measured off the rendered canvas, V38 at
+five frame shapes, and V39 inside the artifact service's wrapper),
 `cine-check.js` (V26's sky assertion, V27, V28, V31's pan residual and V32's
 glow overhang, on a colony set to turn 706, and V37 at the phone and iPad
 shapes), `achv-check.js` (V33, on a colony
@@ -736,6 +744,8 @@ deterministic, so a seed and a move list reproduces it exactly.
 | 1.21 | 5 Oct 2026 | V2.12.15 | V37: a colony opens with the sun in view, unless the lander set down at the east edge, where the habitat comes first. Reported off an iPad; V2.12.9 had fitted the opening, which puts the west edge — where the sun rises on every site — under the glass. `cine-check.js` checks it at the phone and iPad shapes, animatic on and off, on a west and an east site, and fails on V2.12.14. V27's note no longer says FIT and a new colony share a framing. The glow-overhang check in `cine-check.js` now draws the frame it reads, after it was found failing one run in two on a sound build. |
 
 | 1.22 | 5 Oct 2026 | V2.12.16 | V38: a frame counts as portrait only when it is a quarter taller than it is wide. Reported from the Claude app's file preview on an iPad, 580×586, which was gated or turned sideways. Two fixture rows for near-square frames. `verify.js` checks five frame shapes with rotation on and off, and fails on V2.12.15. |
+
+| 1.23 | 5 Oct 2026 | V2.12.17 | V39: inside the claude.ai artifact viewer the bottom lane is on screen. Reported on an iPad: the service's wrapper pads the root by the safe area, the game insets itself by it too, and the top inset counted twice pushed the lane off the frame. Fixture row for the viewer. `verify.js` loads the build inside the service's wrapper under a 60px inset — through the DevTools protocol, or written into `env()` on the older Chromium CI pins — and fails on V2.12.16. |
 
 When a build fixes something this plan did not catch, add the check here in the
 same commit as the fix, and note the build it was first seen in.

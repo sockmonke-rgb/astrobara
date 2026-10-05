@@ -5,7 +5,7 @@ on the Shackleton crater rim, where the antagonist is the night.
 
 One HTML file. No dependencies, no build step, no network. Open it and play.
 
-**V2.12.16** · MIT · Mark Florentino LLC and Kittenmancer
+**V2.12.17** · MIT · Mark Florentino LLC and Kittenmancer
 
 ---
 
@@ -253,9 +253,13 @@ the system's own reduce-transparency setting.
   standalone mode desynchronises the hit test.
 - **Copy diagnostics** puts one block on the clipboard: build, site, turn, view
   and page measurements, text scale, frame rate and each dip with what was open
-  at the time, where the last eight touches began and what they became, every
-  option, achievements, board and log. Paste it with any bug
-  report.
+  at the time, where the last eight touches began and what they became, the
+  safe-area insets the host reports and where it has put the page, every
+  option, achievements, board and log. Paste it with any bug report.
+
+The game insets itself by the safe area and ignores any padding a host puts on
+the page around it, so it lays out the same from the Home Screen, in Safari and
+inside the claude.ai artifact viewer.
 
 The pane also reports what the map is doing — zoom, cell against base cell,
 stage size against map size — which is what to screenshot if the view ever

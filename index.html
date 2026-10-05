@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  ASTROBARA V2.12.16
+  ASTROBARA V2.12.17
   A 3X lunar survival colony builder. Single file, no dependencies, no network.
 
   MIT License
@@ -40,7 +40,7 @@
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <meta name="author" content="Mark Florentino LLC, Kittenmancer">
-<meta name="description" content="Astrobara V2.12.16 — a 3X lunar survival colony builder with seeded sites. MIT licensed.">
+<meta name="description" content="Astrobara V2.12.17 — a 3X lunar survival colony builder with seeded sites. MIT licensed.">
 <style>
 :root{
   --vacuum:#07080B;
@@ -67,6 +67,13 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;
   -webkit-text-size-adjust:100%;text-size-adjust:100%;}
 html,body{margin:0;padding:0;height:100%;width:100%;overflow:hidden;background:var(--vacuum);position:fixed;}
+/* #app insets itself by the safe area below, and that is the only count. A
+   host may serve the page inside a document of its own that pads the root by
+   the same insets — the claude.ai artifact viewer does — which moved body down
+   by the top inset and #app by it again, and pushed the bottom lane off the
+   frame. :root{} matches that rule's specificity and comes after it. */
+:root{padding:0;}
+body{top:0;left:0;}
 body{
   font-size:calc(13px * var(--tsb));
   font-family:ui-monospace,"SF Mono",Menlo,Consolas,"Roboto Mono",monospace;
@@ -4442,6 +4449,26 @@ function paintBoardPane(){
   });
 }
 
+// The safe-area insets the host reports. Only CSS can read env(), so it is
+// asked of a throwaway element.
+function safeInsets(){
+  const out = { t:0, r:0, b:0, l:0 };
+  try {
+    const p = document.createElement('div');
+    p.style.cssText = 'position:fixed;visibility:hidden;pointer-events:none;'
+      + 'padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) '
+      + 'env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);';
+    document.body.appendChild(p);
+    const cs = getComputedStyle(p);
+    out.t = Math.round(parseFloat(cs.paddingTop) || 0);
+    out.r = Math.round(parseFloat(cs.paddingRight) || 0);
+    out.b = Math.round(parseFloat(cs.paddingBottom) || 0);
+    out.l = Math.round(parseFloat(cs.paddingLeft) || 0);
+    p.remove();
+  } catch(err){ /* no view to measure */ }
+  return out;
+}
+
 function diagnosticsText(){
   const L = [];
   const vv = window.visualViewport;
@@ -4477,6 +4504,15 @@ function diagnosticsText(){
                              + ' @' + (vv.scale||1).toFixed(2) : 'n/a')
        + '  dpr ' + (window.devicePixelRatio||1)
        + (rotated ? '  ROTATED' : ''));
+  // What the host reports as covered, and where it has put us. A body that is
+  // not at 0, or a stage short of the page by more than the insets, means a
+  // host is laying the page out for us.
+  const si = safeInsets();
+  let framed = false;
+  try { framed = window.top !== window.self; } catch(err){ framed = true; }
+  L.push('inset t' + si.t + ' r' + si.r + ' b' + si.b + ' l' + si.l
+       + '  body at ' + Math.round(document.body.getBoundingClientRect().top)
+       + (framed ? '  framed' : ''));
   if(OPT.fps && fpsWins){
     L.push('fps   now '+fpsNow+'  low '+fpsWorst+'  avg '+Math.round(fpsSum/fpsWins)
          + '  over '+fpsWins+'s  dips<'+FPS_DIP+' '+fpsDips
@@ -5675,7 +5711,7 @@ function endCine(){
 // Everything in G is plain data, so the run round-trips through JSON as-is.
 const SAVE_KEY = 'astrobara.run';
 const SAVE_VERSION = 2;
-const BUILD = 'V2.12.16';
+const BUILD = 'V2.12.17';
 let saveWorks = true;
 
 // Awards belong to a major version. Dev builds and release candidates inside one

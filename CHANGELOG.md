@@ -1,3 +1,66 @@
+## V2.12.17
+
+**The safe area, counted once.** Reported from the claude.ai artifact viewer on
+an iPad: no controls. The bottom lane — the arrows, FIT, the objective line and
+the action cell — was off the bottom of the frame. The same build was fine
+from the Home Screen.
+
+The artifact service serves the page inside a document of its own, and that
+document's stylesheet pads the root by the safe area:
+
+```
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);
+      padding-bottom:env(safe-area-inset-bottom,0px)}
+```
+
+The viewer reports a top inset of about 60 for the header it lays over the
+frame. `#app` already insets itself by the same `env()` values, so the top
+inset was taken twice. The root padding moved `body` down by it — `body` is
+fixed with `top:auto`, so it sits at its static position, inside that padding —
+and `#app` added it again. `body` is a viewport tall, so whatever it was moved
+down by went off the bottom, and the lane went with it.
+
+### Fixed
+
+- **`:root` carries no padding of its own.** Same specificity as the service's
+  rule and later in the document, so it wins without `!important`.
+- **`body` is pinned to the top left**, so where it sits never depends on what
+  a host does to the root.
+- `#app` goes on insetting itself by the safe area, as it always has: that is
+  the one count. Outside a wrapper, both rules change nothing.
+
+### Added
+
+- **Copy diagnostics · `inset`.** The four safe-area insets, which only CSS can
+  read, where `body` actually sits, and whether the page is in a frame. This
+  report took a screenshot and the stage against the page to read — 582 tall in
+  a 650 frame is 64 of insets — and the next one will say it outright.
+
+### Verified
+
+- **Reproduced headless** with the service's wrapper verbatim, from a read of
+  the published page, at 580×650 with a 60px top inset: stage 576×582 — the
+  numbers in the report — `body` at 60, `#app` at 122, and the lane ending at
+  694 in a 650 frame. V2.12.17 wrapped: `body` at 0, `#app` at 62, the lane
+  ending at 634, identical to the build unwrapped.
+- **New: V39 in `verify.js`.** The build bare and inside the service's wrapper,
+  580×650, a 60px top inset: `#app` 2px inside the inset, once, and the lane
+  inside the frame. **V2.12.16 fails wrapped.** The inset goes in through the
+  DevTools protocol where Chromium has it; the Playwright CI pins predates
+  that, so there the same values are written into the `env()` calls instead.
+  Both routes were run on both builds and agree to the pixel.
+- Tier 0 clean, `verify.js` passing, `cine-check.js` 30/30, `achv-check.js`
+  8/8. The survival bot matches the V2.11.1 baseline exactly, 90.8 overall.
+  Two CSS rules and a diagnostics line; nothing in a turn.
+
+### Worth watching
+
+- **The wrapper is the service's to change.** V39 pins the wrapper as it is
+  today. If the viewer starts padding the root some other way — a margin, a
+  transform on `body` — the pinned `body` holds for anything that moves it by
+  position, but not for a transform. The `body at` figure in Copy diagnostics
+  is the first place it would show.
+
 ## V2.12.16
 
 **A frame that is barely taller than it is wide is not a phone held

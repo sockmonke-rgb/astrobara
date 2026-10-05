@@ -371,6 +371,58 @@ function parseSeeds(text) {
     check('V38', ok, (label + ' ' + w + 'x' + h).padEnd(26) + seen.join(' · '));
   }
 
+  // V39 — the safe area is counted once. The claude.ai artifact service serves
+  // the page inside a document of its own whose stylesheet pads the root by
+  // the safe area, and its iPad viewer reports a top inset for the header it
+  // lays over the frame. #app insets itself by the same amounts, so the top
+  // inset was taken twice and the bottom lane went off the frame: no arrows,
+  // no FIT, no action cell. The wrapper here is the service's, verbatim as of
+  // V2.12.16. The inset is set through the DevTools protocol where Chromium
+  // has it, so the page's own env() values are what move; where it does not —
+  // the Playwright CI pins is older than the override — the same 60 and 4 are
+  // written into the env() calls instead, wrapper and build alike.
+  console.log('\nInside a host document, under a safe-area inset');
+  const WRAP_HEAD = '<!doctype html><html><head><meta charset=utf8><meta name=viewport ' +
+    'content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;' +
+    'box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}' +
+    'html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,' +
+    'BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}' +
+    '[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>\n';
+  const fixed = s => s.replace(/env\(safe-area-inset-top\s*,\s*0px\)/g, '60px')
+                      .replace(/env\(safe-area-inset-bottom\s*,\s*0px\)/g, '4px');
+  let viaCdp = true;
+  {
+    const t0 = await browser.newPage();
+    try { await (await t0.context().newCDPSession(t0)).send('Emulation.setSafeAreaInsetsOverride',
+                                                           { insets: { top: 60, bottom: 4 } }); }
+    catch (e) { viaCdp = false; }
+    await t0.close();
+  }
+  const bare = path.join(OUT, 'bare.html'), wrapped = path.join(OUT, 'wrapped.html');
+  fs.writeFileSync(bare, viaCdp ? src : fixed(src));
+  fs.writeFileSync(wrapped, viaCdp ? WRAP_HEAD + src + '\n</body></html>\n'
+                                   : fixed(WRAP_HEAD + src + '\n</body></html>\n'));
+  console.log('  inset set ' + (viaCdp ? 'through the DevTools protocol' : 'by writing it into env()'));
+  for (const [label, file] of [['bare', bare], ['wrapped', wrapped]]) {
+    const wp = await browser.newPage({ viewport: { width: 580, height: 650 }, deviceScaleFactor: 2 });
+    if (viaCdp) await (await wp.context().newCDPSession(wp)).send('Emulation.setSafeAreaInsetsOverride',
+                                                                 { insets: { top: 60, bottom: 4 } });
+    await wp.goto('file://' + path.resolve(file));
+    await wp.waitForFunction(() => typeof G !== 'undefined' && !!G);
+    const r = await wp.evaluate(`(() => {
+      document.getElementById('splash').style.display = 'none';
+      applyLayout();
+      const box = id => document.getElementById(id).getBoundingClientRect();
+      return { H: innerHeight, app: Math.round(box('app').top), lane: Math.round(box('bottom').bottom),
+               hud: Math.round(box('top').top) };
+    })()`);
+    await wp.close();
+    // #app sits 2px inside the inset, once; the lane ends inside the frame.
+    const ok = r.app === 62 && r.lane <= r.H;
+    check('V39', ok, label.padEnd(8) + 'inset 60 · #app top ' + r.app + ' (want 62) · lane ends ' +
+      r.lane + ' of ' + r.H + (r.lane > r.H ? ' — OFF THE FRAME' : ''));
+  }
+
   await browser.close();
   console.log('\n' + (fails ? fails + ' CHECK(S) FAILED' : 'all checks passed'));
   process.exit(fails ? 1 : 0);
