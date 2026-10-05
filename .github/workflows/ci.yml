@@ -104,3 +104,51 @@ jobs:
           echo '```' >> "$GITHUB_STEP_SUMMARY"
           cat survival.txt >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+  # itch.io gets the same file GitHub Pages serves, and only once every check
+  # above has passed. The itch page used to be a zip uploaded by hand, which is
+  # how it ended up a dozen builds behind the game.
+  #
+  # Every run stages the build and fetches butler, so a pull request proves the
+  # job works without touching the page. Only main pushes — on a push, or from
+  # the Run workflow button on the Actions tab.
+  itch:
+    name: Publish to itch.io
+    needs: [preflight, verify, cine, achv, survival]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      # Only the game goes up. The repo root is also the changelog, the harness
+      # and the test plan, and none of that belongs on the page. The build stamp
+      # goes up with it as the itch version, so the page and the watermark name
+      # the same build.
+      - name: Stage the build
+        run: |
+          mkdir -p itch
+          cp index.html itch/index.html
+          v=$(grep -oP "^const BUILD = '\K[^']+" index.html || true)
+          if [ -z "$v" ]; then echo "::error::no BUILD stamp in index.html"; exit 1; fi
+          echo "BUILD=$v" >> "$GITHUB_ENV"
+          echo "staged $v"; ls -la itch
+      # broth is itch's permanent URL for the latest butler.
+      - name: Get butler
+        run: |
+          curl -fsSL -o butler.zip https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default
+          unzip -q butler.zip -d butler
+          chmod +x butler/butler
+          butler/butler -V
+      - name: Push to sockmonke/astrobara:html5
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+        run: |
+          # Until the key is in the repo's Actions secrets this says so and
+          # stops, rather than turning every run red.
+          if [ -z "$BUTLER_API_KEY" ]; then
+            echo "::warning::BUTLER_API_KEY is not set in Settings > Secrets and variables > Actions, so nothing went to itch.io."
+            exit 0
+          fi
+          # --if-changed: a commit that only touches the docs pushes nothing.
+          butler/butler push itch sockmonke/astrobara:html5 --userversion "$BUILD" --if-changed
+          echo "Pushed $BUILD to https://sockmonke.itch.io/astrobara" >> "$GITHUB_STEP_SUMMARY"
