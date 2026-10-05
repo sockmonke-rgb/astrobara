@@ -336,6 +336,41 @@ function parseSeeds(text) {
   await page.screenshot({ path: path.join(OUT, 'map.png'), clip: { x: 0, y: 0, width: 900, height: 420 } });
   console.log('\nscreenshot: ' + path.join(OUT, 'map.png'));
 
+  // V38 — portrait means clearly tall. `(orientation: portrait)` is true for
+  // anything at least as tall as it is wide, so the Claude app's file preview
+  // on an iPad, 580 by 586, was treated as a phone held upright: the gate with
+  // rotation off, the whole game sideways with it on. A tall frame gets the
+  // gate, or the rotation when it is switched on; anything else gets neither,
+  // whatever the switch says.
+  console.log('\nFrame shapes');
+  const FRAMES = [
+    ['Claude preview', 580, 586, false],
+    ['iPad split view', 678, 744, false],
+    ['iPad upright', 768, 1024, true],
+    ['phone upright', 402, 812, true],
+    ['phone landscape', 812, 402, false],
+  ];
+  for (const [label, w, h, tall] of FRAMES) {
+    const seen = [];
+    let ok = true;
+    for (const auto of [false, true]) {
+      const fp = await browser.newPage({ viewport: { width: w, height: h }, deviceScaleFactor: 2 });
+      await fp.goto('file://' + path.resolve(BUILD_PATH));
+      await fp.waitForFunction(() => typeof G !== 'undefined' && !!G);
+      const r = await fp.evaluate(`(() => {
+        OPT.autorotate = ${auto}; applyLayout();
+        return { rotated: rotated,
+                 gate: getComputedStyle(document.getElementById('portraitgate')).display !== 'none' };
+      })()`);
+      await fp.close();
+      const want = tall ? (auto ? 'rotated' : 'gate') : 'upright';
+      const got = r.rotated ? (r.gate ? 'rotated+gate' : 'rotated') : (r.gate ? 'gate' : 'upright');
+      if (got !== want) ok = false;
+      seen.push('rotate ' + (auto ? 'on ' : 'off') + ' ' + got + (got === want ? '' : ' (want ' + want + ')'));
+    }
+    check('V38', ok, (label + ' ' + w + 'x' + h).padEnd(26) + seen.join(' · '));
+  }
+
   await browser.close();
   console.log('\n' + (fails ? fails + ' CHECK(S) FAILED' : 'all checks passed'));
   process.exit(fails ? 1 : 0);

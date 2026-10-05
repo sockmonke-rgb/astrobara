@@ -1,3 +1,53 @@
+## V2.12.16
+
+**A frame that is barely taller than it is wide is not a phone held
+upright.** Reported from the Claude app's file preview on an iPad, a frame 580
+wide and 586 tall: the game turned itself on its side.
+
+`isPortrait()` asked `(orientation: portrait)`, which is true for any frame at
+least as tall as it is wide. Six pixels made the preview a phone in portrait —
+the whole game sideways with Rotate view in portrait on, and with it off, the
+gate saying TURN YOUR PHONE in a frame that turning the iPad does not change.
+Rotating it bought tiles of 17.2 against 16.9 upright.
+
+### Fixed
+
+- **Portrait is now a frame at least a quarter taller than it is wide**,
+  `(max-aspect-ratio: 4/5)`. While the map is width-bound both ways round,
+  rotating grows the tiles by exactly the frame's height over its width, so the
+  ratio is the whole question: a rotation has to make the tiles at least a
+  quarter bigger to be worth a sideways screen.
+
+  | frame | | upright | rotated | now |
+  |---|---|---|---|---|
+  | phone upright | 402×812 | 11.7 | 23.9 | gate, or rotated |
+  | iPad upright | 768×1024 | 22.5 | 30.1 | gate, or rotated |
+  | iPad split view | 678×744 | 19.8 | 21.9 | **upright** |
+  | Claude preview | 580×586 | 16.9 | 17.2 | **upright** |
+
+- The gate and the rotation both read `isPortrait()`, so they move together.
+  The orientation listener stays on `(orientation: portrait)`: it is there to
+  catch a device turning, which crosses both lines, and a frame that crosses
+  only the new one fires `resize` anyway.
+
+### Verified
+
+- **New: V38 in `verify.js`.** Five frame shapes, rotation on and off: a tall
+  frame gets the gate, or the rotation when it is on; anything else gets
+  neither. **V2.12.15 fails on the preview and on split view**, both ways round.
+- At 580×586 the HUD fits across, the sun is in view at the west edge after
+  the opening, and there are no page errors.
+- Tier 0 clean, `verify.js` passing, `cine-check.js` 30/30, `achv-check.js`
+  8/8. The survival bot matches the V2.11.1 baseline exactly, 90.8 overall.
+  One function, no markup, no CSS, nothing in a turn.
+
+### Worth watching
+
+- A frame between the two lines — wider than 4:5, narrower than square — now
+  plays upright on width-bound tiles, which in a small window can be small: a
+  500×600 window gives 14.7 upright against 17.6 rotated. Nothing reported
+  plays there; if something does, the line is one number.
+
 ## V2.12.15
 
 **A colony opens with the sun in view.** Reported off an iPad on DARK-POND-34:

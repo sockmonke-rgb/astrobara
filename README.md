@@ -5,7 +5,7 @@ on the Shackleton crater rim, where the antagonist is the night.
 
 One HTML file. No dependencies, no build step, no network. Open it and play.
 
-**V2.12.15** · MIT · Mark Florentino LLC and Kittenmancer
+**V2.12.16** · MIT · Mark Florentino LLC and Kittenmancer
 
 ---
 
@@ -198,6 +198,12 @@ typical sites per rating.
 Switches: high-contrast ore and larger glyphs (both on), tile grid lines, glass panels, FPS
 meter, objective hints, the opening animatic, subsurface fog (both on), reveal map
 (review only), and rotate view in portrait.
+
+**Portrait** means a frame at least a quarter taller than it is wide — a phone
+or an iPad held upright. Those show the TURN YOUR PHONE gate, or turn the game
+on its side when Rotate view in portrait is on. A frame nearer square, such as
+a file preview or an iPad split-view window, plays upright with no gate,
+because turning it would barely change the size of a tile.
 
 **Glass panels** covers every floating surface, not only the lanes: the panes,
 the splash and the end card, the achievement card that slides in at the lower

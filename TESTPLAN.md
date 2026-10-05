@@ -1,6 +1,6 @@
 # Astrobara — test plan
 
-**Plan version 1.21** · 5 October 2026 · covers Astrobara V2.12.15
+**Plan version 1.22** · 5 October 2026 · covers Astrobara V2.12.16
 
 The single HTML file is the unit under test; there is no build step to verify.
 The plan is versioned separately from the game: quote both when reporting, as in
@@ -398,6 +398,12 @@ For each handedness — BALANCED, LEFT, RIGHT — with glass on and with glass o
 
 ### The end card
 
+- **V38** — open the build from the Claude app's file preview on the iPad, a
+  frame about 580 by 586. It plays upright: no TURN YOUR PHONE gate, and not
+  turned on its side, with **Rotate view in portrait** on or off. Then a
+  phone held upright: the gate, or the rotated view when the switch is on,
+  exactly as before. Guards V2.12.16, where any frame at least as tall as it
+  was wide counted as portrait. `verify.js` checks five frame shapes.
 - **V20b** — with the phone rotation-locked in portrait, the gate offers both
   ways out: unlock rotation, or the switch on the card. Guards V2.10.5.
 - **V20c** — set the phone's text size large and hold it in portrait: every
@@ -424,6 +430,8 @@ For each handedness — BALANCED, LEFT, RIGHT — with glass on and with glass o
 | iPhone, full-screen browser | 402×844 | 874×390 | height |
 | iPad | 768×1024 | 1024×768 | width in portrait |
 | Rotated view (portrait gate ON) | 402×844 | — | both |
+| Claude app file preview, iPad | 580×586 | — | width; plays upright |
+| iPad split view | 678×744 | — | width; plays upright |
 
 ---
 
@@ -663,7 +671,8 @@ and got wrong.
 
 `.github/workflows/ci.yml` runs five jobs against `index.html`, so a commit
 made on a phone is still checked: `preflight.py` (Tier 0 static), `verify.js`
-(Tier 0 in a real page, plus V23 measured off the rendered canvas),
+(Tier 0 in a real page, plus V23 measured off the rendered canvas and V38 at
+five frame shapes),
 `cine-check.js` (V26's sky assertion, V27, V28, V31's pan residual and V32's
 glow overhang, on a colony set to turn 706, and V37 at the phone and iPad
 shapes), `achv-check.js` (V33, on a colony
@@ -725,6 +734,8 @@ deterministic, so a seed and a move list reproduces it exactly.
 | 1.20 | 24 Sep 2026 | V2.12.14 | V36 for ESCAPE VELOCITY, the twelfth award — every other award earned — and for the star rating now on every board row. Tier 3 is twelve runs' worth of awards, not eleven. THE LONG SURVEY renamed ABUNDANCE; same id, same condition, so nothing already earned is affected. Model change: achievement conditions, so Tier 3 in full before release. |
 
 | 1.21 | 5 Oct 2026 | V2.12.15 | V37: a colony opens with the sun in view, unless the lander set down at the east edge, where the habitat comes first. Reported off an iPad; V2.12.9 had fitted the opening, which puts the west edge — where the sun rises on every site — under the glass. `cine-check.js` checks it at the phone and iPad shapes, animatic on and off, on a west and an east site, and fails on V2.12.14. V27's note no longer says FIT and a new colony share a framing. The glow-overhang check in `cine-check.js` now draws the frame it reads, after it was found failing one run in two on a sound build. |
+
+| 1.22 | 5 Oct 2026 | V2.12.16 | V38: a frame counts as portrait only when it is a quarter taller than it is wide. Reported from the Claude app's file preview on an iPad, 580×586, which was gated or turned sideways. Two fixture rows for near-square frames. `verify.js` checks five frame shapes with rotation on and off, and fails on V2.12.15. |
 
 When a build fixes something this plan did not catch, add the check here in the
 same commit as the fix, and note the build it was first seen in.

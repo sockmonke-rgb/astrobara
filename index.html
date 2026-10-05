@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  ASTROBARA V2.12.15
+  ASTROBARA V2.12.16
   A 3X lunar survival colony builder. Single file, no dependencies, no network.
 
   MIT License
@@ -40,7 +40,7 @@
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <meta name="author" content="Mark Florentino LLC, Kittenmancer">
-<meta name="description" content="Astrobara V2.12.15 — a 3X lunar survival colony builder with seeded sites. MIT licensed.">
+<meta name="description" content="Astrobara V2.12.16 — a 3X lunar survival colony builder with seeded sites. MIT licensed.">
 <style>
 :root{
   --vacuum:#07080B;
@@ -2240,13 +2240,22 @@ function viewport(){
   return { w: Math.round(window.innerWidth), h: Math.round(window.innerHeight) };
 }
 let rotated = false;
+// Portrait is a frame tall enough that turning the game on its side pays.
+// `(orientation: portrait)` is true for anything at least as tall as it is
+// wide, which made the Claude app's file preview on an iPad — 580 by 586 —
+// a phone held upright: the gate, or the whole game sideways, for tiles of
+// 17.2 against 16.9. While the map is width-bound both ways round, rotating
+// grows the tiles by exactly the frame's height over its width, so a frame has
+// to be a quarter taller than it is wide before it counts. A phone upright is
+// twice as tall; an iPad upright a third.
+const PORTRAIT_MQ = '(max-aspect-ratio: 4/5)';
 function isPortrait(){
   try {
-    const mq = window.matchMedia && window.matchMedia('(orientation: portrait)');
+    const mq = window.matchMedia && window.matchMedia(PORTRAIT_MQ);
     if(mq && typeof mq.matches === 'boolean') return mq.matches;
   } catch(err){ /* fall through to measuring */ }
   const vp = viewport();
-  return vp.h > vp.w;
+  return vp.w <= vp.h * 0.8;
 }
 let layoutQueued = false;
 function resize(){
@@ -5666,7 +5675,7 @@ function endCine(){
 // Everything in G is plain data, so the run round-trips through JSON as-is.
 const SAVE_KEY = 'astrobara.run';
 const SAVE_VERSION = 2;
-const BUILD = 'V2.12.15';
+const BUILD = 'V2.12.16';
 let saveWorks = true;
 
 // Awards belong to a major version. Dev builds and release candidates inside one
